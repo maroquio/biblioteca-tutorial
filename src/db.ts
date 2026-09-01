@@ -33,6 +33,18 @@ export function createDb() {
     );
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS livros (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero_registro TEXT NOT NULL UNIQUE,
+      isbn TEXT NOT NULL UNIQUE,
+      titulo TEXT NOT NULL,
+      autor_id INTEGER NOT NULL,
+      data_catalogacao TEXT NOT NULL,
+      FOREIGN KEY (autor_id) REFERENCES autores(id)
+    );
+  `);
+
   seedAutores();
 
   console.log("Banco de dados inicializado.");

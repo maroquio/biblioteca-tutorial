@@ -38,13 +38,6 @@ const routes: Route[] = [
     handler: () => Response.json({ message: "API da Biblioteca" }),
   },
   {
-    // rota descartável: existe só para provarmos a captura de parâmetros.
-    // Some na fase 10, quando a primeira rota de verdade com parâmetro chegar.
-    method: "GET",
-    pattern: "/eco/:mensagem",
-    handler: (_request, params) => Response.json({ eco: params.mensagem }),
-  },
-  {
     method: "POST",
     pattern: "/livros",
     handler: async (request) => {
@@ -67,6 +60,17 @@ const routes: Route[] = [
         .get(result.lastInsertRowid as number);
 
       return Response.json(livro, { status: 201 });
+    },
+  },
+  {
+    method: "GET",
+    pattern: "/livros/:q",
+    handler: (_request, params) => {
+      const livros = db
+        .query("SELECT * FROM livros WHERE isbn = ?")
+        .all(params.q!);
+
+      return Response.json(livros);
     },
   },
 ];

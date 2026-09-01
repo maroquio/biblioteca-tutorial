@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 06 de 53 — Tabela livros, com chave estrangeira</title>
+<title>Fase 07 de 53 — Servidor HTTP com Bun.serve</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,166 +211,122 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 06 de 53</span>
+  <span class="pos">Fase 07 de 53</span>
   <span class="marco">Preparação</span>
-  <span class="br">branch <code>fase06</code></span>
+  <span class="br">branch <code>fase07</code></span>
 </div>
-<article class="fase" id="fase-6">
+<article class="fase" id="fase-7">
 <header class="fase-head">
-  <div class="fase-n">06</div>
-  <div class="fase-t"><h2>Tabela <code>livros</code>, com chave estrangeira</h2><div class="req">Requisitos: RF01</div></div>
+  <div class="fase-n">07</div>
+  <div class="fase-t"><h2>Servidor HTTP com <code>Bun.serve</code></h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Criar a tabela <code>livros</code>, base do <strong>RF01</strong>, ligada a <code>autores</code> por uma chave estrangeira — a mesma que vamos remover, deliberadamente, na fase 50. O campo <code>isbn</code> nasce <code>UNIQUE</code>: é o que sustenta o RF08, e é a única regra deste sistema que o banco consegue impor sozinho.</p></div>
-  <figure class="diagram" id="dg-fase-06-der"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 450" class="dg" preserveAspectRatio="xMidYMid meet">
-  <style> #dg-fase-06-der text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-06-der .t {fill:#111827} #dg-fase-06-der .s {fill:#6b7280}</style>
+<p>Subir um servidor HTTP com <code>Bun.serve</code>, sem framework nenhum: responde a <code>GET /</code> e devolve 404 para qualquer outro caminho.</p></div>
+  <figure class="diagram" id="dg-fase-07-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 400" class="dg" preserveAspectRatio="xMidYMid meet">
+  <style> #dg-fase-07-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-07-arquitetura .t {fill:#111827} #dg-fase-07-arquitetura .s {fill:#6b7280}</style>
   <defs>
-    <marker id="fase-06-der__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
-    <marker id="fase-06-der__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
-    <marker id="fase-06-der__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
-    <marker id="fase-06-der__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
-    <marker id="fase-06-der__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
-    <marker id="fase-06-der__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
-    <marker id="fase-06-der__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
-    <marker id="fase-06-der__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
-    <marker id="fase-06-der__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
-    <marker id="fase-06-der__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
-    <marker id="fase-06-der__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
-    <marker id="fase-06-der__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
-    <marker id="fase-06-der__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-06-der__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-06-der__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
+    <marker id="fase-07-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="fase-07-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+    <marker id="fase-07-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="fase-07-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
+    <marker id="fase-07-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="fase-07-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
+    <marker id="fase-07-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="fase-07-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
+    <marker id="fase-07-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="fase-07-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+    <marker id="fase-07-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+    <marker id="fase-07-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+    <marker id="fase-07-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-07-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-07-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
   </defs>
-  <rect width="980" height="450" fill="#ffffff"/>
-  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 06 — livros, com chave estrangeira para o autor</text>
-  <text x="40" y="64" class="s" font-size="13">O autor existe antes; o livro é o que a biblioteca cadastra. Um autor, muitos livros.</text>
-  <rect x="60" y="150" width="300" height="108" rx="8" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.6"/>
-  <path d="M 68,150 h 284 a 8,8 0 0 1 8,8 v 18 h -300 v -18 a 8,8 0 0 1 8,-8 z" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.6"/>
-  <line x1="60" y1="176" x2="360" y2="176" stroke="#bfdbfe" stroke-width="1.6"/>
-  <text x="210.0" y="168" font-size="13.5" text-anchor="middle" fill="#111827" font-weight="700">AUTOR</text>
-  <text x="74" y="197" font-size="12" text-anchor="start" fill="#111827" font-weight="400">id  INTEGER</text>
-  <line x1="74" y1="200" x2="143.3" y2="200" stroke="#111827" stroke-width="1"/>
-  <text x="74" y="219" font-size="12" text-anchor="start" fill="#6b7280" font-weight="400">nome  TEXT NOT NULL</text>
-  <text x="74" y="241" font-size="12" text-anchor="start" fill="#9333ea" font-weight="400">orcid  TEXT UNIQUE NULL</text>
-  <rect x="600" y="118" width="340" height="174" rx="8" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.6"/>
-  <path d="M 608,118 h 324 a 8,8 0 0 1 8,8 v 18 h -340 v -18 a 8,8 0 0 1 8,-8 z" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.6"/>
-  <line x1="600" y1="144" x2="940" y2="144" stroke="#bfdbfe" stroke-width="1.6"/>
-  <text x="770.0" y="136" font-size="13.5" text-anchor="middle" fill="#111827" font-weight="700">LIVRO</text>
-  <text x="614" y="165" font-size="12" text-anchor="start" fill="#111827" font-weight="400">id  INTEGER</text>
-  <line x1="614" y1="168" x2="683.3" y2="168" stroke="#111827" stroke-width="1"/>
-  <text x="614" y="187" font-size="12" text-anchor="start" fill="#9333ea" font-weight="400">numero_registro  TEXT UNIQUE</text>
-  <text x="614" y="209" font-size="12" text-anchor="start" fill="#9333ea" font-weight="400">isbn  TEXT UNIQUE</text>
-  <text x="614" y="231" font-size="12" text-anchor="start" fill="#6b7280" font-weight="400">titulo  TEXT NOT NULL</text>
-  <text x="614" y="253" font-size="12" text-anchor="start" fill="#ea580c" font-weight="400" font-style="italic">autor_id  INTEGER  (FK)</text>
-  <text x="614" y="275" font-size="12" text-anchor="start" fill="#6b7280" font-weight="400">data_catalogacao  TEXT</text>
-  <line x1="360" y1="210" x2="588" y2="210" stroke="#6b7280" stroke-width="1.6"/>
-  <line x1="372" y1="202" x2="372" y2="218" stroke="#6b7280" stroke-width="1.6"/>
-  <line x1="588" y1="210" x2="576" y2="203" stroke="#6b7280" stroke-width="1.5"/>
-  <line x1="588" y1="210" x2="576" y2="210" stroke="#6b7280" stroke-width="1.5"/>
-  <line x1="588" y1="210" x2="576" y2="217" stroke="#6b7280" stroke-width="1.5"/>
-  <text x="384" y="204" font-size="12.5" text-anchor="start" fill="#6b7280" font-weight="700">1</text>
-  <text x="570" y="204" font-size="12.5" text-anchor="end" fill="#6b7280" font-weight="700">N</text>
-  <text x="474" y="186" font-size="12" text-anchor="middle" fill="#6b7280" font-weight="400">escreveu</text>
-  <line x1="770" y1="304" x2="770" y2="330" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,4"/>
-  <rect x="600" y="330" width="340" height="70" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="770" y="355" font-size="12.5" text-anchor="middle" fill="#16a34a" font-weight="700">dois UNIQUE, dois motivos</text>
-  <text x="770" y="376" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">numero_registro é atribuído por nós (RF07);</text>
-  <text x="770" y="392" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">isbn vem de fora e sustenta o RF08.</text>
-  <text x="60" y="300" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">sublinhado = PK</text>
-  <text x="185.0" y="300" font-size="11.5" text-anchor="start" fill="#9333ea" font-weight="400">roxo = UNIQUE</text>
-  <text x="296.8" y="300" font-size="11.5" text-anchor="start" fill="#ea580c" font-weight="400">itálico = FK</text>
-  <text x="60" y="338" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">As duas identidades são inteiros. As chaves naturais —</text>
-  <text x="60" y="356" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">orcid e isbn — são UNIQUE, e uma delas aceita nulo.</text>
-  <text x="60" y="374" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">A diferença entre as duas coisas é a fase 33.</text>
-</svg></div><figcaption>DER da fase 06</figcaption></figure>
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Note os dois <code>UNIQUE</code>, e que eles são de naturezas diferentes.</p>
-<p><code>numero_registro</code> é a identidade que a biblioteca grava na etiqueta: <strong>nós</strong> a atribuímos, sequencialmente, a partir da fase 15.</p>
-<p><code>isbn</code> vem de fora e apenas <strong>conferimos</strong>: é ele que vai sustentar o RF08 na fase 16 — e é ele que vai salvar o sistema da corrida entre o <code>SELECT</code> e o <code>INSERT</code> que aquela fase expõe.</p>
+  <rect width="880" height="400" fill="#ffffff"/>
+  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 07 — o servidor HTTP entra em cena</text>
+  <text x="40" y="64" class="s" font-size="13">Bun.serve com um único fetch. Ainda não existe rota, nem regra, nem endpoint de negócio.</text>
+  <rect x="70" y="150" width="190" height="70" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="165.0" y="182.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">curl</text>
+  <text x="165.0" y="200.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">cliente</text>
+  <rect x="340" y="150" width="190" height="70" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="435.0" y="182.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">Bun.serve</text>
+  <text x="435.0" y="200.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">fetch(request)</text>
+  <path d="M 630,151 a 90.0,9 0 0 1 180,0 v 68 a 90.0,9 0 0 1 -180,0 z" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <path d="M 630,151 a 90.0,9 0 0 0 180,0" fill="none" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="720.0" y="186.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">SQLite</text>
+  <text x="720.0" y="203.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">autores (fase 04)</text>
+  <line x1="262" y1="175" x2="334" y2="175" stroke="#2563eb" stroke-width="1.6" marker-end="url(#fase-07-arquitetura__a-blue)"/>
+  <text x="298.0" y="167" font-size="11.5" text-anchor="middle" fill="#2563eb" font-weight="400">GET /</text>
+  <line x1="334" y1="200" x2="262" y2="200" stroke="#2563eb" stroke-width="1.6" marker-end="url(#fase-07-arquitetura__a-blue)"/>
+  <text x="298.0" y="192" font-size="11.5" text-anchor="middle" fill="#2563eb" font-weight="400">JSON</text>
+  <line x1="435" y1="220" x2="435" y2="268" stroke="#6b7280" stroke-width="1.4" stroke-dasharray="5,4"/>
+  <text x="435" y="288" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">ainda não conversam</text>
+  <line x1="532" y1="185" x2="622" y2="185" stroke="#6b7280" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#fase-07-arquitetura__a-gray)"/>
+  <rect x="70" y="310" width="740" height="66" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.4"/>
+  <text x="440" y="336" font-size="12" text-anchor="middle" fill="#111827" font-weight="400">Um único fetch atende tudo. Qualquer caminho responde a mesma coisa, e não há como</text>
+  <text x="440" y="356" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">distinguir /livros de /livros/9780321125217 — é isso que a fase 08 resolve.</text>
+</svg></div><figcaption>Arquitetura da fase 07</figcaption></figure>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p><code>Bun.serve()</code> é o servidor HTTP nativo do runtime — não instalamos Express nem Hono. A função <code>fetch</code> recebe uma <code>Request</code> e devolve uma <code>Response</code>: é a mesma API do navegador.</p>
 
-<p><strong><code>src/db.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<p><strong><code>src/index.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c408-diff" data-alt="c408-clean">ver o que mudou</button><button class="cp" data-code="c408-clean">copiar</button></div></div>
-<pre class="cb-body" id="c408-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">Database</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:sqlite"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c409-diff" data-alt="c409-clean">ver o que mudou</button><button class="cp" data-code="c409-clean">copiar</button></div></div>
+<pre class="cb-body" id="c409-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
 
-<i class="t-kw">export</i> <i class="t-kw">const</i> db <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Database</i><i class="t-pun">(</i><i class="t-str">"data/biblioteca.sqlite"</i><i class="t-pun">,</i> <i class="t-pun">{</i> create<i class="t-pun">:</i> <i class="t-kw">true</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
-db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"PRAGMA foreign_keys = ON;"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<strong class="ln-new"><i class="t-kw">const</i> server <i class="t-pun">=</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">serve</i><i class="t-pun">(</i><i class="t-pun">{</i></strong>
+<strong class="ln-new">  port<i class="t-pun">:</i> <i class="t-num">3000</i><i class="t-pun">,</i></strong>
 
-<i class="t-com">// O id vai explícito de propósito: é ele que faz o INSERT OR IGNORE ser</i>
-<i class="t-com">// idempotente, e é ele que os exemplos deste documento referenciam.</i>
-<i class="t-com">// O ORCID é nulo para os quatro — três morreram antes de ele existir.</i>
-<i class="t-kw">const</i> <i class="t-typ">AUTORES</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
-  <i class="t-pun">[</i><i class="t-num">1</i><i class="t-pun">,</i> <i class="t-str">"Eric Evans"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-  <i class="t-pun">[</i><i class="t-num">2</i><i class="t-pun">,</i> <i class="t-str">"Robert C. Martin"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-  <i class="t-pun">[</i><i class="t-num">3</i><i class="t-pun">,</i> <i class="t-str">"Harper Lee"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-  <i class="t-pun">[</i><i class="t-num">4</i><i class="t-pun">,</i> <i class="t-str">"Jane Austen"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-<i class="t-pun">]</i> <i class="t-kw">as</i> <i class="t-kw">const</i><i class="t-pun">;</i>
+<strong class="ln-new">  <i class="t-fn">fetch</i><i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">    <i class="t-kw">const</i> url <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">URL</i><i class="t-pun">(</i>request<i class="t-pun">.</i>url<i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
-<i class="t-kw">function</i> <i class="t-fn">seedAutores</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-  <i class="t-kw">const</i> insert <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">prepare</i><i class="t-pun">(</i>
-    <i class="t-str">"INSERT OR IGNORE INTO autores (id, nome) VALUES (?, ?)"</i><i class="t-pun">,</i>
-  <i class="t-pun">)</i><i class="t-pun">;</i>
+<strong class="ln-new">    <i class="t-kw">if</i> <i class="t-pun">(</i>url<i class="t-pun">.</i>pathname <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> <i class="t-str">"/"</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> message<i class="t-pun">:</i> <i class="t-str">"API da Biblioteca"</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">    <i class="t-pun">}</i></strong>
 
-  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">const</i> <i class="t-pun">[</i>id<i class="t-pun">,</i> nome<i class="t-pun">]</i> <i class="t-kw">of</i> <i class="t-typ">AUTORES</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-    insert<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>id<i class="t-pun">,</i> nome<i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
-<i class="t-pun">}</i>
+<strong class="ln-new">    <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Recurso não encontrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  <i class="t-pun">}</i><i class="t-pun">,</i></strong>
+<strong class="ln-new"><i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
-<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">`
-    CREATE TABLE IF NOT EXISTS autores (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL,
-      orcid TEXT UNIQUE
-    );
-  `</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<strong class="ln-new">  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">`</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">    CREATE TABLE IF NOT EXISTS livros (</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      id INTEGER PRIMARY KEY AUTOINCREMENT,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      numero_registro TEXT NOT NULL UNIQUE,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      isbn TEXT NOT NULL UNIQUE,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      titulo TEXT NOT NULL,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      autor_id INTEGER NOT NULL,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      data_catalogacao TEXT NOT NULL,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      FOREIGN KEY (autor_id) REFERENCES autores(id)</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">    );</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">  `</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-  <i class="t-fn">seedAutores</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">"Banco de dados inicializado."</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i></code></pre>
-<pre class="cb-body cb-diff" id="c408-diff" hidden><code><span class="dl ctx"> import { Database } from "bun:sqlite";</span><span class="dl ctx"> </span><span class="dl ctx"> export const db = new Database("data/biblioteca.sqlite", { create: true });</span><span class="dl ctx"> </span><span class="dl ctx"> db.run("PRAGMA foreign_keys = ON;");</span><span class="dl ctx"> </span><span class="dl ctx"> // O id vai explícito de propósito: é ele que faz o INSERT OR IGNORE ser</span><span class="dl ctx"> // idempotente, e é ele que os exemplos deste documento referenciam.</span><span class="dl ctx"> // O ORCID é nulo para os quatro — três morreram antes de ele existir.</span><span class="dl ctx"> const AUTORES = [</span><span class="dl ctx">   [1, "Eric Evans"],</span><span class="dl ctx">   [2, "Robert C. Martin"],</span><span class="dl ctx">   [3, "Harper Lee"],</span><span class="dl ctx">   [4, "Jane Austen"],</span><span class="dl ctx"> ] as const;</span><span class="dl ctx"> </span><span class="dl ctx"> function seedAutores() {</span><span class="dl ctx">   const insert = db.prepare(</span><span class="dl ctx">     "INSERT OR IGNORE INTO autores (id, nome) VALUES (?, ?)",</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl ctx">   for (const [id, nome] of AUTORES) {</span><span class="dl ctx">     insert.run(id, nome);</span><span class="dl ctx">   }</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> export function createDb() {</span><span class="dl ctx">   db.run(`</span><span class="dl ctx">     CREATE TABLE IF NOT EXISTS autores (</span><span class="dl ctx">       id INTEGER PRIMARY KEY AUTOINCREMENT,</span><span class="dl ctx">       nome TEXT NOT NULL,</span><span class="dl ctx">       orcid TEXT UNIQUE</span><span class="dl ctx">     );</span><span class="dl ctx">   `);</span><span class="dl ctx"> </span><span class="dl add">+  db.run(`</span><span class="dl add">+    CREATE TABLE IF NOT EXISTS livros (</span><span class="dl add">+      id INTEGER PRIMARY KEY AUTOINCREMENT,</span><span class="dl add">+      numero_registro TEXT NOT NULL UNIQUE,</span><span class="dl add">+      isbn TEXT NOT NULL UNIQUE,</span><span class="dl add">+      titulo TEXT NOT NULL,</span><span class="dl add">+      autor_id INTEGER NOT NULL,</span><span class="dl add">+      data_catalogacao TEXT NOT NULL,</span><span class="dl add">+      FOREIGN KEY (autor_id) REFERENCES autores(id)</span><span class="dl add">+    );</span><span class="dl add">+  `);</span><span class="dl add">+</span><span class="dl ctx">   seedAutores();</span><span class="dl ctx"> </span><span class="dl ctx">   console.log("Banco de dados inicializado.");</span><span class="dl ctx"> }</span></code></pre>
+<strong class="ln-new">console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`Servidor executando em http://localhost:${server.port}`</i><i class="t-pun">)</i><i class="t-pun">;</i></strong></code></pre>
+<pre class="cb-body cb-diff" id="c409-diff" hidden><code><span class="dl ctx"> import { createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl add">+</span><span class="dl add">+const server = Bun.serve({</span><span class="dl add">+  port: 3000,</span><span class="dl add">+</span><span class="dl add">+  fetch(request) {</span><span class="dl add">+    const url = new URL(request.url);</span><span class="dl add">+</span><span class="dl add">+    if (url.pathname === "/") {</span><span class="dl add">+      return Response.json({ message: "API da Biblioteca" });</span><span class="dl add">+    }</span><span class="dl add">+</span><span class="dl add">+    return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl add">+  },</span><span class="dl add">+});</span><span class="dl add">+</span><span class="dl add">+console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
 </div></div>
-  <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c29">copiar</button></div></div>
-<pre class="cb-body" id="c29"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun run start
+  <div class="step test"><h3>✅ Como testar</h3><p>Em um terminal:</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c34">copiar</button></div></div>
+<pre class="cb-body" id="c34"><code><i class="t-cmd">bun</i> run dev</code></pre>
+</div>
+<p>Em outro:</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c35">copiar</button></div></div>
+<pre class="cb-body" id="c35"><code><i class="t-com"># rota conhecida: deve responder 200 com o JSON de boas-vindas</i>
+<i class="t-cmd">curl</i> <i class="t-flag">-i</i> http://localhost:3000/
 
-<i class="t-com"># lista as tabelas do arquivo: autores e livros devem estar lá</i>
-<i class="t-cmd">sqlite3</i> data/biblioteca.sqlite <i class="t-str">".tables"</i>
-
-<i class="t-com"># lista as chaves estrangeiras de livros: prova que a FK para autores foi criada</i>
-<i class="t-cmd">sqlite3</i> data/biblioteca.sqlite <i class="t-str">"PRAGMA foreign_key_list(livros);"</i></code></pre>
+<i class="t-com"># rota inexistente: deve cair no 404 padrão, e não derrubar o servidor</i>
+<i class="t-cmd">curl</i> <i class="t-flag">-i</i> http://localhost:3000/qualquer-coisa</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c30"><code>autores  livros</code></pre>
+<pre class="cb-body" id="c36"><code>HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+
+{"message":"API da Biblioteca"}</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c31"><code>0|0|autores|autor_id|id|NO ACTION|NO ACTION|NONE</code></pre>
-</div>
-<p>Na linha do <code>PRAGMA</code>, <code>autor_id</code> é a coluna daqui e <code>id</code> é a coluna de lá: a chave estrangeira lê-se "<code>livros.autor_id</code> aponta para <code>autores.id</code>".</p></div>
+<pre class="cb-body" id="c37"><code>HTTP/1.1 404 Not Found
+
+{"error":"Recurso não encontrado"}</code></pre>
+</div></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c32">copiar</button></div></div>
-<pre class="cb-body" id="c32"><code><i class="t-cmd">git</i> add src/db.ts
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 06: tabela livros com chave estrangeira"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c38">copiar</button></div></div>
+<pre class="cb-body" id="c38"><code><i class="t-cmd">git</i> add src/index.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 07: servidor HTTP com Bun.serve"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase05</code>. Próxima fase: <code>git checkout fase07</code>, e <code>git diff fase06 fase07 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase06</code>. Próxima fase: <code>git checkout fase08</code>, e <code>git diff fase07 fase08 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

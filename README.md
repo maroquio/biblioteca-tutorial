@@ -1,12 +1,12 @@
-# Fase 03 de 53 · Preparação
+# Fase 04 de 53 · Preparação
 
-**Conexão com o SQLite e PRAGMA foreign_keys**
+**Tabela autores**
 
-O enunciado desta fase está em `.docs/fase03.html`: objetivo, código completo
+O enunciado desta fase está em `.docs/fase04.html`: objetivo, código completo
 com as linhas novas destacadas, como testar e a mensagem do commit. O GitHub não
 renderiza HTML — clone o repositório e abra o arquivo no navegador.
 
-Este branch já contém o código **concluído** até a fase 03.
+Este branch já contém o código **concluído** até a fase 04.
 
 ## Rodar
 
@@ -17,8 +17,8 @@ bun install
 ## Navegar
 
 ```bash
-git checkout fase04                  # a próxima fase
-git diff fase03 fase04 -- src tests  # só o que ela muda
-git checkout fase02                  # a fase anterior
+git checkout fase05                  # a próxima fase
+git diff fase04 fase05 -- src tests  # só o que ela muda
+git checkout fase03                  # a fase anterior
 git checkout main                    # o tutorial completo das 53 fases
 ```

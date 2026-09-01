@@ -1,3 +1,3 @@
-import { db } from "./db";
+import { createDb } from "./db";
 
-console.log("Banco aberto em:", db.filename);
+createDb();

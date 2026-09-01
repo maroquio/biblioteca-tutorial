@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 02 de 53 — Scripts dev e start</title>
+<title>Fase 03 de 53 — Conexão com o SQLite e PRAGMA foreign_keys</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,58 +211,59 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 02 de 53</span>
+  <span class="pos">Fase 03 de 53</span>
   <span class="marco">Preparação</span>
-  <span class="br">branch <code>fase02</code></span>
+  <span class="br">branch <code>fase03</code></span>
 </div>
-<article class="fase" id="fase-2">
+<article class="fase" id="fase-3">
 <header class="fase-head">
-  <div class="fase-n">02</div>
-  <div class="fase-t"><h2>Scripts <code>dev</code> e <code>start</code></h2></div>
+  <div class="fase-n">03</div>
+  <div class="fase-t"><h2>Conexão com o SQLite e <code>PRAGMA foreign_keys</code></h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Criar os scripts <code>dev</code> (com <code>--watch</code>, que reinicia o processo a cada alteração) e <code>start</code>, e apontar o <code>package.json</code> para <code>src/index.ts</code>. A partir daqui você roda o projeto com <code>bun run dev</code> e não pensa mais no caminho do arquivo.</p></div>
+<p>Abrir — e criar, se ainda não existir — o arquivo SQLite em <code>data/</code>, e ligar a verificação de chaves estrangeiras, que no SQLite vem <strong>desligada</strong> por padrão. Nenhuma tabela ainda.</p></div>
   
-  <div class="step"><h3>👨‍💻 O que você digita</h3>
-<p><strong><code>package.json</code></strong> — arquivo completo, com as mudanças marcadas</p>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>O Bun traz driver de SQLite embutido em <code>bun:sqlite</code> — nenhum <code>bun add</code> necessário.</p>
+<p>A opção <code>{ create: true }</code> faz o arquivo ser criado se ainda não existir.</p>
+<p>O <code>PRAGMA foreign_keys = ON</code> merece atenção: sem essa linha, um livro poderia apontar para um autor inexistente e o banco não reclamaria.</p>
+
+<p><strong><code>src/db.ts</code></strong> — arquivo novo</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c402-diff" data-alt="c402-clean">ver o que mudou</button><button class="cp" data-code="c402-clean">copiar</button></div></div>
-<pre class="cb-body" id="c402-clean"><code><i class="t-pun">{</i>
-  <i class="t-key">"name"</i><i class="t-pun">:</i> <i class="t-str">"biblioteca"</i><i class="t-pun">,</i>
-<strong class="ln-new">  <i class="t-key">"module"</i><i class="t-pun">:</i> <i class="t-str">"src/index.ts"</i><i class="t-pun">,</i></strong>
-  <i class="t-key">"type"</i><i class="t-pun">:</i> <i class="t-str">"module"</i><i class="t-pun">,</i>
-  <i class="t-key">"private"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-<strong class="ln-new">  <i class="t-key">"scripts"</i><i class="t-pun">:</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">    <i class="t-key">"dev"</i><i class="t-pun">:</i> <i class="t-str">"bun --watch src/index.ts"</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">    <i class="t-key">"start"</i><i class="t-pun">:</i> <i class="t-str">"bun src/index.ts"</i></strong>
-<strong class="ln-new">  <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-  <i class="t-key">"devDependencies"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
-    <i class="t-key">"@types/bun"</i><i class="t-pun">:</i> <i class="t-str">"latest"</i>
-  <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-key">"peerDependencies"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
-    <i class="t-key">"typescript"</i><i class="t-pun">:</i> <i class="t-str">"^7"</i>
-  <i class="t-pun">}</i>
-<i class="t-pun">}</i></code></pre>
-<pre class="cb-body cb-diff" id="c402-diff" hidden><code><span class="dl ctx"> {</span><span class="dl ctx">   "name": "biblioteca",</span><span class="dl del">-  "module": "index.ts",</span><span class="dl add">+  "module": "src/index.ts",</span><span class="dl ctx">   "type": "module",</span><span class="dl ctx">   "private": true,</span><span class="dl add">+  "scripts": {</span><span class="dl add">+    "dev": "bun --watch src/index.ts",</span><span class="dl add">+    "start": "bun src/index.ts"</span><span class="dl add">+  },</span><span class="dl ctx">   "devDependencies": {</span><span class="dl ctx">     "@types/bun": "latest"</span><span class="dl ctx">   },</span><span class="dl ctx">   "peerDependencies": {</span><span class="dl ctx">     "typescript": "^7"</span><span class="dl ctx">   }</span><span class="dl ctx"> }</span></code></pre>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c403">copiar</button></div></div>
+<pre class="cb-body" id="c403"><code><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">Database</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:sqlite"</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">const</i> db <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Database</i><i class="t-pun">(</i><i class="t-str">"data/biblioteca.sqlite"</i><i class="t-pun">,</i> <i class="t-pun">{</i> create<i class="t-pun">:</i> <i class="t-kw">true</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"PRAGMA foreign_keys = ON;"</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+</div>
+
+<p><strong><code>src/index.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c404-diff" data-alt="c404-clean">ver o que mudou</button><button class="cp" data-code="c404-clean">copiar</button></div></div>
+<pre class="cb-body" id="c404-clean"><code><strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">"Banco aberto em:"</i><i class="t-pun">,</i> db<i class="t-pun">.</i>filename<i class="t-pun">)</i><i class="t-pun">;</i></strong></code></pre>
+<pre class="cb-body cb-diff" id="c404-diff" hidden><code><span class="dl del">-console.log("Hello via Bun!");</span><span class="dl add">+import { db } from "./db";</span><span class="dl add">+</span><span class="dl add">+console.log("Banco aberto em:", db.filename);</span></code></pre>
 </div></div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c10">copiar</button></div></div>
-<pre class="cb-body" id="c10"><code><i class="t-cmd">bun</i> run start</code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c15">copiar</button></div></div>
+<pre class="cb-body" id="c15"><code><i class="t-cmd">bun</i> run start
+<i class="t-cmd">ls</i> <i class="t-flag">-l</i> data/</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c11"><code>$ bun src/index.ts
-Hello via Bun!</code></pre>
-</div></div>
+<pre class="cb-body" id="c16"><code>Banco aberto em: data/biblioteca.sqlite</code></pre>
+</div>
+<p>O arquivo <code>data/biblioteca.sqlite</code> passa a existir.</p></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c12">copiar</button></div></div>
-<pre class="cb-body" id="c12"><code><i class="t-cmd">git</i> add package.json
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 02: scripts dev e start no package.json"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c17">copiar</button></div></div>
+<pre class="cb-body" id="c17"><code><i class="t-cmd">git</i> add src/db.ts src/index.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 03: conexao com o SQLite e PRAGMA foreign_keys"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase01</code>. Próxima fase: <code>git checkout fase03</code>, e <code>git diff fase02 fase03 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase02</code>. Próxima fase: <code>git checkout fase04</code>, e <code>git diff fase03 fase04 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

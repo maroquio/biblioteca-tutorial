@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 01 de 53 — bun init e estrutura de pastas</title>
+<title>Fase 02 de 53 — Scripts dev e start</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,40 +211,32 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 01 de 53</span>
+  <span class="pos">Fase 02 de 53</span>
   <span class="marco">Preparação</span>
-  <span class="br">branch <code>fase01</code></span>
+  <span class="br">branch <code>fase02</code></span>
 </div>
-<article class="fase" id="fase-1">
+<article class="fase" id="fase-2">
 <header class="fase-head">
-  <div class="fase-n">01</div>
-  <div class="fase-t"><h2><code>bun init</code> e estrutura de pastas</h2></div>
+  <div class="fase-n">02</div>
+  <div class="fase-t"><h2>Scripts <code>dev</code> e <code>start</code></h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Sair do zero: <code>bun init</code>, as pastas <code>src/</code> e <code>data/</code>, e o primeiro arquivo executável. Nenhuma decisão de arquitetura aqui — só um projeto Bun que roda.</p></div>
+<p>Criar os scripts <code>dev</code> (com <code>--watch</code>, que reinicia o processo a cada alteração) e <code>start</code>, e apontar o <code>package.json</code> para <code>src/index.ts</code>. A partir daqui você roda o projeto com <code>bun run dev</code> e não pensa mais no caminho do arquivo.</p></div>
   
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Na sua branch <code>uma-feature</code>, a partir da raiz do repositório clonado:</p>
+  <div class="step"><h3>👨‍💻 O que você digita</h3>
+<p><strong><code>package.json</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c2">copiar</button></div></div>
-<pre class="cb-body" id="c2"><code><i class="t-cmd">bun</i> init <i class="t-flag">-y</i>
-<i class="t-cmd">rm</i> <i class="t-flag">-rf</i> .cursor CLAUDE.md README.md
-<i class="t-cmd">mkdir</i> <i class="t-flag">-p</i> src data
-<i class="t-cmd">mv</i> index.ts src/index.ts
-<i class="t-cmd">touch</i> data/.gitkeep</code></pre>
-</div>
-<p>O <code>bun init -y</code> já cria <code>package.json</code>, <code>tsconfig.json</code> e instala <code>@types/bun</code> e <code>typescript</code>. Não precisamos de mais nada — nem de servidor HTTP, nem de driver de banco.</p>
-<p>Os arquivos abaixo são os que o <strong>Bun 1.4</strong> gera. Versões anteriores (1.3.x) geram <code>"typescript": "^5"</code> e <strong>não</strong> incluem a linha <code>"types": ["bun"]</code> no <code>tsconfig.json</code> — se for o seu caso, acrescente a linha à mão: sem ela, o TypeScript 7 nativo (o <code>tsgo</code> que a IDE usa) não enxerga <code>Bun</code>, <code>bun:sqlite</code> nem <code>bun:test</code>.</p>
-<p>O <code>.gitignore</code> <strong>já vem pronto na <code>main</code></strong> e cobre <code>node_modules/</code>, o arquivo SQLite e os CSVs de importação. Detalhe que economiza confusão: o <code>bun init</code> <em>preserva</em> um <code>.gitignore</code> existente em vez de sobrescrevê-lo.</p>
-<p>A pasta <code>data/</code> vai guardar o arquivo SQLite, que não entra no versionamento; o <code>.gitkeep</code> existe só para o Git preservar a pasta vazia.</p>
-<p><strong><code>package.json</code></strong> — gerado pelo <code>bun init</code></p>
-<div class="cb cb-out">
-<div class="cb-bar"><span class="cb-lang">resposta</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c3"><code><i class="t-pun">{</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c402-diff" data-alt="c402-clean">ver o que mudou</button><button class="cp" data-code="c402-clean">copiar</button></div></div>
+<pre class="cb-body" id="c402-clean"><code><i class="t-pun">{</i>
   <i class="t-key">"name"</i><i class="t-pun">:</i> <i class="t-str">"biblioteca"</i><i class="t-pun">,</i>
-  <i class="t-key">"module"</i><i class="t-pun">:</i> <i class="t-str">"index.ts"</i><i class="t-pun">,</i>
+<strong class="ln-new">  <i class="t-key">"module"</i><i class="t-pun">:</i> <i class="t-str">"src/index.ts"</i><i class="t-pun">,</i></strong>
   <i class="t-key">"type"</i><i class="t-pun">:</i> <i class="t-str">"module"</i><i class="t-pun">,</i>
   <i class="t-key">"private"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
+<strong class="ln-new">  <i class="t-key">"scripts"</i><i class="t-pun">:</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">    <i class="t-key">"dev"</i><i class="t-pun">:</i> <i class="t-str">"bun --watch src/index.ts"</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">    <i class="t-key">"start"</i><i class="t-pun">:</i> <i class="t-str">"bun src/index.ts"</i></strong>
+<strong class="ln-new">  <i class="t-pun">}</i><i class="t-pun">,</i></strong>
   <i class="t-key">"devDependencies"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
     <i class="t-key">"@types/bun"</i><i class="t-pun">:</i> <i class="t-str">"latest"</i>
   <i class="t-pun">}</i><i class="t-pun">,</i>
@@ -252,63 +244,25 @@ body.solo{background:var(--bg)}
     <i class="t-key">"typescript"</i><i class="t-pun">:</i> <i class="t-str">"^7"</i>
   <i class="t-pun">}</i>
 <i class="t-pun">}</i></code></pre>
-</div>
-
-<p><strong><code>src/index.ts</code></strong> — arquivo novo</p>
-<div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c401">copiar</button></div></div>
-<pre class="cb-body" id="c401"><code>console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">"Hello via Bun!"</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-</div>
-<p><strong><code>tsconfig.json</code></strong> — gerado pelo <code>bun init</code></p>
-<div class="cb cb-out">
-<div class="cb-bar"><span class="cb-lang">resposta</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c5"><code><i class="t-pun">{</i>
-  <i class="t-key">"compilerOptions"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
-    <i class="t-pun">/</i><i class="t-pun">/</i> Environment setup <i class="t-pun">&amp;</i> latest features
-    <i class="t-key">"lib"</i><i class="t-pun">:</i> <i class="t-pun">[</i><i class="t-str">"ESNext"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-    <i class="t-key">"target"</i><i class="t-pun">:</i> <i class="t-str">"ESNext"</i><i class="t-pun">,</i>
-    <i class="t-key">"module"</i><i class="t-pun">:</i> <i class="t-str">"Preserve"</i><i class="t-pun">,</i>
-    <i class="t-key">"moduleDetection"</i><i class="t-pun">:</i> <i class="t-str">"force"</i><i class="t-pun">,</i>
-    <i class="t-key">"jsx"</i><i class="t-pun">:</i> <i class="t-str">"react-jsx"</i><i class="t-pun">,</i>
-    <i class="t-key">"allowJs"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"types"</i><i class="t-pun">:</i> <i class="t-pun">[</i><i class="t-str">"bun"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-
-    <i class="t-pun">/</i><i class="t-pun">/</i> Bundler mode
-    <i class="t-key">"moduleResolution"</i><i class="t-pun">:</i> <i class="t-str">"bundler"</i><i class="t-pun">,</i>
-    <i class="t-key">"allowImportingTsExtensions"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"verbatimModuleSyntax"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"noEmit"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-
-    <i class="t-pun">/</i><i class="t-pun">/</i> Best practices
-    <i class="t-key">"strict"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"skipLibCheck"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"noFallthroughCasesInSwitch"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"noUncheckedIndexedAccess"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-    <i class="t-key">"noImplicitOverride"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
-
-    <i class="t-pun">/</i><i class="t-pun">/</i> Some stricter flags <i class="t-pun">(</i>disabled by default<i class="t-pun">)</i>
-    <i class="t-key">"noUnusedLocals"</i><i class="t-pun">:</i> <i class="t-kw">false</i><i class="t-pun">,</i>
-    <i class="t-key">"noUnusedParameters"</i><i class="t-pun">:</i> <i class="t-kw">false</i><i class="t-pun">,</i>
-    <i class="t-key">"noPropertyAccessFromIndexSignature"</i><i class="t-pun">:</i> <i class="t-kw">false</i>
-  <i class="t-pun">}</i>
-<i class="t-pun">}</i></code></pre>
+<pre class="cb-body cb-diff" id="c402-diff" hidden><code><span class="dl ctx"> {</span><span class="dl ctx">   "name": "biblioteca",</span><span class="dl del">-  "module": "index.ts",</span><span class="dl add">+  "module": "src/index.ts",</span><span class="dl ctx">   "type": "module",</span><span class="dl ctx">   "private": true,</span><span class="dl add">+  "scripts": {</span><span class="dl add">+    "dev": "bun --watch src/index.ts",</span><span class="dl add">+    "start": "bun src/index.ts"</span><span class="dl add">+  },</span><span class="dl ctx">   "devDependencies": {</span><span class="dl ctx">     "@types/bun": "latest"</span><span class="dl ctx">   },</span><span class="dl ctx">   "peerDependencies": {</span><span class="dl ctx">     "typescript": "^7"</span><span class="dl ctx">   }</span><span class="dl ctx"> }</span></code></pre>
 </div></div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c6">copiar</button></div></div>
-<pre class="cb-body" id="c6"><code><i class="t-cmd">bun</i> run src/index.ts</code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c10">copiar</button></div></div>
+<pre class="cb-body" id="c10"><code><i class="t-cmd">bun</i> run start</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c7"><code>Hello via Bun!</code></pre>
+<pre class="cb-body" id="c11"><code>$ bun src/index.ts
+Hello via Bun!</code></pre>
 </div></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c8">copiar</button></div></div>
-<pre class="cb-body" id="c8"><code><i class="t-cmd">git</i> add bun.lock data/.gitkeep package.json src/index.ts tsconfig.json
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 01: bun init e estrutura de pastas"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c12">copiar</button></div></div>
+<pre class="cb-body" id="c12"><code><i class="t-cmd">git</i> add package.json
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 02: scripts dev e start no package.json"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Próxima fase: <code>git checkout fase02</code>, e <code>git diff fase01 fase02 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase01</code>. Próxima fase: <code>git checkout fase03</code>, e <code>git diff fase02 fase03 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

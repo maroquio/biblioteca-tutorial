@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 11 de 53 — a busca ganha título e autor</title>
+<title>Fase 12 de 53 — RF04 — autor fora da base devolve 404</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,87 +211,24 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 11 de 53</span>
+  <span class="pos">Fase 12 de 53</span>
   <span class="marco">A API ingênua</span>
-  <span class="br">branch <code>fase11</code></span>
+  <span class="br">branch <code>fase12</code></span>
 </div>
-<article class="fase" id="fase-11">
+<article class="fase" id="fase-12">
 <header class="fase-head">
-  <div class="fase-n">11</div>
-  <div class="fase-t"><h2>a busca ganha título e autor</h2><div class="req">Requisitos: RF03</div></div>
+  <div class="fase-n">12</div>
+  <div class="fase-t"><h2>RF04 — autor fora da base devolve 404</h2><div class="req">Requisitos: RF04</div></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Implementar o <strong>RF03</strong>: o mesmo <code>GET /livros/:q</code> passa a aceitar também parte do título e parte do nome do autor. Um endpoint, três critérios, em cascata — ISBN exato primeiro, depois título, depois nome do autor.</p>
-<p>Você vai perceber que está copiando o bloco anterior e trocando as palavras, duas vezes. <strong>Copie mesmo.</strong> É esse o ponto.</p></div>
-  <figure class="diagram" id="dg-fase-11-atividade"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" class="dg" preserveAspectRatio="xMidYMid meet">
-  <style> #dg-fase-11-atividade text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-11-atividade .t {fill:#111827} #dg-fase-11-atividade .s {fill:#6b7280}</style>
-  <defs>
-    <marker id="fase-11-atividade__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
-    <marker id="fase-11-atividade__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
-    <marker id="fase-11-atividade__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
-    <marker id="fase-11-atividade__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
-    <marker id="fase-11-atividade__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
-    <marker id="fase-11-atividade__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
-    <marker id="fase-11-atividade__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
-    <marker id="fase-11-atividade__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
-    <marker id="fase-11-atividade__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
-    <marker id="fase-11-atividade__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
-    <marker id="fase-11-atividade__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
-    <marker id="fase-11-atividade__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
-    <marker id="fase-11-atividade__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-11-atividade__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-11-atividade__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
-  </defs>
-  <rect width="1000" height="660" fill="#ffffff"/>
-  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 11 — RF03 — a busca em cascata</text>
-  <text x="40" y="64" class="s" font-size="13">Um endpoint, três critérios. O primeiro que devolve alguma coisa encerra a busca.</text>
-  <rect x="175.0" y="88.0" width="250" height="40" rx="20.0" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.6"/>
-  <text x="300" y="113" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">GET /livros/:q</text>
-  <line x1="300" y1="128" x2="300" y2="156" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-gray)"/>
-  <rect x="120" y="156" width="360" height="46" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
-  <text x="300.0" y="184.0" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">SELECT ... FROM livros WHERE isbn = ?</text>
-  <line x1="300" y1="202" x2="300" y2="234" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-gray)"/>
-  <polygon points="300,236.0 445.0,266 300,296.0 155.0,266" fill="#fefce8" stroke="#fde68a" stroke-width="1.6"/>
-  <text x="300" y="270" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">achou?</text>
-  <line x1="300" y1="296" x2="300" y2="330" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-gray)"/>
-  <text x="314" y="316" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">não</text>
-  <rect x="120" y="330" width="360" height="46" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.5"/>
-  <text x="300.0" y="358.0" font-size="12" text-anchor="middle" fill="#111827" font-weight="600">SELECT ... FROM livros WHERE titulo LIKE ?</text>
-  <line x1="300" y1="376" x2="300" y2="404" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-gray)"/>
-  <polygon points="300,406.0 445.0,436 300,466.0 155.0,436" fill="#fefce8" stroke="#fde68a" stroke-width="1.6"/>
-  <text x="300" y="440" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">achou?</text>
-  <line x1="300" y1="466" x2="300" y2="500" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-gray)"/>
-  <text x="314" y="486" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">não</text>
-  <rect x="120" y="500" width="360" height="58" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
-  <text x="300.0" y="526.0" font-size="12" text-anchor="middle" fill="#111827" font-weight="600">JOIN autores ON ... WHERE nome LIKE ?</text>
-  <text x="300.0" y="544.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">lê a tabela do outro módulo</text>
-  <line x1="300" y1="558" x2="300" y2="590" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-gray)"/>
-  <rect x="140.0" y="592.0" width="320" height="40" rx="20.0" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.6"/>
-  <text x="300" y="617" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">200 com a lista (pode ser vazia)</text>
-  <path d="M 445,266 H 560 V 612 H 462" fill="none" stroke="#16a34a" stroke-width="1.6" marker-end="url(#fase-11-atividade__a-green)"/>
-  <text x="452" y="258" font-size="11.5" text-anchor="start" fill="#16a34a" font-weight="400">sim</text>
-  <path d="M 445,436 H 520 V 612" fill="none" stroke="#16a34a" stroke-width="1.6"/>
-  <text x="452" y="428" font-size="11.5" text-anchor="start" fill="#16a34a" font-weight="400">sim</text>
-  <rect x="620" y="150" width="340" height="118" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.4"/>
-  <text x="790" y="176" font-size="12.5" text-anchor="middle" fill="#16a34a" font-weight="700">Buscar não é encontrar</text>
-  <text x="790" y="200" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">Lista vazia devolve 200, não 404.</text>
-  <text x="790" y="218" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">O mesmo ISBN inexistente devolve</text>
-  <text x="790" y="236" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">404 no cadastro — lá ele é uma</text>
-  <text x="790" y="254" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">regra violada, não uma busca.</text>
-  <rect x="620" y="380" width="340" height="136" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.4"/>
-  <text x="790" y="406" font-size="12.5" text-anchor="middle" fill="#dc2626" font-weight="700">A bomba-relógio</text>
-  <text x="790" y="432" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">O terceiro critério precisa de um JOIN</text>
-  <text x="790" y="450" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">com autores — tabela que na fase 47</text>
-  <text x="790" y="468" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">vira de outro módulo.</text>
-  <text x="790" y="492" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">Anote a pergunta:</text>
-  <text x="790" y="510" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="600">quem pode ler a tabela de quem?</text>
-</svg></div><figcaption>Atividade da fase 11</figcaption></figure>
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>O handler da fase 10 cresce de sete para vinte linhas — e as vinte são três variações da mesma consulta.</p>
+<p>Implementar o <strong>RF04</strong>: um livro só pode ser cadastrado se o autor estiver no base de autores, e a tentativa recusada devolve <code>404</code> com uma mensagem em português — não um <code>500</code> com stack trace. É a primeira regra de negócio do sistema, escrita como um <code>if</code> dentro do handler HTTP. Repare onde ela mora.</p></div>
+  
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Antes do <code>INSERT</code>, uma consulta: existe autor com este <code>id</code>?</p>
 <p><strong><code>src/index.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c413-diff" data-alt="c413-clean">ver o que mudou</button><button class="cp" data-code="c413-clean">copiar</button></div></div>
-<pre class="cb-body" id="c413-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c414-diff" data-alt="c414-clean">ver o que mudou</button><button class="cp" data-code="c414-clean">copiar</button></div></div>
+<pre class="cb-body" id="c414-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
 
 <i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
@@ -342,6 +279,14 @@ body.solo{background:var(--bg)}
         dataCatalogacao<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
       <i class="t-pun">}</i><i class="t-pun">;</i>
 
+<strong class="ln-new">      <i class="t-kw">const</i> autor <i class="t-pun">=</i> db</strong>
+<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM autores WHERE id = ?"</i><i class="t-pun">)</i></strong>
+<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>autor<i class="t-pun">)</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Autor não cadastrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">      <i class="t-pun">}</i></strong>
+
       <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>
         <i class="t-str">`INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
          VALUES (?, ?, ?, ?, ?)`</i><i class="t-pun">,</i>
@@ -359,29 +304,29 @@ body.solo{background:var(--bg)}
     method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
     pattern<i class="t-pun">:</i> <i class="t-str">"/livros/:q"</i><i class="t-pun">,</i>
     handler<i class="t-pun">:</i> <i class="t-pun">(</i>_request<i class="t-pun">,</i> params<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-<strong class="ln-new">      <i class="t-kw">const</i> q <i class="t-pun">=</i> params<i class="t-pun">.</i>q<i class="t-pun">!</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">const</i> q <i class="t-pun">=</i> params<i class="t-pun">.</i>q<i class="t-pun">!</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> db</strong>
+      <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> db
         <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porIsbn<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porIsbn<i class="t-pun">)</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> db</strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE titulo LIKE ?"</i><i class="t-pun">)</i></strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE titulo LIKE ?"</i><i class="t-pun">)</i>
+        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porTitulo<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porTitulo<i class="t-pun">)</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">const</i> porAutor <i class="t-pun">=</i> db</strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i></strong>
-<strong class="ln-new">          <i class="t-str">`SELECT livros.* FROM livros</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">             JOIN autores ON autores.id = livros.autor_id</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">            WHERE autores.nome LIKE ?`</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">        <i class="t-pun">)</i></strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">const</i> porAutor <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
+          <i class="t-str">`SELECT livros.* FROM livros
+             JOIN autores ON autores.id = livros.autor_id
+            WHERE autores.nome LIKE ?`</i><i class="t-pun">,</i>
+        <i class="t-pun">)</i>
+        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porAutor<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porAutor<i class="t-pun">)</i><i class="t-pun">;</i>
     <i class="t-pun">}</i><i class="t-pun">,</i>
   <i class="t-pun">}</i><i class="t-pun">,</i>
 <i class="t-pun">]</i><i class="t-pun">;</i>
@@ -404,32 +349,28 @@ body.solo{background:var(--bg)}
 <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
 console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`Servidor executando em http://localhost:${server.port}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c413-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">         numeroRegistro: string;</span><span class="dl ctx">         dataCatalogacao: string;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl ctx">         [body.numeroRegistro, body.isbn, body.titulo, body.autorId, body.dataCatalogacao],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, { status: 201 });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl del">-      const livros = db</span><span class="dl add">+      const q = params.q!;</span><span class="dl add">+</span><span class="dl add">+      const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl del">-        .all(params.q!);</span><span class="dl add">+        .all(q);</span><span class="dl ctx"> </span><span class="dl del">-      return Response.json(livros);</span><span class="dl add">+      if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl add">+</span><span class="dl add">+      const porTitulo = db</span><span class="dl add">+        .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl add">+        .all(`%${q}%`);</span><span class="dl add">+</span><span class="dl add">+      if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl add">+</span><span class="dl add">+      const porAutor = db</span><span class="dl add">+        .query(</span><span class="dl add">+          `SELECT livros.* FROM livros</span><span class="dl add">+             JOIN autores ON autores.id = livros.autor_id</span><span class="dl add">+            WHERE autores.nome LIKE ?`,</span><span class="dl add">+        )</span><span class="dl add">+        .all(`%${q}%`);</span><span class="dl add">+</span><span class="dl add">+      return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: 3000,</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
+<pre class="cb-body cb-diff" id="c414-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">         numeroRegistro: string;</span><span class="dl ctx">         dataCatalogacao: string;</span><span class="dl ctx">       };</span><span class="dl add">+</span><span class="dl add">+      const autor = db</span><span class="dl add">+        .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl add">+        .get(body.autorId);</span><span class="dl add">+</span><span class="dl add">+      if (!autor) {</span><span class="dl add">+        return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl add">+      }</span><span class="dl ctx"> </span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl ctx">         [body.numeroRegistro, body.isbn, body.titulo, body.autorId, body.dataCatalogacao],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, { status: 201 });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: 3000,</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
 </div>
 </div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c59">copiar</button></div></div>
-<pre class="cb-body" id="c59"><code><i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> http://localhost:3000/livros/9780132350884
-<i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> http://localhost:3000/livros/Limpo
-<i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> http://localhost:3000/livros/Austen
-<i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> http://localhost:3000/livros/zzz</code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c63">copiar</button></div></div>
+<pre class="cb-body" id="c63"><code><i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> <i class="t-flag">-X</i> POST http://localhost:3000/livros \
+  <i class="t-flag">-H</i> <i class="t-str">"Content-Type: application/json"</i> \
+  <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780321125217","titulo":"Domain-Driven Design","autorId":99,"numeroRegistro":"R-9","dataCatalogacao":"2026-08-25"}'</i></code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c60"><code><i class="t-pun">[</i><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"R-2"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780132350884"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Código Limpo"</i><i class="t-pun">,</i><i class="t-key">"autor_id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i><i class="t-pun">]</i> <i class="t-pun">[</i><i class="t-num">200</i><i class="t-pun">]</i>
-<i class="t-pun">[</i><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"R-2"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780132350884"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Código Limpo"</i><i class="t-pun">,</i><i class="t-key">"autor_id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i><i class="t-pun">]</i> <i class="t-pun">[</i><i class="t-num">200</i><i class="t-pun">]</i>
-<i class="t-pun">[</i><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">3</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"R-3"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780141439518"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Orgulho e Preconceito"</i><i class="t-pun">,</i><i class="t-key">"autor_id"</i><i class="t-pun">:</i><i class="t-num">4</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i><i class="t-pun">]</i> <i class="t-pun">[</i><i class="t-num">200</i><i class="t-pun">]</i>
-<i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">[</i><i class="t-num">200</i><i class="t-pun">]</i></code></pre>
+<pre class="cb-body" id="c64"><code><i class="t-pun">{</i><i class="t-key">"error"</i><i class="t-pun">:</i><i class="t-str">"Autor não cadastrado"</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">404</i><i class="t-pun">]</i></code></pre>
 </div>
-<p>As duas primeiras linhas são o mesmo livro, achado por dois caminhos diferentes. A última continua sendo <code>200</code>.</p></div>
+<p>Sem stack trace no terminal do servidor.</p></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c61">copiar</button></div></div>
-<pre class="cb-body" id="c61"><code><i class="t-cmd">git</i> add src/index.ts
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 11: RF03 busca por titulo e autor"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c65">copiar</button></div></div>
+<pre class="cb-body" id="c65"><code><i class="t-cmd">git</i> add src/index.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 12: RF04 autor fora da base devolve 404"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase10</code>. Próxima fase: <code>git checkout fase12</code>, e <code>git diff fase11 fase12 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase11</code>. Próxima fase: <code>git checkout fase13</code>, e <code>git diff fase12 fase13 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

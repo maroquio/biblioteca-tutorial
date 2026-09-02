@@ -48,9 +48,9 @@ function linhasCsv(livros: typeof LIVROS, autorId: number): string {
 }
 
 test("RF05 também vale para a importação em lote", async () => {
-  const csv = linhasCsv(LIVROS.slice(0, 6), AUSTEN);
+  const csv = linhasCsv(LIVROS, AUSTEN);
 
   await importar(csv);
 
-  expect(noAcervo(AUSTEN)).toBe(3);
+  expect(noAcervo(AUSTEN)).toBe(5);
 });

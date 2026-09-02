@@ -77,6 +77,19 @@ const routes: Route[] = [
         );
       }
 
+      const mesmoTitulo = db
+        .query(
+          "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",
+        )
+        .get(body.autorId, body.titulo);
+
+      if (mesmoTitulo) {
+        return Response.json(
+          { error: "Este autor já tem um livro com este título" },
+          { status: 409 },
+        );
+      }
+
       const hoje = new Date().toISOString().slice(0, 10);
       const ano = hoje.slice(0, 4);
 

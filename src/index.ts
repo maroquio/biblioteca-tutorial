@@ -45,7 +45,6 @@ const routes: Route[] = [
         isbn: string;
         titulo: string;
         autorId: number;
-        numeroRegistro: string;
       };
 
       const autor = db
@@ -68,11 +67,21 @@ const routes: Route[] = [
       }
 
       const hoje = new Date().toISOString().slice(0, 10);
+      const ano = hoje.slice(0, 4);
+
+      const catalogadosNoAno = db
+        .query(
+          `SELECT COUNT(*) AS total FROM livros
+            WHERE data_catalogacao LIKE ?`,
+        )
+        .get(`${ano}%`) as { total: number };
+
+      const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;
 
       const result = db.run(
         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
          VALUES (?, ?, ?, ?, ?)`,
-        [body.numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],
+        [numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],
       );
 
       const livro = db

@@ -1,11 +1,13 @@
 import { TituloVazio } from "./errors";
 import type { LivroId, AutorId } from "./identifiers";
+import type { Isbn } from "./Isbn";
+import type { NumeroRegistro } from "./NumeroRegistro";
 
 export class Livro {
   constructor(
     readonly id: LivroId,
-    readonly numeroRegistro: string,
-    readonly isbn: string,
+    readonly numeroRegistro: NumeroRegistro,
+    readonly isbn: Isbn,
     readonly titulo: string,
     readonly autorId: AutorId,
     readonly dataCatalogacao: string,

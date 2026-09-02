@@ -1,5 +1,5 @@
 import { createDb } from "./db";
-import { DomainError } from "./domain/errors";
+import { DomainError, InvalidValue } from "./domain/errors";
 import { InvalidInput, NotFound, RuleConflict } from "./errors";
 import { match, type Route } from "./router";
 import { livroRoutes } from "./routes/livros";
@@ -16,7 +16,7 @@ const routes: Route[] = [
 ];
 
 function errorResponse(error: unknown): Response {
-  if (error instanceof InvalidInput) {
+  if (error instanceof InvalidInput || error instanceof InvalidValue) {
     return Response.json({ error: error.message }, { status: 400 });
   }
 

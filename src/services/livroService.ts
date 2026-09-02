@@ -1,5 +1,7 @@
 import type { Livro } from "../domain/Livro";
 import { AutorId } from "../domain/identifiers";
+import { Isbn } from "../domain/Isbn";
+import { NumeroRegistro } from "../domain/NumeroRegistro";
 import { RuleConflict } from "../errors";
 import type { AutorRow } from "../repositories/autorRepository";
 import {
@@ -20,7 +22,7 @@ export function cadastrarLivro(
   titulo: string,
   autorIdBruto: number,
 ): LivroComAutor {
-  const isbn = isbnBruto.replace(/[^0-9]/g, "");
+  const isbn = new Isbn(isbnBruto);
   const autorId = new AutorId(autorIdBruto);
 
   const autor = buscarAutor(autorId);
@@ -48,15 +50,19 @@ export function cadastrarLivro(
   const ano = hoje.slice(0, 4);
 
   const sequencial = contarCatalogadosNoAno(ano) + 1;
-  const numeroRegistro = `${ano}-${String(sequencial).padStart(6, "0")}`;
+  const numeroRegistro = new NumeroRegistro(
+    `${ano}-${String(sequencial).padStart(NumeroRegistro.DIGITOS_DO_SEQUENCIAL, "0")}`,
+  );
 
   return { livro: insertLivro(numeroRegistro, isbn, titulo, autorId, hoje), autor };
 }
 
 export function buscarLivros(q: string): LivroComAutor[] {
-  const porIsbn = findLivroByIsbn(q);
+  if (Isbn.isValid(q)) {
+    const porIsbn = findLivroByIsbn(new Isbn(q));
 
-  if (porIsbn) return [comAutor(porIsbn)];
+    if (porIsbn) return [comAutor(porIsbn)];
+  }
 
   const porTitulo = searchLivrosPorTitulo(q);
 

@@ -1,6 +1,8 @@
 import { db } from "../db";
 import { Livro } from "../domain/Livro";
 import { LivroId, AutorId } from "../domain/identifiers";
+import { Isbn } from "../domain/Isbn";
+import { NumeroRegistro } from "../domain/NumeroRegistro";
 
 type LivroRow = {
   id: number;
@@ -14,8 +16,8 @@ type LivroRow = {
 function toLivro(row: LivroRow): Livro {
   return new Livro(
     new LivroId(row.id),
-    row.numero_registro,
-    row.isbn,
+    new NumeroRegistro(row.numero_registro),
+    new Isbn(row.isbn),
     row.titulo,
     new AutorId(row.autor_id),
     row.data_catalogacao,
@@ -49,8 +51,8 @@ export function findLivroById(id: LivroId): Livro | null {
   return row === null ? null : toLivro(row);
 }
 
-export function findLivroByIsbn(isbn: string): Livro | null {
-  const row = db.query("SELECT * FROM livros WHERE isbn = ?").get(isbn) as
+export function findLivroByIsbn(isbn: Isbn): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE isbn = ?").get(isbn.value) as
     | LivroRow
     | null;
 
@@ -66,8 +68,8 @@ export function findLivrosByAutorId(autorId: AutorId): Livro[] {
 }
 
 export function insertLivro(
-  numeroRegistro: string,
-  isbn: string,
+  numeroRegistro: NumeroRegistro,
+  isbn: Isbn,
   titulo: string,
   autorId: AutorId,
   dataCatalogacao: string,
@@ -75,7 +77,7 @@ export function insertLivro(
   const result = db.run(
     `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
      VALUES (?, ?, ?, ?, ?)`,
-    [numeroRegistro, isbn, titulo, autorId.value, dataCatalogacao],
+    [numeroRegistro.value, isbn.value, titulo, autorId.value, dataCatalogacao],
   );
 
   return findLivroById(new LivroId(Number(result.lastInsertRowid)))!;

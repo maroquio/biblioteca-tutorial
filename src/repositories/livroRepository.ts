@@ -1,6 +1,7 @@
 import { db } from "../db";
+import { Livro } from "../domain/Livro";
 
-export type LivroRow = {
+type LivroRow = {
   id: number;
   numero_registro: string;
   isbn: string;
@@ -8,6 +9,17 @@ export type LivroRow = {
   autor_id: number;
   data_catalogacao: string;
 };
+
+function toLivro(row: LivroRow): Livro {
+  return new Livro(
+    row.id,
+    row.numero_registro,
+    row.isbn,
+    row.titulo,
+    row.autor_id,
+    row.data_catalogacao,
+  );
+}
 
 export function contarNoAcervoDoAutor(autorId: number): number {
   const row = db
@@ -28,22 +40,28 @@ export function contarCatalogadosNoAno(ano: string): number {
   return row.total;
 }
 
-export function findLivroById(id: number): LivroRow | null {
-  return db.query("SELECT * FROM livros WHERE id = ?").get(id) as
+export function findLivroById(id: number): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE id = ?").get(id) as
     | LivroRow
     | null;
+
+  return row === null ? null : toLivro(row);
 }
 
-export function findLivroByIsbn(isbn: string): LivroRow | null {
-  return db.query("SELECT * FROM livros WHERE isbn = ?").get(isbn) as
+export function findLivroByIsbn(isbn: string): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE isbn = ?").get(isbn) as
     | LivroRow
     | null;
+
+  return row === null ? null : toLivro(row);
 }
 
-export function findLivrosByAutorId(autorId: number): LivroRow[] {
-  return db
+export function findLivrosByAutorId(autorId: number): Livro[] {
+  const rows = db
     .query("SELECT * FROM livros WHERE autor_id = ?")
     .all(autorId) as LivroRow[];
+
+  return rows.map(toLivro);
 }
 
 export function insertLivro(
@@ -52,7 +70,7 @@ export function insertLivro(
   titulo: string,
   autorId: number,
   dataCatalogacao: string,
-): LivroRow {
+): Livro {
   const result = db.run(
     `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
      VALUES (?, ?, ?, ?, ?)`,
@@ -62,19 +80,23 @@ export function insertLivro(
   return findLivroById(Number(result.lastInsertRowid))!;
 }
 
-export function searchLivrosPorTitulo(termo: string): LivroRow[] {
-  return db
+export function searchLivrosPorTitulo(termo: string): Livro[] {
+  const rows = db
     .query("SELECT * FROM livros WHERE titulo LIKE ?")
     .all(`%${termo}%`) as LivroRow[];
+
+  return rows.map(toLivro);
 }
 
 // ⚠️ ainda lê a tabela do outro lado da fronteira. Fase 50.
-export function searchLivrosPorNomeDoAutor(termo: string): LivroRow[] {
-  return db
+export function searchLivrosPorNomeDoAutor(termo: string): Livro[] {
+  const rows = db
     .query(
       `SELECT livros.* FROM livros
          JOIN autores ON autores.id = livros.autor_id
         WHERE autores.nome LIKE ?`,
     )
     .all(`%${termo}%`) as LivroRow[];
+
+  return rows.map(toLivro);
 }

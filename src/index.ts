@@ -66,6 +66,17 @@ const routes: Route[] = [
         );
       }
 
+      const jaExiste = db
+        .query("SELECT 1 FROM livros WHERE isbn = ?")
+        .get(body.isbn);
+
+      if (jaExiste) {
+        return Response.json(
+          { error: "Livro já cadastrado" },
+          { status: 409 },
+        );
+      }
+
       const hoje = new Date().toISOString().slice(0, 10);
       const ano = hoje.slice(0, 4);
 

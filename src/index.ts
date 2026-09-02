@@ -1,4 +1,5 @@
 import { createDb } from "./db";
+import { DomainError } from "./domain/errors";
 import { InvalidInput, NotFound, RuleConflict } from "./errors";
 import { match, type Route } from "./router";
 import { livroRoutes } from "./routes/livros";
@@ -23,7 +24,7 @@ function errorResponse(error: unknown): Response {
     return Response.json({ error: error.message }, { status: 404 });
   }
 
-  if (error instanceof RuleConflict) {
+  if (error instanceof RuleConflict || error instanceof DomainError) {
     return Response.json({ error: error.message }, { status: 409 });
   }
 

@@ -1,3 +1,5 @@
+import { TituloVazio } from "./errors";
+
 export class Livro {
   constructor(
     readonly id: number,
@@ -6,7 +8,11 @@ export class Livro {
     readonly titulo: string,
     readonly autorId: number,
     readonly dataCatalogacao: string,
-  ) {}
+  ) {
+    if (Livro.normalizar(titulo) === "") {
+      throw new TituloVazio();
+    }
+  }
 
   /** O que conta como "a mesma obra" é decisão do negócio, não do SQL. */
   mesmoTituloQue(outro: string): boolean {

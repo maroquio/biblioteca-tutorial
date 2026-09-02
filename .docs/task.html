@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 22 de 53 — 💣 GOLPE 2 — o limite muda, e só metade do sistema fica sabendo</title>
+<title>Fase 23 de 53 — 🔬 TEMPO 2 — a regra não é testável sozinha</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,578 +211,132 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 22 de 53</span>
+  <span class="pos">Fase 23 de 53</span>
   <span class="marco">A dor</span>
-  <span class="br">branch <code>fase22</code></span>
+  <span class="br">branch <code>fase23</code></span>
 </div>
-<article class="fase mk" id="fase-22">
+<article class="fase mk" id="fase-23">
 <header class="fase-head">
-  <div class="fase-n">22</div>
-  <div class="fase-t"><h2>💣 GOLPE 2 — o limite muda, e só metade do sistema fica sabendo</h2><div class="req">Requisitos: RF05′</div></div>
+  <div class="fase-n">23</div>
+  <div class="fase-t"><h2>🔬 TEMPO 2 — a regra não é testável sozinha</h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>O <strong>RF05 muda</strong>: a direção da biblioteca decidiu que o limite passa de três para <strong>cinco</strong>, e que autores <strong>didáticos</strong> — os adotados em disciplina — podem ter <strong>dez</strong> livros. Requisito trivial. Implemente — e não olhe para o <code>src/importar.ts</code>.</p></div>
-  <figure class="diagram" id="dg-fase-22-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" class="dg" preserveAspectRatio="xMidYMid meet">
-  <style> #dg-fase-22-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-22-arquitetura .t {fill:#111827} #dg-fase-22-arquitetura .s {fill:#6b7280}</style>
+<p>Tentar escrever o teste que resolveria tudo: um teste só da regra, sem servidor, sem porta, sem banco, sem CSV. E descobrir que ele não existe.</p></div>
+  <figure class="diagram" id="dg-fase-23-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" class="dg" preserveAspectRatio="xMidYMid meet">
+  <style> #dg-fase-23-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-23-arquitetura .t {fill:#111827} #dg-fase-23-arquitetura .s {fill:#6b7280}</style>
   <defs>
-    <marker id="fase-22-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
-    <marker id="fase-22-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
-    <marker id="fase-22-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
-    <marker id="fase-22-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
-    <marker id="fase-22-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
-    <marker id="fase-22-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
-    <marker id="fase-22-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
-    <marker id="fase-22-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
-    <marker id="fase-22-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
-    <marker id="fase-22-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
-    <marker id="fase-22-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
-    <marker id="fase-22-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
-    <marker id="fase-22-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-22-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-22-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
+    <marker id="fase-23-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="fase-23-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+    <marker id="fase-23-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="fase-23-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
+    <marker id="fase-23-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="fase-23-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
+    <marker id="fase-23-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="fase-23-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
+    <marker id="fase-23-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="fase-23-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+    <marker id="fase-23-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+    <marker id="fase-23-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+    <marker id="fase-23-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-23-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-23-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
   </defs>
-  <rect width="960" height="470" fill="#ffffff"/>
-  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 22 — GOLPE 2 — o limite muda, e só metade do sistema fica sabendo</text>
-  <text x="40" y="64" class="s" font-size="13">RF05' chega: 5 livros para autores de literatura, 10 para didáticos. Alguém atualiza o handler e esquece o importador.</text>
-  <!-- requisito -->
-  <rect x="40" y="197" width="190" height="60" rx="8" fill="#fefce8" stroke="#fde68a" stroke-width="1.5"/>
-  <text x="135" y="223" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">requisito RF05′</text>
-  <text x="135" y="241" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">5 livros · didático 10</text>
-  <!-- handler -->
-  <rect x="380" y="120" width="240" height="84" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="500" y="159" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">handler POST /livros</text>
-  <text x="500" y="177" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">limite = autor.tipo didatico ? 10 : 5</text>
-  <text x="636" y="166" font-size="11.5" fill="#16a34a" font-weight="600">✓ testes HTTP passam</text>
-  <!-- importador -->
-  <rect x="380" y="250" width="240" height="84" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
-  <text x="500" y="289" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">importar.ts</text>
-  <text x="500" y="307" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">limite = 3</text>
-  <!-- suíte -->
-  <rect x="700" y="250" width="220" height="84" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
-  <text x="810" y="289" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">a suíte fica vermelha</text>
-  <text x="810" y="307" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">e continua até a fase 25</text>
-  <!-- tronco: requisito sai da caixa e bifurca -->
-  <line x1="230" y1="227" x2="290" y2="227" stroke="#6b7280" stroke-width="1.6"/>
-  <path d="M 290,227 V 162 H 376" fill="none" stroke="#16a34a" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#fase-22-arquitetura__a-green)"/>
-  <text x="333" y="152" font-size="11.5" text-anchor="middle" fill="#16a34a" font-weight="600">aplicado</text>
-  <path d="M 290,227 V 292 H 376" fill="none" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 4" stroke-linejoin="round" marker-end="url(#fase-22-arquitetura__a-red)"/>
-  <circle cx="290" cy="227" r="3.5" fill="#6b7280"/>
-  <!-- X cortando o ramo esquecido -->
-  <circle cx="341" cy="292" r="12" fill="#ffffff"/>
-  <line x1="332" y1="283" x2="350" y2="301" stroke="#dc2626" stroke-width="2.4" stroke-linecap="round"/>
-  <line x1="350" y1="283" x2="332" y2="301" stroke="#dc2626" stroke-width="2.4" stroke-linecap="round"/>
-  <text x="333" y="318" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="600">esquecido</text>
-  <!-- importador -> suíte -->
-  <line x1="622" y1="292" x2="694" y2="292" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-22-arquitetura__a-red)"/>
-  <text x="658" y="282" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="600">teste falha</text>
-  <!-- provocação -->
-  <rect x="40" y="366" width="880" height="88" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
-  <text x="480" y="392" font-size="13" text-anchor="middle" fill="#dc2626" font-weight="700">Este sistema tem DOIS casos de uso, e um deles é um SELECT.</text>
-  <text x="480" y="414" font-size="13" text-anchor="middle" fill="#dc2626" font-weight="700">Alguém aqui consegue argumentar que o problema é ele ser grande demais?</text>
-  <text x="480" y="440" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">O argumento "arquitetura é coisa de sistema grande" morre nesta fase, com três rotas e 181 linhas.</text>
-</svg></div><figcaption>Arquitetura da fase 22</figcaption></figure>
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>São quatro mudanças:</p>
-<ol><li><strong>schema</strong>: <code>autores</code> ganha a coluna <code>tipo</code> (<code>'literatura'</code> por padrão);</li><li>o seed passa a informar o tipo de cada autor;</li><li><code>POST /livros</code> calcula o limite a partir do tipo do autor;</li><li>os testes são atualizados para a regra nova.</li></ol>
-<p>Repare que o item 1 <strong>não é uma migração</strong>: <code>CREATE TABLE IF NOT EXISTS</code> não altera tabela que já existe, e a coluna só aparece porque a verificação apaga o banco antes de rodar. Num banco de verdade, com dados, a coluna nunca surgiria e o limite cairia para cinco em silêncio — sem erro nenhum. Este documento recria o banco o tempo todo e por isso escapa; sistemas em produção não escapam, e é daí que vem a disciplina de migração versionada.</p>
-<p>Faça exatamente isso — e <strong>não olhe para <code>src/importar.ts</code></strong>. Você não tem motivo para olhar: você foi ao lugar onde a regra estava, e mudou.</p>
+  <rect width="980" height="560" fill="#ffffff"/>
+  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 23 — TEMPO 2 — a dor, medida</text>
+  <text x="40" y="64" class="s" font-size="13">Tudo funciona. E para exercitar uma regra de três linhas é preciso subir servidor, porta e banco.</text>
+  <rect x="60" y="120" width="200" height="68" rx="8" fill="#fefce8" stroke="#fde68a" stroke-width="1.5"/>
+  <text x="160.0" y="151.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">tests/</text>
+  <text x="160.0" y="169.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">cadastro.e2e.test.ts</text>
+  <line x1="262" y1="154" x2="320" y2="154" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-23-arquitetura__a-red)"/>
+  <text x="291.0" y="142" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="400">precisa de</text>
+  <rect x="330" y="100" width="400" height="300" rx="10" fill="#fef2f2" stroke="#fecaca" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="344" y="120" font-size="12.5" text-anchor="start" fill="#6b7280" font-weight="600">para testar UMA regra, tudo isto sobe</text>
+  <rect x="360" y="140" width="160" height="62" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="440.0" y="168.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">Bun.spawn</text>
+  <text x="440.0" y="186.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">processo</text>
+  <rect x="546" y="140" width="160" height="62" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="626.0" y="168.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">porta 3000</text>
+  <text x="626.0" y="186.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">espera abrir</text>
+  <rect x="360" y="226" width="160" height="62" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="440.0" y="254.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">arquivo SQLite</text>
+  <text x="440.0" y="272.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">estado real</text>
+  <rect x="546" y="226" width="160" height="62" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="626.0" y="254.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">DELETE FROM</text>
+  <text x="626.0" y="272.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">entre testes</text>
+  <rect x="430" y="312" width="220" height="62" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
+  <text x="540.0" y="340.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">134 ms por execução</text>
+  <text x="540.0" y="358.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">para 4 asserções</text>
+  <rect x="780" y="140" width="180" height="148" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="870" y="170" font-size="14" text-anchor="middle" fill="#111827" font-weight="700">index.ts</text>
+  <line x1="800" y1="184" x2="940" y2="184" stroke="#bfdbfe" stroke-width="1.2"/>
+  <text x="870" y="210" font-size="12" text-anchor="middle" fill="#6b7280" font-weight="400">181 linhas</text>
+  <text x="870" y="234" font-size="12" text-anchor="middle" fill="#6b7280" font-weight="400">3 rotas</text>
+  <text x="870" y="258" font-size="12" text-anchor="middle" fill="#6b7280" font-weight="400">10 comandos SQL</text>
+  <text x="870" y="280" font-size="12" text-anchor="middle" fill="#dc2626" font-weight="400">0 testes de unidade</text>
+  <rect x="60" y="424" width="900" height="118" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
+  <text x="510" y="450" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">O maior handler tem 89 linhas e DEZ responsabilidades — cinco de negócio, cinco de transporte.</text>
+  <text x="510" y="474" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">Comparado a aula03.md: mesmas dez responsabilidades, metade das linhas, um quinto dos casos de uso.</text>
+  <text x="510" y="500" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">A pergunta que o teste responde: o que precisaria ser verdade para exercitar a regra do limite</text>
+  <text x="510" y="517" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">sem subir nada disso? A resposta é a fase 43 — e falta o percurso inteiro até lá.</text>
+</svg></div><figcaption>Arquitetura da fase 23</figcaption></figure>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Crie o arquivo abaixo. Ele não testa nada — documenta uma impossibilidade, e usa <code>test.todo</code> para que ela apareça no relatório do runner.</p>
 
-<p><strong><code>src/db.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<p><strong><code>tests/regra-isolada.test.ts</code></strong> — arquivo novo</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c427-diff" data-alt="c427-clean">ver o que mudou</button><button class="cp" data-code="c427-clean">copiar</button></div></div>
-<pre class="cb-body" id="c427-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">Database</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:sqlite"</i><i class="t-pun">;</i>
-
-<i class="t-kw">export</i> <i class="t-kw">const</i> db <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Database</i><i class="t-pun">(</i><i class="t-str">"data/biblioteca.sqlite"</i><i class="t-pun">,</i> <i class="t-pun">{</i> create<i class="t-pun">:</i> <i class="t-kw">true</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"PRAGMA foreign_keys = ON;"</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-com">// dois processos podem abrir este arquivo ao mesmo tempo — o servidor e o</i>
-<i class="t-com">// teste. Sem isto o segundo leva SQLITE_BUSY na hora, em vez de esperar.</i>
-db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"PRAGMA busy_timeout = 5000;"</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-com">// O id vai explícito de propósito: é ele que faz o INSERT OR IGNORE ser</i>
-<i class="t-com">// idempotente, e é ele que os exemplos deste documento referenciam.</i>
-<i class="t-com">// O ORCID é nulo para os quatro — três morreram antes de ele existir.</i>
-<i class="t-kw">const</i> <i class="t-typ">AUTORES</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
-<strong class="ln-new">  <i class="t-pun">[</i><i class="t-num">1</i><i class="t-pun">,</i> <i class="t-str">"Eric Evans"</i><i class="t-pun">,</i> <i class="t-str">"didatico"</i><i class="t-pun">]</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">  <i class="t-pun">[</i><i class="t-num">2</i><i class="t-pun">,</i> <i class="t-str">"Robert C. Martin"</i><i class="t-pun">,</i> <i class="t-str">"didatico"</i><i class="t-pun">]</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">  <i class="t-pun">[</i><i class="t-num">3</i><i class="t-pun">,</i> <i class="t-str">"Harper Lee"</i><i class="t-pun">,</i> <i class="t-str">"literatura"</i><i class="t-pun">]</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">  <i class="t-pun">[</i><i class="t-num">4</i><i class="t-pun">,</i> <i class="t-str">"Jane Austen"</i><i class="t-pun">,</i> <i class="t-str">"literatura"</i><i class="t-pun">]</i><i class="t-pun">,</i></strong>
-<i class="t-pun">]</i> <i class="t-kw">as</i> <i class="t-kw">const</i><i class="t-pun">;</i>
-
-<i class="t-kw">function</i> <i class="t-fn">seedAutores</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-  <i class="t-kw">const</i> insert <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">prepare</i><i class="t-pun">(</i>
-<strong class="ln-new">    <i class="t-str">"INSERT OR IGNORE INTO autores (id, nome, tipo) VALUES (?, ?, ?)"</i><i class="t-pun">,</i></strong>
-  <i class="t-pun">)</i><i class="t-pun">;</i>
-
-<strong class="ln-new">  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">const</i> <i class="t-pun">[</i>id<i class="t-pun">,</i> nome<i class="t-pun">,</i> tipo<i class="t-pun">]</i> <i class="t-kw">of</i> <i class="t-typ">AUTORES</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">    insert<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>id<i class="t-pun">,</i> nome<i class="t-pun">,</i> tipo<i class="t-pun">)</i><i class="t-pun">;</i></strong>
-  <i class="t-pun">}</i>
-<i class="t-pun">}</i>
-
-<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">`
-    CREATE TABLE IF NOT EXISTS autores (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL,
-</i><strong class="ln-new"><i class="t-str">      orcid TEXT UNIQUE,</i></strong><i class="t-str">
-</i><strong class="ln-new"><i class="t-str">      tipo TEXT NOT NULL DEFAULT 'literatura'</i></strong><i class="t-str">
-    );
-  `</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">`
-    CREATE TABLE IF NOT EXISTS livros (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      numero_registro TEXT NOT NULL UNIQUE,
-      isbn TEXT NOT NULL UNIQUE,
-      titulo TEXT NOT NULL,
-      autor_id INTEGER NOT NULL,
-      data_catalogacao TEXT NOT NULL,
-      FOREIGN KEY (autor_id) REFERENCES autores(id)
-    );
-  `</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-fn">seedAutores</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">"Banco de dados inicializado."</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i></code></pre>
-<pre class="cb-body cb-diff" id="c427-diff" hidden><code><span class="dl ctx"> import { Database } from "bun:sqlite";</span><span class="dl ctx"> </span><span class="dl ctx"> export const db = new Database("data/biblioteca.sqlite", { create: true });</span><span class="dl ctx"> </span><span class="dl ctx"> db.run("PRAGMA foreign_keys = ON;");</span><span class="dl ctx"> </span><span class="dl ctx"> // dois processos podem abrir este arquivo ao mesmo tempo — o servidor e o</span><span class="dl ctx"> // teste. Sem isto o segundo leva SQLITE_BUSY na hora, em vez de esperar.</span><span class="dl ctx"> db.run("PRAGMA busy_timeout = 5000;");</span><span class="dl ctx"> </span><span class="dl ctx"> // O id vai explícito de propósito: é ele que faz o INSERT OR IGNORE ser</span><span class="dl ctx"> // idempotente, e é ele que os exemplos deste documento referenciam.</span><span class="dl ctx"> // O ORCID é nulo para os quatro — três morreram antes de ele existir.</span><span class="dl ctx"> const AUTORES = [</span><span class="dl del">-  [1, "Eric Evans"],</span><span class="dl del">-  [2, "Robert C. Martin"],</span><span class="dl del">-  [3, "Harper Lee"],</span><span class="dl del">-  [4, "Jane Austen"],</span><span class="dl add">+  [1, "Eric Evans", "didatico"],</span><span class="dl add">+  [2, "Robert C. Martin", "didatico"],</span><span class="dl add">+  [3, "Harper Lee", "literatura"],</span><span class="dl add">+  [4, "Jane Austen", "literatura"],</span><span class="dl ctx"> ] as const;</span><span class="dl ctx"> </span><span class="dl ctx"> function seedAutores() {</span><span class="dl ctx">   const insert = db.prepare(</span><span class="dl del">-    "INSERT OR IGNORE INTO autores (id, nome) VALUES (?, ?)",</span><span class="dl add">+    "INSERT OR IGNORE INTO autores (id, nome, tipo) VALUES (?, ?, ?)",</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl del">-  for (const [id, nome] of AUTORES) {</span><span class="dl del">-    insert.run(id, nome);</span><span class="dl add">+  for (const [id, nome, tipo] of AUTORES) {</span><span class="dl add">+    insert.run(id, nome, tipo);</span><span class="dl ctx">   }</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> export function createDb() {</span><span class="dl ctx">   db.run(`</span><span class="dl ctx">     CREATE TABLE IF NOT EXISTS autores (</span><span class="dl ctx">       id INTEGER PRIMARY KEY AUTOINCREMENT,</span><span class="dl ctx">       nome TEXT NOT NULL,</span><span class="dl del">-      orcid TEXT UNIQUE</span><span class="dl add">+      orcid TEXT UNIQUE,</span><span class="dl add">+      tipo TEXT NOT NULL DEFAULT 'literatura'</span><span class="dl ctx">     );</span><span class="dl ctx">   `);</span><span class="dl ctx"> </span><span class="dl ctx">   db.run(`</span><span class="dl ctx">     CREATE TABLE IF NOT EXISTS livros (</span><span class="dl ctx">       id INTEGER PRIMARY KEY AUTOINCREMENT,</span><span class="dl ctx">       numero_registro TEXT NOT NULL UNIQUE,</span><span class="dl ctx">       isbn TEXT NOT NULL UNIQUE,</span><span class="dl ctx">       titulo TEXT NOT NULL,</span><span class="dl ctx">       autor_id INTEGER NOT NULL,</span><span class="dl ctx">       data_catalogacao TEXT NOT NULL,</span><span class="dl ctx">       FOREIGN KEY (autor_id) REFERENCES autores(id)</span><span class="dl ctx">     );</span><span class="dl ctx">   `);</span><span class="dl ctx"> </span><span class="dl ctx">   seedAutores();</span><span class="dl ctx"> </span><span class="dl ctx">   console.log("Banco de dados inicializado.");</span><span class="dl ctx"> }</span></code></pre>
-</div>
-<p><strong><code>src/index.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
-<div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c428-diff" data-alt="c428-clean">ver o que mudou</button><button class="cp" data-code="c428-clean">copiar</button></div></div>
-<pre class="cb-body" id="c428-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
-
-<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-kw">type</i> <i class="t-typ">Handler</i> <i class="t-pun">=</i> <i class="t-pun">(</i>
-  request<i class="t-pun">:</i> <i class="t-typ">Request</i><i class="t-pun">,</i>
-  params<i class="t-pun">:</i> <i class="t-typ">Record</i><i class="t-pun">&lt;</i><i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">&gt;</i><i class="t-pun">,</i>
-<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-typ">Response</i> <i class="t-pun">|</i> <i class="t-typ">Promise</i><i class="t-pun">&lt;</i><i class="t-typ">Response</i><i class="t-pun">&gt;</i><i class="t-pun">;</i>
-
-<i class="t-kw">type</i> <i class="t-typ">Route</i> <i class="t-pun">=</i> <i class="t-pun">{</i> method<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i> pattern<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i> handler<i class="t-pun">:</i> <i class="t-typ">Handler</i> <i class="t-pun">}</i><i class="t-pun">;</i>
-
-<i class="t-kw">function</i> <i class="t-fn">match</i><i class="t-pun">(</i>pattern<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i> path<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">Record</i><i class="t-pun">&lt;</i><i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">&gt;</i> <i class="t-pun">|</i> <i class="t-kw">null</i> <i class="t-pun">{</i>
-  <i class="t-kw">const</i> patternParts <i class="t-pun">=</i> pattern<i class="t-pun">.</i><i class="t-fn">split</i><i class="t-pun">(</i><i class="t-str">"/"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">filter</i><i class="t-pun">(</i><i class="t-typ">Boolean</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-kw">const</i> pathParts <i class="t-pun">=</i> path<i class="t-pun">.</i><i class="t-fn">split</i><i class="t-pun">(</i><i class="t-str">"/"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">filter</i><i class="t-pun">(</i><i class="t-typ">Boolean</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-kw">if</i> <i class="t-pun">(</i>patternParts<i class="t-pun">.</i>length <i class="t-pun">!</i><i class="t-pun">=</i><i class="t-pun">=</i> pathParts<i class="t-pun">.</i>length<i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-kw">null</i><i class="t-pun">;</i>
-
-  <i class="t-kw">const</i> params<i class="t-pun">:</i> <i class="t-typ">Record</i><i class="t-pun">&lt;</i><i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">&gt;</i> <i class="t-pun">=</i> <i class="t-pun">{</i><i class="t-pun">}</i><i class="t-pun">;</i>
-
-  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> patternParts<i class="t-pun">.</i>length<i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-    <i class="t-kw">const</i> expected <i class="t-pun">=</i> patternParts<i class="t-pun">[</i>i<i class="t-pun">]</i><i class="t-pun">!</i><i class="t-pun">;</i>
-    <i class="t-kw">const</i> received <i class="t-pun">=</i> pathParts<i class="t-pun">[</i>i<i class="t-pun">]</i><i class="t-pun">!</i><i class="t-pun">;</i>
-
-    <i class="t-kw">if</i> <i class="t-pun">(</i>expected<i class="t-pun">.</i><i class="t-fn">startsWith</i><i class="t-pun">(</i><i class="t-str">":"</i><i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-      params<i class="t-pun">[</i>expected<i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">1</i><i class="t-pun">)</i><i class="t-pun">]</i> <i class="t-pun">=</i> received<i class="t-pun">;</i>
-    <i class="t-pun">}</i> <i class="t-kw">else</i> <i class="t-kw">if</i> <i class="t-pun">(</i>expected <i class="t-pun">!</i><i class="t-pun">=</i><i class="t-pun">=</i> received<i class="t-pun">)</i> <i class="t-pun">{</i>
-      <i class="t-kw">return</i> <i class="t-kw">null</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i>
-  <i class="t-pun">}</i>
-
-  <i class="t-kw">return</i> params<i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<i class="t-kw">const</i> routes<i class="t-pun">:</i> <i class="t-typ">Route</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
-  <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
-    pattern<i class="t-pun">:</i> <i class="t-str">"/"</i><i class="t-pun">,</i>
-    handler<i class="t-pun">:</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> message<i class="t-pun">:</i> <i class="t-str">"API da Biblioteca"</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">,</i>
-  <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i>
-    pattern<i class="t-pun">:</i> <i class="t-str">"/livros"</i><i class="t-pun">,</i>
-    handler<i class="t-pun">:</i> <i class="t-kw">async</i> <i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-      <i class="t-kw">const</i> body <i class="t-pun">=</i> <i class="t-pun">(</i><i class="t-kw">await</i> request<i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i>
-        isbn<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
-        titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
-        autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> isbn <i class="t-pun">=</i> body<i class="t-pun">.</i>isbn<i class="t-pun">.</i><i class="t-fn">replace</i><i class="t-pun">(</i><i class="t-pun">/</i><i class="t-pun">[</i><i class="t-pun">^</i><i class="t-num">0</i><i class="t-pun">-</i><i class="t-num">9</i><i class="t-pun">]</i><i class="t-pun">/</i>g<i class="t-pun">,</i> <i class="t-str">""</i><i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-kw">const</i> titulo <i class="t-pun">=</i> body<i class="t-pun">.</i>titulo<i class="t-pun">;</i>
-      <i class="t-kw">const</i> autorId <i class="t-pun">=</i> body<i class="t-pun">.</i>autorId<i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> autor <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM autores WHERE id = ?"</i><i class="t-pun">)</i>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i></strong>
-<strong class="ln-new">        <i class="t-pun">|</i> <i class="t-pun">{</i> id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i> nome<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i> orcid<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i> tipo<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">}</i></strong>
-<strong class="ln-new">        <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i></strong>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>autor<i class="t-pun">)</i> <i class="t-pun">{</i>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Autor não cadastrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i>
-
-      <i class="t-kw">const</i> livrosDoAutor <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
-
-<strong class="ln-new">      <i class="t-kw">const</i> noAcervo <i class="t-pun">=</i> livrosDoAutor<i class="t-pun">.</i>total<i class="t-pun">;</i></strong>
-<strong class="ln-new">      <i class="t-kw">const</i> limite <i class="t-pun">=</i> autor<i class="t-pun">.</i>tipo <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> <i class="t-str">"didatico"</i> <i class="t-pun">?</i> <i class="t-num">10</i> <i class="t-pun">:</i> <i class="t-num">5</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i>noAcervo <i class="t-pun">&gt;</i><i class="t-pun">=</i> limite<i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-<strong class="ln-new">          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">`O autor já tem ${limite} livros no acervo`</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i>
-
-      <i class="t-kw">const</i> jaExiste <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT 1 FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>isbn<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>jaExiste<i class="t-pun">)</i> <i class="t-pun">{</i>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Livro já cadastrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i>
-
-      <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
-          <i class="t-str">"SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)"</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">,</i> titulo<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>mesmoTitulo<i class="t-pun">)</i> <i class="t-pun">{</i>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Este autor já tem um livro com este título"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i>
-
-      <i class="t-kw">const</i> hoje <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toISOString</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-kw">const</i> ano <i class="t-pun">=</i> hoje<i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">4</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> catalogadosNoAno <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
-          <i class="t-str">`SELECT COUNT(*) AS total FROM livros
-            WHERE data_catalogacao LIKE ?`</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i><i class="t-str">`${ano}%`</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> numeroRegistro <i class="t-pun">=</i> <i class="t-str">`${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>
-        <i class="t-str">`INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
-         VALUES (?, ?, ?, ?, ?)`</i><i class="t-pun">,</i>
-        <i class="t-pun">[</i>numeroRegistro<i class="t-pun">,</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">,</i> hoje<i class="t-pun">]</i><i class="t-pun">,</i>
-      <i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> livro <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE id = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>result<i class="t-pun">.</i>lastInsertRowid <i class="t-kw">as</i> <i class="t-typ">number</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">Record</i><i class="t-pun">&lt;</i><i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">unknown</i><i class="t-pun">&gt;</i><i class="t-pun">;</i>
-
-      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-        <i class="t-pun">{</i> <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i>livro<i class="t-pun">,</i> autor<i class="t-pun">:</i> autor<i class="t-pun">.</i>nome <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">{</i>
-          status<i class="t-pun">:</i> <i class="t-num">201</i><i class="t-pun">,</i>
-          headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-typ">Location</i><i class="t-pun">:</i> <i class="t-str">`/livros/${isbn}`</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">}</i><i class="t-pun">,</i>
-      <i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
-    pattern<i class="t-pun">:</i> <i class="t-str">"/livros/:q"</i><i class="t-pun">,</i>
-    handler<i class="t-pun">:</i> <i class="t-pun">(</i>_request<i class="t-pun">,</i> params<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-      <i class="t-kw">const</i> q <i class="t-pun">=</i> params<i class="t-pun">.</i>q<i class="t-pun">!</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porIsbn<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE titulo LIKE ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porTitulo<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> porAutor <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
-          <i class="t-str">`SELECT livros.* FROM livros
-             JOIN autores ON autores.id = livros.autor_id
-            WHERE autores.nome LIKE ?`</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porAutor<i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">}</i><i class="t-pun">,</i>
-<i class="t-pun">]</i><i class="t-pun">;</i>
-
-<i class="t-kw">const</i> server <i class="t-pun">=</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">serve</i><i class="t-pun">(</i><i class="t-pun">{</i>
-  port<i class="t-pun">:</i> <i class="t-fn">Number</i><i class="t-pun">(</i>process<i class="t-pun">.</i>env<i class="t-pun">.</i><i class="t-typ">PORT</i> <i class="t-pun">??</i> <i class="t-num">3000</i><i class="t-pun">)</i><i class="t-pun">,</i>
-
-  <i class="t-kw">async</i> <i class="t-fn">fetch</i><i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">{</i>
-    <i class="t-kw">const</i> url <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">URL</i><i class="t-pun">(</i>request<i class="t-pun">.</i>url<i class="t-pun">)</i><i class="t-pun">;</i>
-
-    <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">const</i> route <i class="t-kw">of</i> routes<i class="t-pun">)</i> <i class="t-pun">{</i>
-      <i class="t-kw">if</i> <i class="t-pun">(</i>route<i class="t-pun">.</i>method <i class="t-pun">!</i><i class="t-pun">=</i><i class="t-pun">=</i> request<i class="t-pun">.</i>method<i class="t-pun">)</i> <i class="t-kw">continue</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> params <i class="t-pun">=</i> <i class="t-fn">match</i><i class="t-pun">(</i>route<i class="t-pun">.</i>pattern<i class="t-pun">,</i> url<i class="t-pun">.</i>pathname<i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-kw">if</i> <i class="t-pun">(</i>params<i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-kw">await</i> route<i class="t-pun">.</i><i class="t-fn">handler</i><i class="t-pun">(</i>request<i class="t-pun">,</i> params<i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i>
-
-    <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Recurso não encontrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i><i class="t-pun">,</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`Servidor executando em http://localhost:${server.port}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c428-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl ctx">       const isbn = body.isbn.replace(/[^0-9]/g, "");</span><span class="dl ctx">       const titulo = body.titulo;</span><span class="dl ctx">       const autorId = body.autorId;</span><span class="dl ctx"> </span><span class="dl ctx">       const autor = db</span><span class="dl ctx">         .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl del">-        .get(autorId) as { id: number; nome: string; orcid: string | null } | null;</span><span class="dl add">+        .get(autorId) as</span><span class="dl add">+        | { id: number; nome: string; orcid: string | null; tipo: string }</span><span class="dl add">+        | null;</span><span class="dl ctx"> </span><span class="dl ctx">       if (!autor) {</span><span class="dl ctx">         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const livrosDoAutor = db</span><span class="dl ctx">         .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl ctx">         .get(autorId) as { total: number };</span><span class="dl ctx"> </span><span class="dl del">-      if (livrosDoAutor.total &gt;= 3) {</span><span class="dl add">+      const noAcervo = livrosDoAutor.total;</span><span class="dl add">+      const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl add">+</span><span class="dl add">+      if (noAcervo &gt;= limite) {</span><span class="dl ctx">         return Response.json(</span><span class="dl del">-          { error: "O autor já tem 3 livros no acervo" },</span><span class="dl add">+          { error: `O autor já tem ${limite} livros no acervo` },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const jaExiste = db</span><span class="dl ctx">         .query("SELECT 1 FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .get(isbn);</span><span class="dl ctx"> </span><span class="dl ctx">       if (jaExiste) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "Livro já cadastrado" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const mesmoTitulo = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl ctx">         )</span><span class="dl ctx">         .get(autorId, titulo);</span><span class="dl ctx"> </span><span class="dl ctx">       if (mesmoTitulo) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "Este autor já tem um livro com este título" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl ctx">       const ano = hoje.slice(0, 4);</span><span class="dl ctx"> </span><span class="dl ctx">       const catalogadosNoAno = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT COUNT(*) AS total FROM livros</span><span class="dl ctx">             WHERE data_catalogacao LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .get(`${ano}%`) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">       const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl ctx"> </span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl ctx">         [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number) as Record&lt;string, unknown&gt;;</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(</span><span class="dl ctx">         { ...livro, autor: autor.nome },</span><span class="dl ctx">         {</span><span class="dl ctx">           status: 201,</span><span class="dl ctx">           headers: { Location: `/livros/${isbn}` },</span><span class="dl ctx">         },</span><span class="dl ctx">       );</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: Number(process.env.PORT ?? 3000),</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
-</div>
-
-<div class="cb cb-fig">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c114-diff" data-alt="c114-clean">ver o que mudou</button></div></div>
-<pre class="cb-body" id="c114-clean"><code>      <i class="t-kw">const</i> noAcervo <i class="t-pun">=</i> livrosDoAutor<i class="t-pun">.</i>total<i class="t-pun">;</i>
-      <i class="t-kw">const</i> limite <i class="t-pun">=</i> autor<i class="t-pun">.</i>tipo <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> <i class="t-str">"didatico"</i> <i class="t-pun">?</i> <i class="t-num">10</i> <i class="t-pun">:</i> <i class="t-num">5</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>noAcervo <i class="t-pun">&gt;</i><i class="t-pun">=</i> limite<i class="t-pun">)</i> <i class="t-pun">{</i>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">`O autor já tem ${limite} livros no acervo`</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i></code></pre>
-<pre class="cb-body cb-diff" id="c114-diff" hidden><code><span class="dl add">+      const noAcervo = livrosDoAutor.total;</span><span class="dl add">+      const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl add">+</span><span class="dl del">-      if (livrosDoAutor.total &gt;= 3) {</span><span class="dl add">+      if (noAcervo &gt;= limite) {</span><span class="dl ctx">         return Response.json(</span><span class="dl del">-          { error: "O autor já tem 3 livros no acervo" },</span><span class="dl add">+          { error: `O autor já tem ${limite} livros no acervo` },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span></code></pre>
-</div>
-
-<p><strong><code>tests/cadastro.e2e.test.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
-<div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c429-diff" data-alt="c429-clean">ver o que mudou</button><button class="cp" data-code="c429-clean">copiar</button></div></div>
-<pre class="cb-body" id="c429-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> afterAll<i class="t-pun">,</i> beforeAll<i class="t-pun">,</i> beforeEach<i class="t-pun">,</i> expect<i class="t-pun">,</i> test <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:test"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../src/db"</i><i class="t-pun">;</i>
-
-<i class="t-kw">const</i> <i class="t-typ">BASE</i> <i class="t-pun">=</i> <i class="t-str">"http://localhost:3999"</i><i class="t-pun">;</i>
-<i class="t-kw">const</i> <i class="t-typ">AUSTEN</i> <i class="t-pun">=</i> <i class="t-num">4</i><i class="t-pun">;</i>
-<i class="t-kw">const</i> <i class="t-typ">LIVROS</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439518"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Orgulho e Preconceito"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439662"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Razão e Sensibilidade"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439587"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Emma"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439761"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Persuasão"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439563"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"A Abadia de Northanger"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141199689"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Lady Susan"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-<i class="t-pun">]</i><i class="t-pun">;</i>
-<strong class="ln-new"><i class="t-kw">const</i> <i class="t-typ">EVANS</i> <i class="t-pun">=</i> <i class="t-num">1</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new"><i class="t-com">/** ISBN-13 sintético com dígito verificador correto — a fase 34 vai conferir. */</i></strong>
-<strong class="ln-new"><i class="t-kw">function</i> <i class="t-fn">isbnSintetico</i><i class="t-pun">(</i>seq<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">  <i class="t-kw">const</i> doze <i class="t-pun">=</i> <i class="t-str">`97800000${String(seq).padStart(4, "0")}`</i><i class="t-pun">;</i></strong>
-<strong class="ln-new">  <i class="t-kw">let</i> soma <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">12</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> soma <i class="t-pun">+</i><i class="t-pun">=</i> <i class="t-typ">Number</i><i class="t-pun">(</i>doze<i class="t-pun">[</i>i<i class="t-pun">]</i><i class="t-pun">!</i><i class="t-pun">)</i> <i class="t-pun">*</i> <i class="t-pun">(</i>i <i class="t-pun">%</i> <i class="t-num">2</i> <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> <i class="t-num">0</i> <i class="t-pun">?</i> <i class="t-num">1</i> <i class="t-pun">:</i> <i class="t-num">3</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">  <i class="t-kw">return</i> doze <i class="t-pun">+</i> <i class="t-pun">(</i><i class="t-pun">(</i><i class="t-num">10</i> <i class="t-pun">-</i> <i class="t-pun">(</i>soma <i class="t-pun">%</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">%</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<strong class="ln-new"><i class="t-pun">}</i></strong>
-
-<strong class="ln-new"><i class="t-kw">const</i> <i class="t-typ">LIVROS_DE_EVANS</i> <i class="t-pun">=</i> <i class="t-typ">Array</i><i class="t-pun">.</i><i class="t-kw">from</i><i class="t-pun">(</i><i class="t-pun">{</i> length<i class="t-pun">:</i> <i class="t-num">11</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">(</i>_<i class="t-pun">,</i> i<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">(</i><i class="t-pun">{</i></strong>
-<strong class="ln-new">  isbn<i class="t-pun">:</i> <i class="t-fn">isbnSintetico</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">  titulo<i class="t-pun">:</i> <i class="t-str">`Título didático ${i + 1}`</i><i class="t-pun">,</i></strong>
-<strong class="ln-new"><i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-<i class="t-kw">let</i> server<i class="t-pun">:</i> <i class="t-typ">ReturnType</i><i class="t-pun">&lt;</i><i class="t-kw">typeof</i> <i class="t-typ">Bun</i><i class="t-pun">.</i>spawn<i class="t-pun">&gt;</i><i class="t-pun">;</i>
-
-<i class="t-fn">beforeAll</i><i class="t-pun">(</i><i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  <i class="t-com">// não há como exercitar a regra sem subir a aplicação inteira</i>
-  server <i class="t-pun">=</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">spawn</i><i class="t-pun">(</i><i class="t-pun">[</i><i class="t-str">"bun"</i><i class="t-pun">,</i> <i class="t-str">"src/index.ts"</i><i class="t-pun">]</i><i class="t-pun">,</i> <i class="t-pun">{</i>
-    stdout<i class="t-pun">:</i> <i class="t-str">"ignore"</i><i class="t-pun">,</i>
-    <i class="t-com">// porta própria: a sonda abaixo só passa quando ESTE servidor subir</i>
-    env<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-pun">...</i>process<i class="t-pun">.</i>env<i class="t-pun">,</i> <i class="t-typ">PORT</i><i class="t-pun">:</i> <i class="t-str">"3999"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-com">// ... e sem esperar a porta abrir</i>
-  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> tentativa <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">tentativa</i> <i class="t-pun">&lt;</i> <i class="t-num">50</i><i class="t-pun">;</i> tentativa<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-    <i class="t-kw">try</i> <i class="t-pun">{</i>
-      <i class="t-kw">await</i> <i class="t-fn">fetch</i><i class="t-pun">(</i><i class="t-typ">BASE</i><i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-kw">return</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i> <i class="t-kw">catch</i> <i class="t-pun">{</i>
-      <i class="t-kw">await</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">sleep</i><i class="t-pun">(</i><i class="t-num">100</i><i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i>
-  <i class="t-pun">}</i>
-
-  <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">Error</i><i class="t-pun">(</i><i class="t-str">"o servidor não subiu"</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-fn">afterAll</i><i class="t-pun">(</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  server<i class="t-pun">.</i><i class="t-fn">kill</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-fn">beforeEach</i><i class="t-pun">(</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  <i class="t-com">// ... e sem limpar o banco de verdade entre um teste e outro</i>
-  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"DELETE FROM livros"</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<strong class="ln-new"><i class="t-kw">function</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>n<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">,</i> autorId <i class="t-pun">=</i> <i class="t-typ">AUSTEN</i><i class="t-pun">,</i> livros <i class="t-pun">=</i> <i class="t-typ">LIVROS</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-  <i class="t-kw">return</i> <i class="t-fn">fetch</i><i class="t-pun">(</i><i class="t-str">`${BASE}/livros`</i><i class="t-pun">,</i> <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i>
-    headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-str">"Content-Type"</i><i class="t-pun">:</i> <i class="t-str">"application/json"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-<strong class="ln-new">    body<i class="t-pun">:</i> <i class="t-typ">JSON</i><i class="t-pun">.</i><i class="t-fn">stringify</i><i class="t-pun">(</i><i class="t-pun">{</i> <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i>livros<i class="t-pun">[</i>n<i class="t-pun">]</i><i class="t-pun">,</i> autorId <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">,</i></strong>
-  <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<strong class="ln-new"><i class="t-kw">const</i> cadastrarDeEvans <i class="t-pun">=</i> <i class="t-pun">(</i>n<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>n<i class="t-pun">,</i> <i class="t-typ">EVANS</i><i class="t-pun">,</i> <i class="t-typ">LIVROS_DE_EVANS</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new"><i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05: um autor de literatura vai até 5 livros no acervo"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">5</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-    <i class="t-kw">const</i> response <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-fn">expect</i><i class="t-pun">(</i>response<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">201</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
-
-<strong class="ln-new">  <i class="t-kw">const</i> sexto <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i><i class="t-num">5</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">  <i class="t-fn">expect</i><i class="t-pun">(</i>sexto<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">409</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<strong class="ln-new"><i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05′: um autor didático vai até 10 livros no acervo"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">10</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">    <i class="t-kw">const</i> response <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrarDeEvans</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<strong class="ln-new">    <i class="t-fn">expect</i><i class="t-pun">(</i>response<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">201</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<strong class="ln-new">  <i class="t-pun">}</i></strong>
-
-<strong class="ln-new">  <i class="t-kw">const</i> decimoPrimeiro <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrarDeEvans</i><i class="t-pun">(</i><i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">  <i class="t-fn">expect</i><i class="t-pun">(</i>decimoPrimeiro<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">409</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<strong class="ln-new"><i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong></code></pre>
-<pre class="cb-body cb-diff" id="c429-diff" hidden><code><span class="dl ctx"> import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test";</span><span class="dl ctx"> import { db } from "../src/db";</span><span class="dl ctx"> </span><span class="dl ctx"> const BASE = "http://localhost:3999";</span><span class="dl ctx"> const AUSTEN = 4;</span><span class="dl ctx"> const LIVROS = [</span><span class="dl ctx">   { isbn: "9780141439518", titulo: "Orgulho e Preconceito" },</span><span class="dl ctx">   { isbn: "9780141439662", titulo: "Razão e Sensibilidade" },</span><span class="dl ctx">   { isbn: "9780141439587", titulo: "Emma" },</span><span class="dl ctx">   { isbn: "9780141439761", titulo: "Persuasão" },</span><span class="dl ctx">   { isbn: "9780141439563", titulo: "A Abadia de Northanger" },</span><span class="dl ctx">   { isbn: "9780141199689", titulo: "Lady Susan" },</span><span class="dl ctx"> ];</span><span class="dl add">+const EVANS = 1;</span><span class="dl add">+</span><span class="dl add">+/** ISBN-13 sintético com dígito verificador correto — a fase 34 vai conferir. */</span><span class="dl add">+function isbnSintetico(seq: number): string {</span><span class="dl add">+  const doze = `97800000${String(seq).padStart(4, "0")}`;</span><span class="dl add">+  let soma = 0;</span><span class="dl add">+</span><span class="dl add">+  for (let i = 0; i &lt; 12; i++) soma += Number(doze[i]!) * (i % 2 === 0 ? 1 : 3);</span><span class="dl add">+</span><span class="dl add">+  return doze + ((10 - (soma % 10)) % 10);</span><span class="dl add">+}</span><span class="dl add">+</span><span class="dl add">+const LIVROS_DE_EVANS = Array.from({ length: 11 }, (_, i) =&gt; ({</span><span class="dl add">+  isbn: isbnSintetico(i),</span><span class="dl add">+  titulo: `Título didático ${i + 1}`,</span><span class="dl add">+}));</span><span class="dl ctx"> </span><span class="dl ctx"> let server: ReturnType&lt;typeof Bun.spawn&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> beforeAll(async () =&gt; {</span><span class="dl ctx">   // não há como exercitar a regra sem subir a aplicação inteira</span><span class="dl ctx">   server = Bun.spawn(["bun", "src/index.ts"], {</span><span class="dl ctx">     stdout: "ignore",</span><span class="dl ctx">     // porta própria: a sonda abaixo só passa quando ESTE servidor subir</span><span class="dl ctx">     env: { ...process.env, PORT: "3999" },</span><span class="dl ctx">   });</span><span class="dl ctx"> </span><span class="dl ctx">   // ... e sem esperar a porta abrir</span><span class="dl ctx">   for (let tentativa = 0; tentativa &lt; 50; tentativa++) {</span><span class="dl ctx">     try {</span><span class="dl ctx">       await fetch(BASE);</span><span class="dl ctx">       return;</span><span class="dl ctx">     } catch {</span><span class="dl ctx">       await Bun.sleep(100);</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   throw new Error("o servidor não subiu");</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> afterAll(() =&gt; {</span><span class="dl ctx">   server.kill();</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> beforeEach(() =&gt; {</span><span class="dl ctx">   // ... e sem limpar o banco de verdade entre um teste e outro</span><span class="dl ctx">   db.run("DELETE FROM livros");</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl del">-function cadastrar(n: number, autorId = AUSTEN): Promise&lt;Response&gt; {</span><span class="dl add">+function cadastrar(n: number, autorId = AUSTEN, livros = LIVROS) {</span><span class="dl ctx">   return fetch(`${BASE}/livros`, {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     headers: { "Content-Type": "application/json" },</span><span class="dl del">-    body: JSON.stringify({ ...LIVROS[n], autorId }),</span><span class="dl add">+    body: JSON.stringify({ ...livros[n], autorId }),</span><span class="dl ctx">   });</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl del">-test("RF05: o autor não pode ter mais de 3 livros no acervo", async () =&gt; {</span><span class="dl del">-  for (let i = 0; i &lt; 3; i++) {</span><span class="dl add">+const cadastrarDeEvans = (n: number) =&gt; cadastrar(n, EVANS, LIVROS_DE_EVANS);</span><span class="dl add">+</span><span class="dl add">+test("RF05: um autor de literatura vai até 5 livros no acervo", async () =&gt; {</span><span class="dl add">+  for (let i = 0; i &lt; 5; i++) {</span><span class="dl ctx">     const response = await cadastrar(i);</span><span class="dl ctx">     expect(response.status).toBe(201);</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl del">-  const quarto = await cadastrar(3);</span><span class="dl add">+  const sexto = await cadastrar(5);</span><span class="dl ctx"> </span><span class="dl del">-  expect(quarto.status).toBe(409);</span><span class="dl add">+  expect(sexto.status).toBe(409);</span><span class="dl ctx"> });</span><span class="dl add">+</span><span class="dl add">+test("RF05′: um autor didático vai até 10 livros no acervo", async () =&gt; {</span><span class="dl add">+  for (let i = 0; i &lt; 10; i++) {</span><span class="dl add">+    const response = await cadastrarDeEvans(i);</span><span class="dl add">+    expect(response.status).toBe(201);</span><span class="dl add">+  }</span><span class="dl add">+</span><span class="dl add">+  const decimoPrimeiro = await cadastrarDeEvans(10);</span><span class="dl add">+</span><span class="dl add">+  expect(decimoPrimeiro.status).toBe(409);</span><span class="dl add">+});</span></code></pre>
-</div>
-<div class="cb cb-fig">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c116-diff" data-alt="c116-clean">ver o que mudou</button></div></div>
-<pre class="cb-body" id="c116-clean"><code><i class="t-kw">function</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>n<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">,</i> autorId <i class="t-pun">=</i> <i class="t-typ">AUSTEN</i><i class="t-pun">,</i> livros <i class="t-pun">=</i> <i class="t-typ">LIVROS</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-  <i class="t-kw">return</i> <i class="t-fn">fetch</i><i class="t-pun">(</i><i class="t-str">`${BASE}/livros`</i><i class="t-pun">,</i> <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i>
-    headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-str">"Content-Type"</i><i class="t-pun">:</i> <i class="t-str">"application/json"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-    body<i class="t-pun">:</i> <i class="t-typ">JSON</i><i class="t-pun">.</i><i class="t-fn">stringify</i><i class="t-pun">(</i><i class="t-pun">{</i> <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i>livros<i class="t-pun">[</i>n<i class="t-pun">]</i><i class="t-pun">,</i> autorId <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">,</i>
-  <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<i class="t-kw">const</i> cadastrarDeEvans <i class="t-pun">=</i> <i class="t-pun">(</i>n<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>n<i class="t-pun">,</i> <i class="t-typ">EVANS</i><i class="t-pun">,</i> <i class="t-typ">LIVROS_DE_EVANS</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c116-diff" hidden><code><span class="dl del">-function cadastrar(n: number, autorId = AUSTEN): Promise&lt;Response&gt; {</span><span class="dl add">+function cadastrar(n: number, autorId = AUSTEN, livros = LIVROS) {</span><span class="dl ctx">   return fetch(`${BASE}/livros`, {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     headers: { "Content-Type": "application/json" },</span><span class="dl del">-    body: JSON.stringify({ ...LIVROS[n], autorId }),</span><span class="dl add">+    body: JSON.stringify({ ...livros[n], autorId }),</span><span class="dl ctx">   });</span><span class="dl ctx"> }</span><span class="dl add">+</span><span class="dl add">+const cadastrarDeEvans = (n: number) =&gt; cadastrar(n, EVANS, LIVROS_DE_EVANS);</span></code></pre>
-</div>
-<div class="cb cb-fig">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c117-diff" data-alt="c117-clean">ver o que mudou</button></div></div>
-<pre class="cb-body" id="c117-clean"><code><i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05: um autor de literatura vai até 5 livros no acervo"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">5</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-    <i class="t-kw">const</i> response <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-fn">expect</i><i class="t-pun">(</i>response<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">201</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
-
-  <i class="t-kw">const</i> sexto <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i><i class="t-num">5</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-fn">expect</i><i class="t-pun">(</i>sexto<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">409</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05′: um autor didático vai até 10 livros no acervo"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">10</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-    <i class="t-kw">const</i> response <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrarDeEvans</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">;</i>
-    <i class="t-fn">expect</i><i class="t-pun">(</i>response<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">201</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
-
-  <i class="t-kw">const</i> decimoPrimeiro <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrarDeEvans</i><i class="t-pun">(</i><i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-fn">expect</i><i class="t-pun">(</i>decimoPrimeiro<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">409</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c117-diff" hidden><code><span class="dl del">-test("RF05: o autor não pode ter mais de 3 livros no acervo", async () =&gt; {</span><span class="dl del">-  for (let i = 0; i &lt; 3; i++) {</span><span class="dl add">+test("RF05: um autor de literatura vai até 5 livros no acervo", async () =&gt; {</span><span class="dl add">+  for (let i = 0; i &lt; 5; i++) {</span><span class="dl ctx">     const response = await cadastrar(i);</span><span class="dl ctx">     expect(response.status).toBe(201);</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl del">-  const quarto = await cadastrar(3);</span><span class="dl add">+  const sexto = await cadastrar(5);</span><span class="dl ctx"> </span><span class="dl del">-  expect(quarto.status).toBe(409);</span><span class="dl add">+  expect(sexto.status).toBe(409);</span><span class="dl ctx"> });</span><span class="dl add">+</span><span class="dl add">+test("RF05′: um autor didático vai até 10 livros no acervo", async () =&gt; {</span><span class="dl add">+  for (let i = 0; i &lt; 10; i++) {</span><span class="dl add">+    const response = await cadastrarDeEvans(i);</span><span class="dl add">+    expect(response.status).toBe(201);</span><span class="dl add">+  }</span><span class="dl add">+</span><span class="dl add">+  const decimoPrimeiro = await cadastrarDeEvans(10);</span><span class="dl add">+</span><span class="dl add">+  expect(decimoPrimeiro.status).toBe(409);</span><span class="dl add">+});</span></code></pre>
-</div>
-
-<p><strong><code>tests/importacao.test.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
-<div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c430-diff" data-alt="c430-clean">ver o que mudou</button><button class="cp" data-code="c430-clean">copiar</button></div></div>
-<pre class="cb-body" id="c430-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> beforeEach<i class="t-pun">,</i> expect<i class="t-pun">,</i> test <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:test"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../src/db"</i><i class="t-pun">;</i>
-
-<i class="t-kw">const</i> <i class="t-typ">AUSTEN</i> <i class="t-pun">=</i> <i class="t-num">4</i><i class="t-pun">;</i>
-<i class="t-kw">const</i> <i class="t-typ">LIVROS</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439518"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Orgulho e Preconceito"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439662"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Razão e Sensibilidade"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439587"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Emma"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439761"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Persuasão"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439563"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"A Abadia de Northanger"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141199689"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Lady Susan"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-<i class="t-pun">]</i><i class="t-pun">;</i>
-
-<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-fn">beforeEach</i><i class="t-pun">(</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"DELETE FROM livros"</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-kw">async</i> <i class="t-kw">function</i> <i class="t-fn">importar</i><i class="t-pun">(</i>csv<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">Promise</i><i class="t-pun">&lt;</i><i class="t-kw">void</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-  <i class="t-kw">await</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">write</i><i class="t-pun">(</i><i class="t-str">"data/importacao-teste.csv"</i><i class="t-pun">,</i> csv<i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-kw">const</i> processo <i class="t-pun">=</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">spawn</i><i class="t-pun">(</i>
-    <i class="t-pun">[</i><i class="t-str">"bun"</i><i class="t-pun">,</i> <i class="t-str">"src/importar.ts"</i><i class="t-pun">,</i> <i class="t-str">"data/importacao-teste.csv"</i><i class="t-pun">]</i><i class="t-pun">,</i>
-    <i class="t-pun">{</i> stdout<i class="t-pun">:</i> <i class="t-str">"ignore"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">)</i><i class="t-pun">;</i>
-
-  <i class="t-kw">await</i> processo<i class="t-pun">.</i>exited<i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<i class="t-kw">function</i> <i class="t-fn">noAcervo</i><i class="t-pun">(</i>autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">{</i>
-  <i class="t-kw">const</i> row <i class="t-pun">=</i> db
-    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
-      <i class="t-str">`SELECT COUNT(*) AS total FROM livros
-        WHERE autor_id = ?`</i><i class="t-pun">,</i>
-    <i class="t-pun">)</i>
-    <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
-
-  <i class="t-kw">return</i> row<i class="t-pun">.</i>total<i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<i class="t-kw">function</i> <i class="t-fn">linhasCsv</i><i class="t-pun">(</i>livros<i class="t-pun">:</i> <i class="t-kw">typeof</i> <i class="t-typ">LIVROS</i><i class="t-pun">,</i> autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">{</i>
-  <i class="t-kw">return</i> <i class="t-pun">(</i>
-    <i class="t-str">"isbn,titulo,autorId\n"</i> <i class="t-pun">+</i>
-    livros<i class="t-pun">.</i><i class="t-fn">map</i><i class="t-pun">(</i><i class="t-pun">(</i>l<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-str">`${l.isbn},${l.titulo},${autorId}`</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">join</i><i class="t-pun">(</i><i class="t-str">"\n"</i><i class="t-pun">)</i> <i class="t-pun">+</i>
-    <i class="t-str">"\n"</i>
-  <i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05 também vale para a importação em lote"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-<strong class="ln-new">  <i class="t-kw">const</i> csv <i class="t-pun">=</i> <i class="t-fn">linhasCsv</i><i class="t-pun">(</i><i class="t-typ">LIVROS</i><i class="t-pun">,</i> <i class="t-typ">AUSTEN</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-  <i class="t-kw">await</i> <i class="t-fn">importar</i><i class="t-pun">(</i>csv<i class="t-pun">)</i><i class="t-pun">;</i>
-
-<strong class="ln-new">  <i class="t-fn">expect</i><i class="t-pun">(</i><i class="t-fn">noAcervo</i><i class="t-pun">(</i><i class="t-typ">AUSTEN</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">5</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c430-diff" hidden><code><span class="dl ctx"> import { beforeEach, expect, test } from "bun:test";</span><span class="dl ctx"> import { db, createDb } from "../src/db";</span><span class="dl ctx"> </span><span class="dl ctx"> const AUSTEN = 4;</span><span class="dl ctx"> const LIVROS = [</span><span class="dl ctx">   { isbn: "9780141439518", titulo: "Orgulho e Preconceito" },</span><span class="dl ctx">   { isbn: "9780141439662", titulo: "Razão e Sensibilidade" },</span><span class="dl ctx">   { isbn: "9780141439587", titulo: "Emma" },</span><span class="dl ctx">   { isbn: "9780141439761", titulo: "Persuasão" },</span><span class="dl ctx">   { isbn: "9780141439563", titulo: "A Abadia de Northanger" },</span><span class="dl ctx">   { isbn: "9780141199689", titulo: "Lady Susan" },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> beforeEach(() =&gt; {</span><span class="dl ctx">   db.run("DELETE FROM livros");</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> async function importar(csv: string): Promise&lt;void&gt; {</span><span class="dl ctx">   await Bun.write("data/importacao-teste.csv", csv);</span><span class="dl ctx"> </span><span class="dl ctx">   const processo = Bun.spawn(</span><span class="dl ctx">     ["bun", "src/importar.ts", "data/importacao-teste.csv"],</span><span class="dl ctx">     { stdout: "ignore" },</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl ctx">   await processo.exited;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> function noAcervo(autorId: number): number {</span><span class="dl ctx">   const row = db</span><span class="dl ctx">     .query(</span><span class="dl ctx">       `SELECT COUNT(*) AS total FROM livros</span><span class="dl ctx">         WHERE autor_id = ?`,</span><span class="dl ctx">     )</span><span class="dl ctx">     .get(autorId) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">   return row.total;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> function linhasCsv(livros: typeof LIVROS, autorId: number): string {</span><span class="dl ctx">   return (</span><span class="dl ctx">     "isbn,titulo,autorId\n" +</span><span class="dl ctx">     livros.map((l) =&gt; `${l.isbn},${l.titulo},${autorId}`).join("\n") +</span><span class="dl ctx">     "\n"</span><span class="dl ctx">   );</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> test("RF05 também vale para a importação em lote", async () =&gt; {</span><span class="dl del">-  const csv = linhasCsv(LIVROS.slice(0, 6), AUSTEN);</span><span class="dl add">+  const csv = linhasCsv(LIVROS, AUSTEN);</span><span class="dl ctx"> </span><span class="dl ctx">   await importar(csv);</span><span class="dl ctx"> </span><span class="dl del">-  expect(noAcervo(AUSTEN)).toBe(3);</span><span class="dl add">+  expect(noAcervo(AUSTEN)).toBe(5);</span><span class="dl ctx"> });</span></code></pre>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c431">copiar</button></div></div>
+<pre class="cb-body" id="c431"><code><i class="t-kw">import</i> <i class="t-pun">{</i> test <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:test"</i><i class="t-pun">;</i>
+
+<i class="t-com">// Objetivo: testar SÓ a regra do limite de livros.</i>
+<i class="t-com">// Sem servidor. Sem porta. Sem banco. Sem CSV.</i>
+<i class="t-com">//</i>
+<i class="t-com">// O import que gostaríamos de escrever é este:</i>
+<i class="t-com">//</i>
+<i class="t-com">//   import { limiteDeLivros } from "../src/index";</i>
+<i class="t-com">//</i>
+<i class="t-com">// Ele não compila, e não é por falta de export.</i>
+<i class="t-com">// A regra não é uma função: é um `if` dentro de um `handler`, dentro de um</i>
+<i class="t-com">// objeto, dentro do array `routes`, dentro de `src/index.ts` — que, ao ser</i>
+<i class="t-com">// importado, sobe um servidor HTTP na porta 3000 como efeito colateral.</i>
+<i class="t-com">//</i>
+<i class="t-com">// Para exercitar essa regra hoje só existem dois caminhos:</i>
+<i class="t-com">//   1. subir a aplicação inteira e falar HTTP com ela (tests/cadastro.e2e.test.ts)</i>
+<i class="t-com">//   2. subir um processo da CLI e falar CSV com ela (tests/importacao.test.ts)</i>
+<i class="t-com">//</i>
+<i class="t-com">// Nenhum dos dois testa a regra. Os dois testam a regra ATRAVÉS de um</i>
+<i class="t-com">// mecanismo de entrega — e é por isso que a mesma regra precisou ser escrita</i>
+<i class="t-com">// duas vezes, e por isso uma das duas está errada agora.</i>
+
+test<i class="t-pun">.</i><i class="t-fn">todo</i><i class="t-pun">(</i><i class="t-str">"a regra do limite de livros deveria ser testável sozinha"</i><i class="t-pun">,</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i><i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
 </div></div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c119">copiar</button></div></div>
-<pre class="cb-body" id="c119"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun test</code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c123">copiar</button></div></div>
+<pre class="cb-body" id="c123"><code><i class="t-cmd">bun</i> test</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c120"><code>tests/importacao.test.ts:
-Banco de dados inicializado.
-50 | test("RF05 também vale para a importação em lote", async () =&gt; {
-51 |   const csv = linhasCsv(LIVROS, AUSTEN);
-52 |
-53 |   await importar(csv);
-54 |
-55 |   expect(noAcervo(AUSTEN)).toBe(5);
-                                ^
-error: expect(received).toBe(expected)
-
-Expected: 5
-Received: 3
-
-      at &lt;anonymous&gt; (.../tests/importacao.test.ts:55:28)
-(fail) RF05 também vale para a importação em lote [25.24ms]
-
- 2 pass
+<pre class="cb-body" id="c124"><code> 2 pass
+ 1 todo
  1 fail
- 18 expect() calls
-Ran 3 tests across 2 files. [193.00ms]</code></pre>
+Ran 4 tests across 3 files. [153.00ms]</code></pre>
+</div>
+<p>E o diagnóstico, medido:</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c125">copiar</button></div></div>
+<pre class="cb-body" id="c125"><code><i class="t-com"># o diagnóstico medido: tamanho dos arquivos, número de rotas e acoplamento ao SQL</i>
+<i class="t-cmd">grep</i> <i class="t-flag">-c</i> <i class="t-str">''</i> src/index.ts                             # 181 linhas
+<i class="t-cmd">grep</i> <i class="t-flag">-c</i> <i class="t-str">''</i> src/importar.ts                          #  71 linhas
+<i class="t-cmd">grep</i> <i class="t-flag">-c</i> <i class="t-str">'pattern: "'</i> src/index.ts                   #   3 rotas
+<i class="t-cmd">grep</i> <i class="t-flag">-o</i> <i class="t-str">'\.\(query\|run\)('</i> src/index.ts <i class="t-pun">|</i> wc <i class="t-flag">-l</i>    #  10 comandos SQL</code></pre>
 </div></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c121">copiar</button></div></div>
-<pre class="cb-body" id="c121"><code><i class="t-cmd">git</i> add src/db.ts src/index.ts tests
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 22: novo limite de livros (5, didatico 10) aplicado so no HTTP"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c126">copiar</button></div></div>
+<pre class="cb-body" id="c126"><code><i class="t-cmd">git</i> add tests/regra-isolada.test.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 23: diagnostico, a regra nao e testavel isoladamente"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase21</code>. Próxima fase: <code>git checkout fase23</code>, e <code>git diff fase22 fase23 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase22</code>. Próxima fase: <code>git checkout fase24</code>, e <code>git diff fase23 fase24 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

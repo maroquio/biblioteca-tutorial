@@ -1,9 +1,4 @@
-export class InvalidInput extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "InvalidInput";
-  }
-}
+import { InvalidInput } from "./errors";
 
 function getBodyAsObject(body: unknown): Record<string, unknown> {
   if (typeof body !== "object" || body === null) {

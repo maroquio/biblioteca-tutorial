@@ -1,4 +1,5 @@
 import { createDb } from "./db";
+import { InvalidInput, NotFound, RuleConflict } from "./errors";
 import { match, type Route } from "./router";
 import { livroRoutes } from "./routes/livros";
 
@@ -13,20 +14,42 @@ const routes: Route[] = [
   ...livroRoutes,
 ];
 
+function errorResponse(error: unknown): Response {
+  if (error instanceof InvalidInput) {
+    return Response.json({ error: error.message }, { status: 400 });
+  }
+
+  if (error instanceof NotFound) {
+    return Response.json({ error: error.message }, { status: 404 });
+  }
+
+  if (error instanceof RuleConflict) {
+    return Response.json({ error: error.message }, { status: 409 });
+  }
+
+  console.error(error);
+
+  return Response.json({ error: "Erro interno" }, { status: 500 });
+}
+
 const server = Bun.serve({
   port: 3000,
 
   async fetch(request) {
     const url = new URL(request.url);
 
-    for (const route of routes) {
-      if (route.method !== request.method) continue;
+    try {
+      for (const route of routes) {
+        if (route.method !== request.method) continue;
 
-      const params = match(route.pattern, url.pathname);
-      if (params) return await route.handler(request, params);
+        const params = match(route.pattern, url.pathname);
+        if (params) return await route.handler(request, params);
+      }
+
+      return Response.json({ error: "Recurso não encontrado" }, { status: 404 });
+    } catch (error) {
+      return errorResponse(error);
     }
-
-    return Response.json({ error: "Recurso não encontrado" }, { status: 404 });
   },
 });
 

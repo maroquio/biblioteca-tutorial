@@ -1,5 +1,6 @@
 import { db } from "../db";
-import { buscarAutorPorId } from "./autorService";
+import { RuleConflict } from "../errors";
+import { buscarAutor } from "./autorService";
 
 export type LivroRow = {
   id: number;
@@ -10,22 +11,14 @@ export type LivroRow = {
   data_catalogacao: string;
 };
 
-export type ResultadoDeLivro =
-  | { ok: true; livro: unknown }
-  | { ok: false; error: string; status: number };
-
 export function cadastrarLivro(
   isbnBruto: string,
   titulo: string,
   autorId: number,
-): ResultadoDeLivro {
+): unknown {
   const isbn = isbnBruto.replace(/[^0-9]/g, "");
 
-  const autor = buscarAutorPorId(autorId);
-
-  if (!autor) {
-    return { ok: false, error: "Autor não cadastrado", status: 404 };
-  }
+  const autor = buscarAutor(autorId);
 
   const livrosDoAutor = db
     .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")
@@ -35,17 +28,13 @@ export function cadastrarLivro(
   const limite = autor.tipo === "didatico" ? 10 : 5;
 
   if (noAcervo >= limite) {
-    return {
-      ok: false,
-      error: `O autor já tem ${limite} livros no acervo`,
-      status: 409,
-    };
+    throw new RuleConflict(`O autor já tem ${limite} livros no acervo`);
   }
 
   const jaExiste = db.query("SELECT 1 FROM livros WHERE isbn = ?").get(isbn);
 
   if (jaExiste) {
-    return { ok: false, error: "Livro já cadastrado", status: 409 };
+    throw new RuleConflict("Livro já cadastrado");
   }
 
   const mesmoTitulo = db
@@ -55,11 +44,7 @@ export function cadastrarLivro(
     .get(autorId, titulo);
 
   if (mesmoTitulo) {
-    return {
-      ok: false,
-      error: "Este autor já tem um livro com este título",
-      status: 409,
-    };
+    throw new RuleConflict("Este autor já tem um livro com este título");
   }
 
   const hoje = new Date().toISOString().slice(0, 10);
@@ -84,10 +69,7 @@ export function cadastrarLivro(
     .query("SELECT * FROM livros WHERE id = ?")
     .get(Number(result.lastInsertRowid)) as Record<string, unknown>;
 
-  return {
-    ok: true,
-    livro: { ...livro, autor: autor.nome },
-  };
+  return { ...livro, autor: autor.nome };
 }
 
 export function buscarLivros(q: string): LivroRow[] {

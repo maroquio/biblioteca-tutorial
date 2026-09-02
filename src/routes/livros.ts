@@ -9,15 +9,11 @@ export const livroRoutes: Route[] = [
     handler: async (request) => {
       const data = parseNovoLivro(await request.json());
 
-      const result = cadastrarLivro(data.isbn, data.titulo, data.autorId);
+      const livro = cadastrarLivro(data.isbn, data.titulo, data.autorId) as {
+        isbn: string;
+      };
 
-      if (!result.ok) {
-        return Response.json({ error: result.error }, { status: result.status });
-      }
-
-      const livro = result.livro as { isbn: string };
-
-      return Response.json(result.livro, {
+      return Response.json(livro, {
         status: 201,
         headers: { Location: `/livros/${livro.isbn}` },
       });
@@ -26,8 +22,7 @@ export const livroRoutes: Route[] = [
   {
     method: "GET",
     pattern: "/livros/:q",
-    handler: (_request, params) => {
-      return Response.json(buscarLivros(parseBusca(params)));
-    },
+    handler: (_request, params) =>
+      Response.json(buscarLivros(parseBusca(params))),
   },
 ];

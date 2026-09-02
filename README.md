@@ -1,12 +1,12 @@
-# Fase 13 de 53 · A API ingênua
+# Fase 14 de 53 · A API ingênua
 
-**RF05 — limite de 3 livros por autor**
+**RF06 — a data de catalogação passa a ser calculada no servidor**
 
-O enunciado desta fase está em `.docs/fase13.html`: objetivo, código completo
+O enunciado desta fase está em `.docs/fase14.html`: objetivo, código completo
 com as linhas novas destacadas, como testar e a mensagem do commit. O GitHub não
 renderiza HTML — clone o repositório e abra o arquivo no navegador.
 
-Este branch já contém o código **concluído** até a fase 13.
+Este branch já contém o código **concluído** até a fase 14.
 
 ## Rodar
 
@@ -17,8 +17,8 @@ bun install
 ## Navegar
 
 ```bash
-git checkout fase14                  # a próxima fase
-git diff fase13 fase14 -- src tests  # só o que ela muda
-git checkout fase12                  # a fase anterior
+git checkout fase15                  # a próxima fase
+git diff fase14 fase15 -- src tests  # só o que ela muda
+git checkout fase13                  # a fase anterior
 git checkout main                    # o tutorial completo das 53 fases
 ```

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 13 de 53 — RF05 — limite de 3 livros por autor</title>
+<title>Fase 14 de 53 — RF06 — a data de catalogação passa a ser calculada no servidor</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,79 +211,24 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 13 de 53</span>
+  <span class="pos">Fase 14 de 53</span>
   <span class="marco">A API ingênua</span>
-  <span class="br">branch <code>fase13</code></span>
+  <span class="br">branch <code>fase14</code></span>
 </div>
-<article class="fase" id="fase-13">
+<article class="fase" id="fase-14">
 <header class="fase-head">
-  <div class="fase-n">13</div>
-  <div class="fase-t"><h2>RF05 — limite de 3 livros por autor</h2><div class="req">Requisitos: RF05</div></div>
+  <div class="fase-n">14</div>
+  <div class="fase-t"><h2>RF06 — a data de catalogação passa a ser calculada no servidor</h2><div class="req">Requisitos: RF06</div></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Implementar o <strong>RF05</strong>: a biblioteca não guarda mais de três livros da mesmo autor, e a quarta tentativa devolve <code>409</code>. Segunda regra, mesma técnica e mesmo lugar da anterior — mais um <code>if</code> dentro do mesmo handler.</p>
-<p><strong>Esta é a regra que o resto do documento vai perseguir.</strong> Ela é a única que consulta o estado do sistema para decidir, e a única que tem um número dentro. Guarde-a: ela é testada na fase 20, duplicada na 21, quebrada na 22, declarada intestável na 23 e finalmente isolada na 43.</p></div>
-  <figure class="diagram" id="dg-fase-13-atividade"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 700" class="dg" preserveAspectRatio="xMidYMid meet">
-  <style> #dg-fase-13-atividade text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-13-atividade .t {fill:#111827} #dg-fase-13-atividade .s {fill:#6b7280}</style>
-  <defs>
-    <marker id="fase-13-atividade__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
-    <marker id="fase-13-atividade__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
-    <marker id="fase-13-atividade__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
-    <marker id="fase-13-atividade__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
-    <marker id="fase-13-atividade__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
-    <marker id="fase-13-atividade__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
-  </defs>
-  <rect width="1120" height="700" fill="#ffffff"/>
-  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 13 — RF04 e RF05 dentro do handler</text>
-  <text x="40" y="64" class="s" font-size="13">Cada requisito novo vira mais um if no mesmo lugar. Nenhum deles tem dono — e o ISBN ainda entra como veio.</text>
-  <rect x="480" y="86" width="240" height="40" rx="20" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.6"/>
-  <text x="600" y="111" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">POST /livros</text>
-  <line x1="600" y1="126" x2="600" y2="152" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-gray)"/>
-  <rect x="430" y="152" width="340" height="46" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
-  <text x="600" y="180" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">SELECT * FROM autores WHERE id = ?</text>
-  <line x1="600" y1="198" x2="600" y2="228" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-gray)"/>
-  <polygon points="600,229 765,262 600,295 435,262" fill="#fefce8" stroke="#fde68a" stroke-width="1.6"/>
-  <text x="600" y="260" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">o autor está na base?</text>
-  <text x="600" y="277" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">RF04</text>
-  <line x1="600" y1="295" x2="600" y2="334" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-gray)"/>
-  <text x="616" y="318" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">sim</text>
-  <rect x="430" y="334" width="340" height="46" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
-  <text x="600" y="362" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">SELECT COUNT(*) dos livros do autor</text>
-  <line x1="600" y1="380" x2="600" y2="410" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-gray)"/>
-  <polygon points="600,411 765,444 600,477 435,444" fill="#fefce8" stroke="#fde68a" stroke-width="1.6"/>
-  <text x="600" y="442" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">já tem 3 livros?</text>
-  <text x="600" y="459" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">RF05</text>
-  <line x1="600" y1="477" x2="600" y2="516" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-gray)"/>
-  <text x="616" y="500" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">não</text>
-  <rect x="430" y="516" width="340" height="46" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="600" y="544" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">INSERT livro — com o número e a data que o cliente mandou</text>
-  <line x1="600" y1="562" x2="600" y2="588" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-gray)"/>
-  <rect x="500" y="592" width="200" height="40" rx="20" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.6"/>
-  <text x="600" y="617" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">201 criado</text>
-  <path d="M 765,262 H 1010" fill="none" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-red)"/>
-  <text x="850" y="254" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="400">não</text>
-  <text x="1020" y="288" font-size="12" text-anchor="middle" fill="#dc2626" font-weight="700">404</text>
-  <text x="1020" y="308" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="400">Autor não</text>
-  <text x="1020" y="324" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="400">cadastrado</text>
-  <path d="M 765,444 H 1010" fill="none" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-13-atividade__a-red)"/>
-  <text x="850" y="436" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="400">sim</text>
-  <text x="1020" y="470" font-size="12" text-anchor="middle" fill="#dc2626" font-weight="700">409</text>
-  <text x="1020" y="490" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="400">limite de 3</text>
-  <text x="1020" y="506" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="400">atingido</text>
-  <rect x="40" y="540" width="300" height="118" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.4"/>
-  <text x="190" y="566" font-size="12.5" text-anchor="middle" fill="#dc2626" font-weight="700">Onde está escrito</text>
-  <text x="190" y="586" font-size="12.5" text-anchor="middle" fill="#dc2626" font-weight="700">que o limite é três?</text>
-  <text x="190" y="608" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">Num literal, dentro de um if — e na</text>
-  <text x="190" y="626" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">mensagem de erro, por extenso.</text>
-  <text x="190" y="646" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">Vira policy só na fase 36.</text>
-</svg>
-</div><figcaption>Atividade da fase 13</figcaption></figure>
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Um <code>COUNT(*)</code> dos livros do autor e um <code>if</code>.</p>
+<p>Implementar o <strong>RF06</strong>: a data de catalogação passa a ser a data de hoje, definida pelo servidor. Até agora quem a enviava era o cliente — ou seja, uma decisão do negócio estava fora do sistema, e nada impedia catalogar um livro em 1998.</p></div>
+  
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>O corpo da requisição encolhe: <code>dataCatalogacao</code> sai.</p>
 <p><strong><code>src/index.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c415-diff" data-alt="c415-clean">ver o que mudou</button><button class="cp" data-code="c415-clean">copiar</button></div></div>
-<pre class="cb-body" id="c415-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c416-diff" data-alt="c416-clean">ver o que mudou</button><button class="cp" data-code="c416-clean">copiar</button></div></div>
+<pre class="cb-body" id="c416-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
 
 <i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
@@ -331,7 +276,6 @@ body.solo{background:var(--bg)}
         titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
         autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
         numeroRegistro<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
-        dataCatalogacao<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
       <i class="t-pun">}</i><i class="t-pun">;</i>
 
       <i class="t-kw">const</i> autor <i class="t-pun">=</i> db
@@ -340,23 +284,25 @@ body.solo{background:var(--bg)}
 
       <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>autor<i class="t-pun">)</i> <i class="t-pun">{</i>
         <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Autor não cadastrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<strong class="ln-new">      <i class="t-pun">}</i></strong>
-
-<strong class="ln-new">      <i class="t-kw">const</i> livrosDoAutor <i class="t-pun">=</i> db</strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i></strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i>livrosDoAutor<i class="t-pun">.</i>total <i class="t-pun">&gt;</i><i class="t-pun">=</i> <i class="t-num">3</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i></strong>
-<strong class="ln-new">          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"O autor já tem 3 livros no acervo"</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">        <i class="t-pun">)</i><i class="t-pun">;</i></strong>
       <i class="t-pun">}</i>
+
+      <i class="t-kw">const</i> livrosDoAutor <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i>
+        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
+
+      <i class="t-kw">if</i> <i class="t-pun">(</i>livrosDoAutor<i class="t-pun">.</i>total <i class="t-pun">&gt;</i><i class="t-pun">=</i> <i class="t-num">3</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
+          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"O autor já tem 3 livros no acervo"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+        <i class="t-pun">)</i><i class="t-pun">;</i>
+      <i class="t-pun">}</i>
+
+<strong class="ln-new">      <i class="t-kw">const</i> hoje <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toISOString</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
       <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>
         <i class="t-str">`INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
          VALUES (?, ?, ?, ?, ?)`</i><i class="t-pun">,</i>
-        <i class="t-pun">[</i>body<i class="t-pun">.</i>numeroRegistro<i class="t-pun">,</i> body<i class="t-pun">.</i>isbn<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">,</i> body<i class="t-pun">.</i>autorId<i class="t-pun">,</i> body<i class="t-pun">.</i>dataCatalogacao<i class="t-pun">]</i><i class="t-pun">,</i>
+<strong class="ln-new">        <i class="t-pun">[</i>body<i class="t-pun">.</i>numeroRegistro<i class="t-pun">,</i> body<i class="t-pun">.</i>isbn<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">,</i> body<i class="t-pun">.</i>autorId<i class="t-pun">,</i> hoje<i class="t-pun">]</i><i class="t-pun">,</i></strong>
       <i class="t-pun">)</i><i class="t-pun">;</i>
 
       <i class="t-kw">const</i> livro <i class="t-pun">=</i> db
@@ -415,42 +361,37 @@ body.solo{background:var(--bg)}
 <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
 console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`Servidor executando em http://localhost:${server.port}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c415-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">         numeroRegistro: string;</span><span class="dl ctx">         dataCatalogacao: string;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl ctx">       const autor = db</span><span class="dl ctx">         .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl ctx">         .get(body.autorId);</span><span class="dl ctx"> </span><span class="dl ctx">       if (!autor) {</span><span class="dl ctx">         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl add">+      }</span><span class="dl add">+</span><span class="dl add">+      const livrosDoAutor = db</span><span class="dl add">+        .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl add">+        .get(body.autorId) as { total: number };</span><span class="dl add">+</span><span class="dl add">+      if (livrosDoAutor.total &gt;= 3) {</span><span class="dl add">+        return Response.json(</span><span class="dl add">+          { error: "O autor já tem 3 livros no acervo" },</span><span class="dl add">+          { status: 409 },</span><span class="dl add">+        );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl ctx">         [body.numeroRegistro, body.isbn, body.titulo, body.autorId, body.dataCatalogacao],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, { status: 201 });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: 3000,</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
+<pre class="cb-body cb-diff" id="c416-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">         numeroRegistro: string;</span><span class="dl del">-        dataCatalogacao: string;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl ctx">       const autor = db</span><span class="dl ctx">         .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl ctx">         .get(body.autorId);</span><span class="dl ctx"> </span><span class="dl ctx">       if (!autor) {</span><span class="dl ctx">         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const livrosDoAutor = db</span><span class="dl ctx">         .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl ctx">         .get(body.autorId) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">       if (livrosDoAutor.total &gt;= 3) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "O autor já tem 3 livros no acervo" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl add">+      const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl add">+</span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl del">-        [body.numeroRegistro, body.isbn, body.titulo, body.autorId, body.dataCatalogacao],</span><span class="dl add">+        [body.numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, { status: 201 });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: 3000,</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
 </div>
 </div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c67">copiar</button></div></div>
-<pre class="cb-body" id="c67"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite   # e reinicie o servidor
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c71">copiar</button></div></div>
+<pre class="cb-body" id="c71"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite   # e reinicie o servidor
 
-<i class="t-cmd">N</i>=0
-<i class="t-cmd">while</i> IFS=<i class="t-str">'|'</i> read <i class="t-flag">-r</i> ISBN TITULO; do
-  <i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> <i class="t-flag">-X</i> POST http://localhost:3000/livros \
-    <i class="t-flag">-H</i> <i class="t-str">"Content-Type: application/json"</i> \
-    <i class="t-flag">-d</i> <i class="t-str">"{\"isbn\":\"$ISBN\",\"titulo\":\"$TITULO\",\"autorId\":4,\"numeroRegistro\":\"R-$N\",\"dataCatalogacao\":\"2026-08-25\"}"</i>
-  <i class="t-cmd">N</i>=$((N + 1))
-<i class="t-cmd">done</i> &lt;&lt;<i class="t-str">'EOF'</i>
-9780141439518<i class="t-pun">|</i>Orgulho e Preconceito
-9780141439662<i class="t-pun">|</i>Razão e Sensibilidade
-9780141439587<i class="t-pun">|</i>Emma
-9780141439761<i class="t-pun">|</i>Persuasão
-<i class="t-cmd">EOF</i></code></pre>
+<i class="t-cmd">curl</i> <i class="t-flag">-X</i> POST http://localhost:3000/livros <i class="t-flag">-H</i> <i class="t-str">"Content-Type: application/json"</i> \
+  <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780321125217","titulo":"Domain-Driven Design","autorId":1,"numeroRegistro":"R-1"}'</i></code></pre>
 </div>
 <div class="cb cb-out">
-<div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c68"><code><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">1</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"R-0"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780141439518"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Orgulho e Preconceito"</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">201</i><i class="t-pun">]</i>
-<i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"R-1"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780141439662"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Razão e Sensibilidade"</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">201</i><i class="t-pun">]</i>
-<i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">3</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"R-2"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780141439587"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Emma"</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">201</i><i class="t-pun">]</i>
-<i class="t-pun">{</i><i class="t-key">"error"</i><i class="t-pun">:</i><i class="t-str">"O autor já tem 3 livros no acervo"</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">409</i><i class="t-pun">]</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">resposta</span><div class="cb-actions"></div></div>
+<pre class="cb-body" id="c72"><code><i class="t-pun">{</i>
+  <i class="t-key">"id"</i><i class="t-pun">:</i> <i class="t-num">1</i><i class="t-pun">,</i>
+  <i class="t-key">"numero_registro"</i><i class="t-pun">:</i> <i class="t-str">"R-1"</i><i class="t-pun">,</i>
+  <i class="t-key">"isbn"</i><i class="t-pun">:</i> <i class="t-str">"9780321125217"</i><i class="t-pun">,</i>
+  <i class="t-key">"titulo"</i><i class="t-pun">:</i> <i class="t-str">"Domain-Driven Design"</i><i class="t-pun">,</i>
+  <i class="t-key">"autor_id"</i><i class="t-pun">:</i> <i class="t-num">1</i><i class="t-pun">,</i>
+  <i class="t-key">"data_catalogacao"</i><i class="t-pun">:</i> <i class="t-str">"2026-08-25"</i>
+<i class="t-pun">}</i></code></pre>
 </div>
-<p>O laço lê os quatro livros de um <em>heredoc</em>, e não de um array, de propósito: em <code>zsh</code> — o shell padrão do macOS — arrays começam em <strong>1</strong>, e um <code>${ISBNS[0]}</code> sairia vazio, cadastrando um livro sem ISBN nem título sem que nada reclamasse. O <code>while read</code> funciona igual em <code>bash</code> e em <code>zsh</code>.</p></div>
+<p>(a data do seu ambiente será diferente)</p>
+<p>Repare que mandar <code>dataCatalogacao</code> no corpo agora não faz mais nada — o campo é silenciosamente ignorado. Isso é correto e é um efeito colateral da mentira tipada do <code>as {...}</code>, que a fase 27 vai desmontar.</p></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c69">copiar</button></div></div>
-<pre class="cb-body" id="c69"><code><i class="t-cmd">git</i> add src/index.ts
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 13: RF05 limite de 3 livros por autor"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c73">copiar</button></div></div>
+<pre class="cb-body" id="c73"><code><i class="t-cmd">git</i> add src/index.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 14: RF06 data de catalogacao calculada no servidor"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase12</code>. Próxima fase: <code>git checkout fase14</code>, e <code>git diff fase13 fase14 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase13</code>. Próxima fase: <code>git checkout fase15</code>, e <code>git diff fase14 fase15 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

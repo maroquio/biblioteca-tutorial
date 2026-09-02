@@ -57,6 +57,17 @@ const routes: Route[] = [
         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });
       }
 
+      const livrosDoAutor = db
+        .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")
+        .get(body.autorId) as { total: number };
+
+      if (livrosDoAutor.total >= 3) {
+        return Response.json(
+          { error: "O autor já tem 3 livros no acervo" },
+          { status: 409 },
+        );
+      }
+
       const result = db.run(
         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
          VALUES (?, ?, ?, ?, ?)`,

@@ -7,8 +7,8 @@ import { buscarLivros, cadastrarLivro } from "../services/livroService";
 function toJson(livro: Livro, autor: AutorRow) {
   return {
     id: livro.id.value,
-    numeroRegistro: livro.numeroRegistro,
-    isbn: livro.isbn,
+    numeroRegistro: livro.numeroRegistro.value,
+    isbn: livro.isbn.value,
     titulo: livro.titulo,
     autor: autor.nome,
     dataCatalogacao: livro.dataCatalogacao,
@@ -26,7 +26,7 @@ export const livroRoutes: Route[] = [
 
       return Response.json(toJson(livro, autor), {
         status: 201,
-        headers: { Location: `/livros/${livro.isbn}` },
+        headers: { Location: `/livros/${livro.isbn.value}` },
       });
     },
   },

@@ -1,9 +1,9 @@
-import { DomainError } from "./errors";
+import { InvalidValue } from "./errors";
 
 class Identifier {
   constructor(readonly value: number) {
     if (!Number.isInteger(value) || value <= 0) {
-      throw new DomainError(`identificador inválido: ${value}`);
+      throw new InvalidValue(`identificador inválido: ${value}`);
     }
   }
 

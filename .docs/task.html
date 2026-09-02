@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 25 de 53 — A regra sai do HTTP e vira um serviço</title>
+<title>Fase 26 de 53 — Serviço de autor — a busca ganha o seu dono</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,71 +211,99 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 25 de 53</span>
+  <span class="pos">Fase 26 de 53</span>
   <span class="marco">A primeira reação</span>
-  <span class="br">branch <code>fase25</code></span>
+  <span class="br">branch <code>fase26</code></span>
 </div>
-<article class="fase" id="fase-25">
+<article class="fase" id="fase-26">
 <header class="fase-head">
-  <div class="fase-n">25</div>
-  <div class="fase-t"><h2>A regra sai do HTTP e vira um serviço</h2></div>
+  <div class="fase-n">26</div>
+  <div class="fase-t"><h2>Serviço de autor — a busca ganha o seu dono</h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Dar um nome próprio às regras do cadastro, num lugar que <strong>não sabe o que é HTTP</strong>. E fazer as duas portas de entrada chamarem o mesmo código.</p></div>
-  <figure class="diagram" id="dg-fase-25-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" class="dg" preserveAspectRatio="xMidYMid meet">
-  <style> #dg-fase-25-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-25-arquitetura .t {fill:#111827} #dg-fase-25-arquitetura .s {fill:#6b7280}</style>
+<p>Repetir para o <em>Buscar Livro</em> o que a fase anterior fez com o <em>Cadastrar Livro</em>. Fase de simetria — ao final dela, <strong>nenhum handler HTTP escreve SQL</strong>. E, de quebra, <code>livroService</code> deixa de consultar a tabela <code>autores</code> diretamente: ele passa a pedir para o serviço de autor.</p></div>
+  <figure class="diagram" id="dg-fase-26-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 500" class="dg" preserveAspectRatio="xMidYMid meet">
+  <style> #dg-fase-26-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-26-arquitetura .t {fill:#111827} #dg-fase-26-arquitetura .s {fill:#6b7280}</style>
   <defs>
-    <marker id="fase-25-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
-    <marker id="fase-25-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
-    <marker id="fase-25-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
-    <marker id="fase-25-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
-    <marker id="fase-25-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
-    <marker id="fase-25-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
-    <marker id="fase-25-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
-    <marker id="fase-25-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
-    <marker id="fase-25-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
-    <marker id="fase-25-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
-    <marker id="fase-25-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
-    <marker id="fase-25-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
-    <marker id="fase-25-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-25-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-25-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
+    <marker id="fase-26-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="fase-26-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+    <marker id="fase-26-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="fase-26-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
+    <marker id="fase-26-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="fase-26-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
+    <marker id="fase-26-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="fase-26-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
+    <marker id="fase-26-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="fase-26-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+    <marker id="fase-26-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+    <marker id="fase-26-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+    <marker id="fase-26-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-26-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-26-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
   </defs>
-  <rect width="960" height="480" fill="#ffffff"/>
-  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 25 — a regra sai do HTTP e ganha um dono</text>
-  <text x="40" y="64" class="s" font-size="13">O teste vermelho da fase 22 fica verde, e ninguém consertou a regra no importador: ela deixou de existir lá.</text>
-  <rect x="60" y="140" width="190" height="64" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
-  <text x="155.0" y="169.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">rota HTTP</text>
-  <text x="155.0" y="187.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">handler de 20 linhas</text>
-  <rect x="60" y="250" width="190" height="64" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
-  <text x="155.0" y="279.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">importar.ts</text>
-  <text x="155.0" y="297.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">71 para 32 linhas</text>
-  <rect x="370" y="180" width="250" height="100" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="495.0" y="227.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">livroService</text>
-  <text x="495.0" y="245.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">cadastrarLivro()</text>
-  <path d="M 740,185 a 85.0,9 0 0 1 170,0 v 90 a 85.0,9 0 0 1 -170,0 z" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <path d="M 740,185 a 85.0,9 0 0 0 170,0" fill="none" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="825.0" y="236.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">SQLite</text>
-  <line x1="252" y1="172" x2="364" y2="210" stroke="#16a34a" stroke-width="1.6" marker-end="url(#fase-25-arquitetura__a-green)"/>
-  <line x1="252" y1="282" x2="364" y2="250" stroke="#16a34a" stroke-width="1.6" marker-end="url(#fase-25-arquitetura__a-green)"/>
-  <line x1="622" y1="230" x2="734" y2="230" stroke="#16a34a" stroke-width="1.6" marker-end="url(#fase-25-arquitetura__a-green)"/>
-  <rect x="370" y="320" width="250" height="62" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
-  <text x="495.0" y="348.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">GET /livros/:q</text>
-  <text x="495.0" y="366.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">segue com SQL no handler</text>
-  <line x1="495" y1="280" x2="495" y2="316" stroke="#6b7280" stroke-width="1.3" stroke-dasharray="5,4"/>
-  <rect x="60" y="400" width="840" height="62" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="480" y="424" font-size="12" text-anchor="middle" fill="#111827" font-weight="400">O que consertou o bug não foi "o serviço". Foi a regra passar a ter UM dono — o serviço é só o nome que demos a ele.</text>
-  <text x="480" y="447" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">E repare qual dos dois casos de uso precisou disso: o que tem regra. O Buscar Livro seguiu no handler e ninguém sentiu falta.</text>
-</svg></div><figcaption>Arquitetura da fase 25</figcaption></figure>
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Crie <code>src/services/livroService.ts</code> com a operação de cadastro — as sete regras, na ordem em que estavam no handler. O tipo de retorno é uma união discriminada (<code>{ ok: true ... }</code> ou <code>{ ok: false ... }</code>) — e traz um campo <code>status</code>.</p>
-<p>⚠️ Esse <code>status</code> é um defeito <strong>proposital</strong>: um serviço de negócio não deveria saber o que é <code>409</code>. Ele morre na fase 28.</p>
-<p>Depois, reescreva <code>src/routes/livros.ts</code> e <code>src/importar.ts</code> para chamarem o serviço.</p>
+  <rect width="980" height="500" fill="#ffffff"/>
+  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 26 — a primeira fronteira de módulo do sistema</text>
+  <text x="40" y="64" class="s" font-size="13">livroService passa a importar autorService. Essa seta aparece 21 fases antes de alguém dizer "módulo".</text>
+  <rect x="80" y="150" width="240" height="80" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="200.0" y="187.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">livroService</text>
+  <text x="200.0" y="205.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">cadastro + busca</text>
+  <rect x="620" y="150" width="270" height="80" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="755.0" y="187.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">autorService</text>
+  <text x="755.0" y="205.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">buscarAutorPorId</text>
+  <line x1="324" y1="180" x2="614" y2="180" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-26-arquitetura__a-red)"/>
+  <text x="469.0" y="168" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="400">o cadastro precisa do tipo do autor</text>
+  <line x1="614" y1="208" x2="324" y2="208" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-26-arquitetura__a-red)"/>
+  <text x="469" y="228" font-size="11.5" text-anchor="middle" fill="#dc2626" font-weight="400">a busca precisa do nome do autor</text>
+  <rect x="80" y="300" width="240" height="64" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="200.0" y="337.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">rota POST /livros</text>
+  <rect x="620" y="300" width="270" height="64" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="755.0" y="337.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">rota GET /livros/:q</text>
+  <line x1="200" y1="298" x2="200" y2="236" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-26-arquitetura__a-gray)"/>
+  <line x1="755" y1="298" x2="755" y2="236" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-26-arquitetura__a-gray)"/>
+  <text x="200" y="384" font-size="12" text-anchor="middle" fill="#ea580c" font-weight="600">caso de uso  Cadastrar Livro</text>
+  <text x="755" y="384" font-size="12" text-anchor="middle" fill="#2563eb" font-weight="600">caso de uso  Buscar Livro</text>
+  <rect x="60" y="410" width="860" height="72" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="490" y="434" font-size="12" text-anchor="middle" fill="#111827" font-weight="400">As duas setas vermelhas vão decidir a fase 47: os DOIS casos de uso precisam do autor.</text>
+  <text x="490" y="454" font-size="12" text-anchor="middle" fill="#111827" font-weight="400">Um para aplicar o limite, o outro para procurar por nome.</text>
+  <text x="490" y="473" font-size="12" text-anchor="middle" fill="#111827" font-weight="600">Não há fronteira ENTRE os casos de uso — a fronteira passa por dentro dos dois.</text>
+</svg></div><figcaption>Arquitetura da fase 26</figcaption></figure>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Um serviço simples e uma rota magra. Repare na terceira mudança, que parece mecânica e não é: <code>livroService</code> passa a chamar <code>buscarAutorPorId</code> em vez de escrever <code>SELECT * FROM autores</code>.</p>
+<p>E repare em <strong>onde</strong> o serviço da busca nasceu: em <code>livroService</code>, ao lado do cadastro. Os dois casos de uso leem <code>livros</code> — e os dois precisam de <code>autores</code>, um para aplicar o limite e o outro para procurar por nome. É a primeira vez que a mesma dependência aparece pelos dois lados.</p>
 
-<p><strong><code>src/services/livroService.ts</code></strong> — arquivo novo</p>
+<p><strong><code>src/services/autorService.ts</code></strong> — arquivo novo</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c435">copiar</button></div></div>
-<pre class="cb-body" id="c435"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../db"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c438">copiar</button></div></div>
+<pre class="cb-body" id="c438"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../db"</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">AutorRow</i> <i class="t-pun">=</i> <i class="t-pun">{</i>
+  id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
+  nome<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
+  orcid<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
+  tipo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">buscarAutorPorId</i><i class="t-pun">(</i>autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">AutorRow</i> <i class="t-pun">|</i> <i class="t-kw">null</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> db
+    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM autores WHERE id = ?"</i><i class="t-pun">)</i>
+    <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">AutorRow</i> <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
+<i class="t-pun">}</i></code></pre>
+</div>
+
+<p><strong><code>src/services/livroService.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c439-diff" data-alt="c439-clean">ver o que mudou</button><button class="cp" data-code="c439-clean">copiar</button></div></div>
+<pre class="cb-body" id="c439-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../db"</i><i class="t-pun">;</i>
+<strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> buscarAutorPorId <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./autorService"</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new"><i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">LivroRow</i> <i class="t-pun">=</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">  id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  numero_registro<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  isbn<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  autor_id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  data_catalogacao<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i></strong>
+<strong class="ln-new"><i class="t-pun">}</i><i class="t-pun">;</i></strong>
 
 <i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">ResultadoDeLivro</i> <i class="t-pun">=</i>
   <i class="t-pun">|</i> <i class="t-pun">{</i> ok<i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">;</i> livro<i class="t-pun">:</i> <i class="t-typ">unknown</i> <i class="t-pun">}</i>
@@ -288,9 +316,7 @@ body.solo{background:var(--bg)}
 <i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">ResultadoDeLivro</i> <i class="t-pun">{</i>
   <i class="t-kw">const</i> isbn <i class="t-pun">=</i> isbnBruto<i class="t-pun">.</i><i class="t-fn">replace</i><i class="t-pun">(</i><i class="t-pun">/</i><i class="t-pun">[</i><i class="t-pun">^</i><i class="t-num">0</i><i class="t-pun">-</i><i class="t-num">9</i><i class="t-pun">]</i><i class="t-pun">/</i>g<i class="t-pun">,</i> <i class="t-str">""</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
-  <i class="t-kw">const</i> autor <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM autores WHERE id = ?"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i>
-    <i class="t-pun">|</i> <i class="t-pun">{</i> id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i> nome<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i> orcid<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i> tipo<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">}</i>
-    <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
+<strong class="ln-new">  <i class="t-kw">const</i> autor <i class="t-pun">=</i> <i class="t-fn">buscarAutorPorId</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
   <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>autor<i class="t-pun">)</i> <i class="t-pun">{</i>
     <i class="t-kw">return</i> <i class="t-pun">{</i> ok<i class="t-pun">:</i> <i class="t-kw">false</i><i class="t-pun">,</i> error<i class="t-pun">:</i> <i class="t-str">"Autor não cadastrado"</i><i class="t-pun">,</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">;</i>
@@ -357,17 +383,39 @@ body.solo{background:var(--bg)}
     ok<i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
     livro<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i>livro<i class="t-pun">,</i> autor<i class="t-pun">:</i> autor<i class="t-pun">.</i>nome <i class="t-pun">}</i><i class="t-pun">,</i>
   <i class="t-pun">}</i><i class="t-pun">;</i>
-<i class="t-pun">}</i></code></pre>
+<i class="t-pun">}</i>
+
+<strong class="ln-new"><i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">buscarLivros</i><i class="t-pun">(</i>q<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">  <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> db</strong>
+<strong class="ln-new">    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i></strong>
+<strong class="ln-new">    <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i>q<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> porIsbn<i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> db</strong>
+<strong class="ln-new">    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE titulo LIKE ?"</i><i class="t-pun">)</i></strong>
+<strong class="ln-new">    <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> porTitulo<i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-com">// ⚠️ este JOIN lê a tabela do outro lado da fronteira. Fase 50.</i></strong>
+<strong class="ln-new">  <i class="t-kw">return</i> db</strong>
+<strong class="ln-new">    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i></strong>
+<strong class="ln-new">      <i class="t-str">`SELECT livros.* FROM livros</i></strong><i class="t-str">
+</i><strong class="ln-new"><i class="t-str">         JOIN autores ON autores.id = livros.autor_id</i></strong><i class="t-str">
+</i><strong class="ln-new"><i class="t-str">        WHERE autores.nome LIKE ?`</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">    <i class="t-pun">)</i></strong>
+<strong class="ln-new">    <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i><i class="t-pun">;</i></strong>
+<strong class="ln-new"><i class="t-pun">}</i></strong></code></pre>
+<pre class="cb-body cb-diff" id="c439-diff" hidden><code><span class="dl ctx"> import { db } from "../db";</span><span class="dl add">+import { buscarAutorPorId } from "./autorService";</span><span class="dl add">+</span><span class="dl add">+export type LivroRow = {</span><span class="dl add">+  id: number;</span><span class="dl add">+  numero_registro: string;</span><span class="dl add">+  isbn: string;</span><span class="dl add">+  titulo: string;</span><span class="dl add">+  autor_id: number;</span><span class="dl add">+  data_catalogacao: string;</span><span class="dl add">+};</span><span class="dl ctx"> </span><span class="dl ctx"> export type ResultadoDeLivro =</span><span class="dl ctx">   | { ok: true; livro: unknown }</span><span class="dl ctx">   | { ok: false; error: string; status: number };</span><span class="dl ctx"> </span><span class="dl ctx"> export function cadastrarLivro(</span><span class="dl ctx">   isbnBruto: string,</span><span class="dl ctx">   titulo: string,</span><span class="dl ctx">   autorId: number,</span><span class="dl ctx"> ): ResultadoDeLivro {</span><span class="dl ctx">   const isbn = isbnBruto.replace(/[^0-9]/g, "");</span><span class="dl ctx"> </span><span class="dl del">-  const autor = db.query("SELECT * FROM autores WHERE id = ?").get(autorId) as</span><span class="dl del">-    | { id: number; nome: string; orcid: string | null; tipo: string }</span><span class="dl del">-    | null;</span><span class="dl add">+  const autor = buscarAutorPorId(autorId);</span><span class="dl ctx"> </span><span class="dl ctx">   if (!autor) {</span><span class="dl ctx">     return { ok: false, error: "Autor não cadastrado", status: 404 };</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const livrosDoAutor = db</span><span class="dl ctx">     .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl ctx">     .get(autorId) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">   const noAcervo = livrosDoAutor.total;</span><span class="dl ctx">   const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl ctx"> </span><span class="dl ctx">   if (noAcervo &gt;= limite) {</span><span class="dl ctx">     return {</span><span class="dl ctx">       ok: false,</span><span class="dl ctx">       error: `O autor já tem ${limite} livros no acervo`,</span><span class="dl ctx">       status: 409,</span><span class="dl ctx">     };</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const jaExiste = db.query("SELECT 1 FROM livros WHERE isbn = ?").get(isbn);</span><span class="dl ctx"> </span><span class="dl ctx">   if (jaExiste) {</span><span class="dl ctx">     return { ok: false, error: "Livro já cadastrado", status: 409 };</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const mesmoTitulo = db</span><span class="dl ctx">     .query(</span><span class="dl ctx">       "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl ctx">     )</span><span class="dl ctx">     .get(autorId, titulo);</span><span class="dl ctx"> </span><span class="dl ctx">   if (mesmoTitulo) {</span><span class="dl ctx">     return {</span><span class="dl ctx">       ok: false,</span><span class="dl ctx">       error: "Este autor já tem um livro com este título",</span><span class="dl ctx">       status: 409,</span><span class="dl ctx">     };</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl ctx">   const ano = hoje.slice(0, 4);</span><span class="dl ctx"> </span><span class="dl ctx">   const catalogadosNoAno = db</span><span class="dl ctx">     .query(</span><span class="dl ctx">       `SELECT COUNT(*) AS total FROM livros</span><span class="dl ctx">         WHERE data_catalogacao LIKE ?`,</span><span class="dl ctx">     )</span><span class="dl ctx">     .get(`${ano}%`) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">   const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl ctx"> </span><span class="dl ctx">   const result = db.run(</span><span class="dl ctx">     `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">      VALUES (?, ?, ?, ?, ?)`,</span><span class="dl ctx">     [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl ctx">   const livro = db</span><span class="dl ctx">     .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">     .get(Number(result.lastInsertRowid)) as Record&lt;string, unknown&gt;;</span><span class="dl ctx"> </span><span class="dl ctx">   return {</span><span class="dl ctx">     ok: true,</span><span class="dl ctx">     livro: { ...livro, autor: autor.nome },</span><span class="dl ctx">   };</span><span class="dl ctx"> }</span><span class="dl add">+</span><span class="dl add">+export function buscarLivros(q: string): LivroRow[] {</span><span class="dl add">+  const porIsbn = db</span><span class="dl add">+    .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl add">+    .all(q) as LivroRow[];</span><span class="dl add">+</span><span class="dl add">+  if (porIsbn.length &gt; 0) return porIsbn;</span><span class="dl add">+</span><span class="dl add">+  const porTitulo = db</span><span class="dl add">+    .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl add">+    .all(`%${q}%`) as LivroRow[];</span><span class="dl add">+</span><span class="dl add">+  if (porTitulo.length &gt; 0) return porTitulo;</span><span class="dl add">+</span><span class="dl add">+  // ⚠️ este JOIN lê a tabela do outro lado da fronteira. Fase 50.</span><span class="dl add">+  return db</span><span class="dl add">+    .query(</span><span class="dl add">+      `SELECT livros.* FROM livros</span><span class="dl add">+         JOIN autores ON autores.id = livros.autor_id</span><span class="dl add">+        WHERE autores.nome LIKE ?`,</span><span class="dl add">+    )</span><span class="dl add">+    .all(`%${q}%`) as LivroRow[];</span><span class="dl add">+}</span></code></pre>
 </div>
-<p>É o handler inteiro, transplantado: as sete regras, na mesma ordem, com o mesmo SQL. A única coisa que mudou de forma foi a saída — onde havia um <code>return Response.json(...)</code> passa a haver um <code>return { ok: false, ... }</code>, porque este arquivo não sabe o que é uma <code>Response</code>.</p>
-<p>O <code>GET /livros/:q</code> fica <strong>como está</strong>, ainda com o SQL dentro do handler. Ele ganha o seu serviço na fase 26 — e é bom que a assimetria fique visível por uma fase: o caso de uso que tem regra precisou de um dono com urgência; o que só consulta, não.</p>
+<p>Repare no que <strong>não</strong> foi unificado: a busca por ISBN lê <code>livros</code>, e o RF04 do cadastro lê <code>autores</code>. São duas perguntas diferentes a duas tabelas diferentes, e por isso continuam sendo duas funções. A duplicação apontada na fase 11 não era duplicação — era semelhança.</p>
 
 <p><strong><code>src/routes/livros.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c436-diff" data-alt="c436-clean">ver o que mudou</button><button class="cp" data-code="c436-clean">copiar</button></div></div>
-<pre class="cb-body" id="c436-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../db"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Route</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../router"</i><i class="t-pun">;</i>
-<strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> cadastrarLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../services/livroService"</i><i class="t-pun">;</i></strong>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c440-diff" data-alt="c440-clean">ver o que mudou</button><button class="cp" data-code="c440-clean">copiar</button></div></div>
+<pre class="cb-body" id="c440-clean"><code><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Route</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../router"</i><i class="t-pun">;</i>
+<strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> buscarLivros<i class="t-pun">,</i> cadastrarLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../services/livroService"</i><i class="t-pun">;</i></strong>
 
 <i class="t-kw">export</i> <i class="t-kw">const</i> livroRoutes<i class="t-pun">:</i> <i class="t-typ">Route</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
   <i class="t-pun">{</i>
@@ -380,128 +428,74 @@ body.solo{background:var(--bg)}
         autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
       <i class="t-pun">}</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">const</i> result <i class="t-pun">=</i> <i class="t-fn">cadastrarLivro</i><i class="t-pun">(</i>body<i class="t-pun">.</i>isbn<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">,</i> body<i class="t-pun">.</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">const</i> result <i class="t-pun">=</i> <i class="t-fn">cadastrarLivro</i><i class="t-pun">(</i>body<i class="t-pun">.</i>isbn<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">,</i> body<i class="t-pun">.</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>result<i class="t-pun">.</i>ok<i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> result<i class="t-pun">.</i>error <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> result<i class="t-pun">.</i>status <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>result<i class="t-pun">.</i>ok<i class="t-pun">)</i> <i class="t-pun">{</i>
+        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> result<i class="t-pun">.</i>error <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> result<i class="t-pun">.</i>status <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
       <i class="t-pun">}</i>
 
-<strong class="ln-new">      <i class="t-kw">const</i> livro <i class="t-pun">=</i> result<i class="t-pun">.</i>livro <i class="t-kw">as</i> <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">}</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">const</i> livro <i class="t-pun">=</i> result<i class="t-pun">.</i>livro <i class="t-kw">as</i> <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">}</i><i class="t-pun">;</i>
 
-<strong class="ln-new">      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>result<i class="t-pun">.</i>livro<i class="t-pun">,</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">        status<i class="t-pun">:</i> <i class="t-num">201</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">        headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-typ">Location</i><i class="t-pun">:</i> <i class="t-str">`/livros/${livro.isbn}`</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">      <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>result<i class="t-pun">.</i>livro<i class="t-pun">,</i> <i class="t-pun">{</i>
+        status<i class="t-pun">:</i> <i class="t-num">201</i><i class="t-pun">,</i>
+        headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-typ">Location</i><i class="t-pun">:</i> <i class="t-str">`/livros/${livro.isbn}`</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+      <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
     <i class="t-pun">}</i><i class="t-pun">,</i>
   <i class="t-pun">}</i><i class="t-pun">,</i>
   <i class="t-pun">{</i>
     method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
     pattern<i class="t-pun">:</i> <i class="t-str">"/livros/:q"</i><i class="t-pun">,</i>
     handler<i class="t-pun">:</i> <i class="t-pun">(</i>_request<i class="t-pun">,</i> params<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-      <i class="t-kw">const</i> q <i class="t-pun">=</i> params<i class="t-pun">.</i>q<i class="t-pun">!</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porIsbn<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE titulo LIKE ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porTitulo<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">const</i> porAutor <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
-          <i class="t-str">`SELECT livros.* FROM livros
-             JOIN autores ON autores.id = livros.autor_id
-            WHERE autores.nome LIKE ?`</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${q}%`</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>porAutor<i class="t-pun">)</i><i class="t-pun">;</i>
+<strong class="ln-new">      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-fn">buscarLivros</i><i class="t-pun">(</i>params<i class="t-pun">.</i>q<i class="t-pun">!</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
     <i class="t-pun">}</i><i class="t-pun">,</i>
   <i class="t-pun">}</i><i class="t-pun">,</i>
 <i class="t-pun">]</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c436-diff" hidden><code><span class="dl ctx"> import { db } from "../db";</span><span class="dl ctx"> import type { Route } from "../router";</span><span class="dl add">+import { cadastrarLivro } from "../services/livroService";</span><span class="dl ctx"> </span><span class="dl ctx"> export const livroRoutes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl del">-      const isbn = body.isbn.replace(/[^0-9]/g, "");</span><span class="dl del">-      const titulo = body.titulo;</span><span class="dl del">-      const autorId = body.autorId;</span><span class="dl add">+      const result = cadastrarLivro(body.isbn, body.titulo, body.autorId);</span><span class="dl ctx"> </span><span class="dl del">-      const autor = db</span><span class="dl del">-        .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl del">-        .get(autorId) as</span><span class="dl del">-        | { id: number; nome: string; orcid: string | null; tipo: string }</span><span class="dl del">-        | null;</span><span class="dl del">-</span><span class="dl del">-      if (!autor) {</span><span class="dl del">-        return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl add">+      if (!result.ok) {</span><span class="dl add">+        return Response.json({ error: result.error }, { status: result.status });</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl del">-      const livrosDoAutor = db</span><span class="dl del">-        .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl del">-        .get(autorId) as { total: number };</span><span class="dl add">+      const livro = result.livro as { isbn: string };</span><span class="dl ctx"> </span><span class="dl del">-      const noAcervo = livrosDoAutor.total;</span><span class="dl del">-      const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl del">-</span><span class="dl del">-      if (noAcervo &gt;= limite) {</span><span class="dl del">-        return Response.json(</span><span class="dl del">-          { error: `O autor já tem ${limite} livros no acervo` },</span><span class="dl del">-          { status: 409 },</span><span class="dl del">-        );</span><span class="dl del">-      }</span><span class="dl del">-</span><span class="dl del">-      const jaExiste = db</span><span class="dl del">-        .query("SELECT 1 FROM livros WHERE isbn = ?")</span><span class="dl del">-        .get(isbn);</span><span class="dl del">-</span><span class="dl del">-      if (jaExiste) {</span><span class="dl del">-        return Response.json(</span><span class="dl del">-          { error: "Livro já cadastrado" },</span><span class="dl del">-          { status: 409 },</span><span class="dl del">-        );</span><span class="dl del">-      }</span><span class="dl del">-</span><span class="dl del">-      const mesmoTitulo = db</span><span class="dl del">-        .query(</span><span class="dl del">-          "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl del">-        )</span><span class="dl del">-        .get(autorId, titulo);</span><span class="dl del">-</span><span class="dl del">-      if (mesmoTitulo) {</span><span class="dl del">-        return Response.json(</span><span class="dl del">-          { error: "Este autor já tem um livro com este título" },</span><span class="dl del">-          { status: 409 },</span><span class="dl del">-        );</span><span class="dl del">-      }</span><span class="dl del">-</span><span class="dl del">-      const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl del">-      const ano = hoje.slice(0, 4);</span><span class="dl del">-</span><span class="dl del">-      const catalogadosNoAno = db</span><span class="dl del">-        .query(</span><span class="dl del">-          `SELECT COUNT(*) AS total FROM livros</span><span class="dl del">-            WHERE data_catalogacao LIKE ?`,</span><span class="dl del">-        )</span><span class="dl del">-        .get(`${ano}%`) as { total: number };</span><span class="dl del">-</span><span class="dl del">-      const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl del">-</span><span class="dl del">-      const result = db.run(</span><span class="dl del">-        `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl del">-         VALUES (?, ?, ?, ?, ?)`,</span><span class="dl del">-        [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl del">-      );</span><span class="dl del">-</span><span class="dl del">-      const livro = db</span><span class="dl del">-        .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl del">-        .get(result.lastInsertRowid as number) as Record&lt;string, unknown&gt;;</span><span class="dl del">-</span><span class="dl del">-      return Response.json(</span><span class="dl del">-        { ...livro, autor: autor.nome },</span><span class="dl del">-        {</span><span class="dl del">-          status: 201,</span><span class="dl del">-          headers: { Location: `/livros/${isbn}` },</span><span class="dl del">-        },</span><span class="dl del">-      );</span><span class="dl add">+      return Response.json(result.livro, {</span><span class="dl add">+        status: 201,</span><span class="dl add">+        headers: { Location: `/livros/${livro.isbn}` },</span><span class="dl add">+      });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span></code></pre>
-</div>
-
-<p><strong><code>src/importar.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
-<div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c437-diff" data-alt="c437-clean">ver o que mudou</button><button class="cp" data-code="c437-clean">copiar</button></div></div>
-<pre class="cb-body" id="c437-clean"><code><strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i></strong>
-<strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> cadastrarLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./services/livroService"</i><i class="t-pun">;</i></strong>
-
-<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-kw">const</i> path <i class="t-pun">=</i> process<i class="t-pun">.</i>argv<i class="t-pun">[</i><i class="t-num">2</i><i class="t-pun">]</i><i class="t-pun">;</i>
-
-<i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>path<i class="t-pun">)</i> <i class="t-pun">{</i>
-  console<i class="t-pun">.</i><i class="t-fn">error</i><i class="t-pun">(</i><i class="t-str">"uso: bun run importar &lt;arquivo.csv&gt;"</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  process<i class="t-pun">.</i><i class="t-fn">exit</i><i class="t-pun">(</i><i class="t-num">1</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-pun">}</i>
-
-<i class="t-kw">const</i> content <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">file</i><i class="t-pun">(</i>path<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">text</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-kw">const</i> rows <i class="t-pun">=</i> content<i class="t-pun">.</i><i class="t-fn">trim</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">split</i><i class="t-pun">(</i><i class="t-str">"\n"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">1</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-<i class="t-kw">let</i> importados <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i>
-<i class="t-kw">let</i> rejeitados <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i>
-
-<i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">const</i> row <i class="t-kw">of</i> rows<i class="t-pun">)</i> <i class="t-pun">{</i>
-<strong class="ln-new">  <i class="t-kw">const</i> <i class="t-pun">[</i>isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">]</i> <i class="t-pun">=</i> row<i class="t-pun">.</i><i class="t-fn">split</i><i class="t-pun">(</i><i class="t-str">","</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">[</i><i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">]</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">  <i class="t-kw">const</i> result <i class="t-pun">=</i> <i class="t-fn">cadastrarLivro</i><i class="t-pun">(</i>isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> <i class="t-typ">Number</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-
-<strong class="ln-new">  <i class="t-kw">if</i> <i class="t-pun">(</i>result<i class="t-pun">.</i>ok<i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">    importados<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">;</i></strong>
-<strong class="ln-new">  <i class="t-pun">}</i> <i class="t-kw">else</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">    console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`linha rejeitada (${result.error}): ${row}`</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
-    rejeitados<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
-<i class="t-pun">}</i>
-
-console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`importados: ${importados} | rejeitados: ${rejeitados}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c437-diff" hidden><code><span class="dl del">-import { db, createDb } from "./db";</span><span class="dl add">+import { createDb } from "./db";</span><span class="dl add">+import { cadastrarLivro } from "./services/livroService";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> const path = process.argv[2];</span><span class="dl ctx"> </span><span class="dl ctx"> if (!path) {</span><span class="dl ctx">   console.error("uso: bun run importar &lt;arquivo.csv&gt;");</span><span class="dl ctx">   process.exit(1);</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const content = await Bun.file(path).text();</span><span class="dl ctx"> const rows = content.trim().split("\n").slice(1);</span><span class="dl ctx"> </span><span class="dl ctx"> let importados = 0;</span><span class="dl ctx"> let rejeitados = 0;</span><span class="dl ctx"> </span><span class="dl ctx"> for (const row of rows) {</span><span class="dl del">-  // ⚠️ daqui para baixo é cópia do que existe em src/index.ts — mas só de</span><span class="dl del">-  // PARTE do que existe lá: o RF08 e o RF09 ficaram de fora. Repare nisso.</span><span class="dl del">-  const [isbnBruto, titulo, autorBruto] = row.split(",") as [</span><span class="dl del">-    string,</span><span class="dl del">-    string,</span><span class="dl del">-    string,</span><span class="dl del">-  ];</span><span class="dl del">-  const isbn = isbnBruto.replace(/[^0-9]/g, "");</span><span class="dl del">-  const autorId = Number(autorBruto);</span><span class="dl add">+  const [isbn, titulo, autorId] = row.split(",") as [string, string, string];</span><span class="dl ctx"> </span><span class="dl del">-  const autor = db.query("SELECT * FROM autores WHERE id = ?").get(autorId);</span><span class="dl add">+  const result = cadastrarLivro(isbn, titulo, Number(autorId));</span><span class="dl ctx"> </span><span class="dl del">-  if (!autor) {</span><span class="dl del">-    console.log(`linha rejeitada (autor não cadastrado): ${row}`);</span><span class="dl add">+  if (result.ok) {</span><span class="dl add">+    importados++;</span><span class="dl add">+  } else {</span><span class="dl add">+    console.log(`linha rejeitada (${result.error}): ${row}`);</span><span class="dl ctx">     rejeitados++;</span><span class="dl del">-    continue;</span><span class="dl ctx">   }</span><span class="dl del">-</span><span class="dl del">-  const livrosDoAutor = db</span><span class="dl del">-    .query(</span><span class="dl del">-      `SELECT COUNT(*) AS total FROM livros</span><span class="dl del">-        WHERE autor_id = ?`,</span><span class="dl del">-    )</span><span class="dl del">-    .get(autorId) as { total: number };</span><span class="dl del">-</span><span class="dl del">-  if (livrosDoAutor.total &gt;= 3) {</span><span class="dl del">-    console.log(`linha rejeitada (limite atingido): ${row}`);</span><span class="dl del">-    rejeitados++;</span><span class="dl del">-    continue;</span><span class="dl del">-  }</span><span class="dl del">-</span><span class="dl del">-  const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl del">-  const ano = hoje.slice(0, 4);</span><span class="dl del">-</span><span class="dl del">-  const catalogadosNoAno = db</span><span class="dl del">-    .query(</span><span class="dl del">-      `SELECT COUNT(*) AS total FROM livros</span><span class="dl del">-        WHERE data_catalogacao LIKE ?`,</span><span class="dl del">-    )</span><span class="dl del">-    .get(`${ano}%`) as { total: number };</span><span class="dl del">-</span><span class="dl del">-  const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl del">-</span><span class="dl del">-  db.run(</span><span class="dl del">-    `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl del">-     VALUES (?, ?, ?, ?, ?)`,</span><span class="dl del">-    [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl del">-  );</span><span class="dl del">-</span><span class="dl del">-  importados++;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`importados: ${importados} | rejeitados: ${rejeitados}`);</span></code></pre>
+<pre class="cb-body cb-diff" id="c440-diff" hidden><code><span class="dl del">-import { db } from "../db";</span><span class="dl ctx"> import type { Route } from "../router";</span><span class="dl del">-import { cadastrarLivro } from "../services/livroService";</span><span class="dl add">+import { buscarLivros, cadastrarLivro } from "../services/livroService";</span><span class="dl ctx"> </span><span class="dl ctx"> export const livroRoutes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl ctx">       const result = cadastrarLivro(body.isbn, body.titulo, body.autorId);</span><span class="dl ctx"> </span><span class="dl ctx">       if (!result.ok) {</span><span class="dl ctx">         return Response.json({ error: result.error }, { status: result.status });</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = result.livro as { isbn: string };</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(result.livro, {</span><span class="dl ctx">         status: 201,</span><span class="dl ctx">         headers: { Location: `/livros/${livro.isbn}` },</span><span class="dl ctx">       });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl del">-      const q = params.q!;</span><span class="dl del">-</span><span class="dl del">-      const porIsbn = db</span><span class="dl del">-        .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl del">-        .all(q);</span><span class="dl del">-</span><span class="dl del">-      if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl del">-</span><span class="dl del">-      const porTitulo = db</span><span class="dl del">-        .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl del">-        .all(`%${q}%`);</span><span class="dl del">-</span><span class="dl del">-      if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl del">-</span><span class="dl del">-      const porAutor = db</span><span class="dl del">-        .query(</span><span class="dl del">-          `SELECT livros.* FROM livros</span><span class="dl del">-             JOIN autores ON autores.id = livros.autor_id</span><span class="dl del">-            WHERE autores.nome LIKE ?`,</span><span class="dl del">-        )</span><span class="dl del">-        .all(`%${q}%`);</span><span class="dl del">-</span><span class="dl del">-      return Response.json(porAutor);</span><span class="dl add">+      return Response.json(buscarLivros(params.q!));</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span></code></pre>
 </div></div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c136">copiar</button></div></div>
-<pre class="cb-body" id="c136"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun test
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c144">copiar</button></div></div>
+<pre class="cb-body" id="c144"><code><i class="t-cmd">bun</i> test
 
-<i class="t-com"># mede o importador: caiu de 71 para 32 linhas ao passar a chamar o serviço</i>
-<i class="t-cmd">grep</i> <i class="t-flag">-c</i> <i class="t-str">''</i> src/importar.ts</code></pre>
+<i class="t-com"># conta acessos diretos ao banco fora dos serviços: tem que dar zero</i>
+<i class="t-cmd">grep</i> <i class="t-flag">-rn</i> <i class="t-str">'db\.'</i> src/routes src/index.ts <i class="t-pun">|</i> wc <i class="t-flag">-l</i></code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c137"><code> 3 pass
+<pre class="cb-body" id="c145"><code> 3 pass
  1 todo
  0 fail
-Ran 4 tests across 3 files. [211.00ms]
 
-32</code></pre>
+0</code></pre>
 </div>
-<p>E uma segunda prova, que a fase 21 deixou armada: um CSV com o mesmo livro três vezes — o ISBN com hífens na segunda linha, o título em minúsculas na terceira.</p>
+<p>E a busca, sobre um banco recém-criado com dois livros:</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c138">copiar</button></div></div>
-<pre class="cb-body" id="c138"><code><i class="t-com"># monta um CSV com o mesmo livro três vezes: ISBN com hífens na 2ª linha, título em minúsculas na 3ª</i>
-<i class="t-cmd">printf</i> <i class="t-str">'isbn,titulo,autorId\n9780141439518,Orgulho e Preconceito,4\n978-0-14-143951-8,Orgulho e Preconceito,4\n9780141439563,orgulho e preconceito,4\n'</i> <i class="t-pun">&gt;</i> data/importacao-teste.csv
-<i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun run importar data/importacao-teste.csv</code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c146">copiar</button></div></div>
+<pre class="cb-body" id="c146"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite   # e reinicie o servidor
+
+<i class="t-com"># semeia dois livros para a busca ter o que achar</i>
+<i class="t-cmd">curl</i> <i class="t-flag">-s</i> <i class="t-flag">-o</i> /dev/null <i class="t-flag">-X</i> POST localhost:3000/livros <i class="t-flag">-H</i> <i class="t-str">'Content-Type: application/json'</i> \
+  <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780132350884","titulo":"Código Limpo","autorId":2}'</i>
+<i class="t-cmd">curl</i> <i class="t-flag">-s</i> <i class="t-flag">-o</i> /dev/null <i class="t-flag">-X</i> POST localhost:3000/livros <i class="t-flag">-H</i> <i class="t-str">'Content-Type: application/json'</i> \
+  <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780141439518","titulo":"Orgulho e Preconceito","autorId":4}'</i>
+
+<i class="t-com"># busca por título e por autor: o comportamento não pode ter mudado com o serviço no meio</i>
+<i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">"\n"</i> localhost:3000/livros/Limpo
+<i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">"\n"</i> localhost:3000/livros/Austen</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c139"><code>linha rejeitada (Livro já cadastrado): 978-0-14-143951-8,Orgulho e Preconceito,4
-linha rejeitada (Este autor já tem um livro com este título): 9780141439563,orgulho e preconceito,4
-importados: 1 | rejeitados: 2</code></pre>
+<pre class="cb-body" id="c147"><code><i class="t-pun">[</i><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">1</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"2026-000001"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780132350884"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Código Limpo"</i><i class="t-pun">,</i><i class="t-key">"autor_id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i><i class="t-pun">]</i>
+<i class="t-pun">[</i><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"2026-000002"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780141439518"</i><i class="t-pun">,</i><i class="t-key">"titulo"</i><i class="t-pun">:</i><i class="t-str">"Orgulho e Preconceito"</i><i class="t-pun">,</i><i class="t-key">"autor_id"</i><i class="t-pun">:</i><i class="t-num">4</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i><i class="t-pun">]</i></code></pre>
 </div>
-<p>Na fase 21 esse arquivo teria importado as três linhas — ou melhor, duas, e a segunda estourando no <code>UNIQUE</code> do banco. O importador acabou de ganhar o RF08 e o RF09 sem que ninguém os escrevesse para ele.</p></div>
+<p>Zero acessos ao banco fora dos serviços, e a busca continua respondendo igual.</p></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c140">copiar</button></div></div>
-<pre class="cb-body" id="c140"><code><i class="t-cmd">git</i> add src/importar.ts src/routes/livros.ts src/services/livroService.ts
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 25: regras do cadastro extraidas para um servico"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c148">copiar</button></div></div>
+<pre class="cb-body" id="c148"><code><i class="t-cmd">git</i> add src/routes/livros.ts src/services
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 26: servico de autor e da busca"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase24</code>. Próxima fase: <code>git checkout fase26</code>, e <code>git diff fase25 fase26 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase25</code>. Próxima fase: <code>git checkout fase27</code>, e <code>git diff fase26 fase27 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

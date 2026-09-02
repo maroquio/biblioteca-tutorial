@@ -1,4 +1,14 @@
 import { db } from "../db";
+import { buscarAutorPorId } from "./autorService";
+
+export type LivroRow = {
+  id: number;
+  numero_registro: string;
+  isbn: string;
+  titulo: string;
+  autor_id: number;
+  data_catalogacao: string;
+};
 
 export type ResultadoDeLivro =
   | { ok: true; livro: unknown }
@@ -11,9 +21,7 @@ export function cadastrarLivro(
 ): ResultadoDeLivro {
   const isbn = isbnBruto.replace(/[^0-9]/g, "");
 
-  const autor = db.query("SELECT * FROM autores WHERE id = ?").get(autorId) as
-    | { id: number; nome: string; orcid: string | null; tipo: string }
-    | null;
+  const autor = buscarAutorPorId(autorId);
 
   if (!autor) {
     return { ok: false, error: "Autor não cadastrado", status: 404 };
@@ -80,4 +88,27 @@ export function cadastrarLivro(
     ok: true,
     livro: { ...livro, autor: autor.nome },
   };
+}
+
+export function buscarLivros(q: string): LivroRow[] {
+  const porIsbn = db
+    .query("SELECT * FROM livros WHERE isbn = ?")
+    .all(q) as LivroRow[];
+
+  if (porIsbn.length > 0) return porIsbn;
+
+  const porTitulo = db
+    .query("SELECT * FROM livros WHERE titulo LIKE ?")
+    .all(`%${q}%`) as LivroRow[];
+
+  if (porTitulo.length > 0) return porTitulo;
+
+  // ⚠️ este JOIN lê a tabela do outro lado da fronteira. Fase 50.
+  return db
+    .query(
+      `SELECT livros.* FROM livros
+         JOIN autores ON autores.id = livros.autor_id
+        WHERE autores.nome LIKE ?`,
+    )
+    .all(`%${q}%`) as LivroRow[];
 }

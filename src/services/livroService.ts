@@ -2,6 +2,7 @@ import type { Autor } from "../domain/Autor";
 import type { Livro } from "../domain/Livro";
 import { AutorId } from "../domain/identifiers";
 import { Isbn } from "../domain/Isbn";
+import { LimiteDeLivros } from "../domain/LimiteDeLivros";
 import { NumeroRegistro } from "../domain/NumeroRegistro";
 import { RuleConflict } from "../errors";
 import {
@@ -27,12 +28,7 @@ export function cadastrarLivro(
 
   const autor = buscarAutor(autorId);
 
-  const noAcervo = contarNoAcervoDoAutor(autorId);
-  const limite = autor.tipo === "didatico" ? 10 : 5;
-
-  if (noAcervo >= limite) {
-    throw new RuleConflict(`O autor já tem ${limite} livros no acervo`);
-  }
+  LimiteDeLivros.verificar(autor.tipo, contarNoAcervoDoAutor(autorId));
 
   if (findLivroByIsbn(isbn)) {
     throw new RuleConflict("Livro já cadastrado");

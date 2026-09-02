@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fase 36 de 53 — A política de limite de livros</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+<style>
+
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#111827; --muted:#5b6472; --line:#e3e7ed;
+  --accent:#1d4ed8; --accent-soft:#eef3ff; --ok:#047857; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --prof:#6d28d9; --prof-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e6edf7;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",SFMono-Regular,ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.87em;background:#eef1f5;border:1px solid #e0e5ec;border-radius:4px;padding:.08em .34em;white-space:nowrap}
+.ref{color:var(--muted);font-style:italic}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:264px minmax(0,1fr);gap:0;max-width:1400px;margin:0 auto}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--card);padding:20px 12px 60px}
+.side h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+.side a{display:block;padding:5px 9px;border-radius:7px;text-decoration:none;color:#374151;font-size:13.5px;line-height:1.35}
+.side a:hover{background:var(--accent-soft);color:var(--accent)}
+.side a.mk{font-weight:700}
+.side .num{display:inline-block;min-width:26px;color:#94a3b8;font-family:var(--mono);font-size:11.5px}
+main{padding:0 44px 120px;min-width:0}
+
+/* hero */
+.hero{margin:0 -44px 44px;padding:56px 44px 44px;background:linear-gradient(160deg,#0f172a 0%,#1e3a8a 100%);color:#fff}
+.hero .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;margin:0 0 12px}
+.hero h1{font-family:var(--serif);font-size:40px;line-height:1.15;margin:0 0 14px;font-weight:700}
+.hero p{margin:0;max-width:70ch;opacity:.9;font-size:17px}
+.hero .chips{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 13px;font-size:12.5px}
+
+/* seções */
+section.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px 34px;margin:0 0 26px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+h2.sec{font-family:var(--serif);font-size:27px;margin:0 0 6px;line-height:1.25}
+h3{font-family:var(--serif);font-size:20px;margin:26px 0 8px}
+h4{font-size:15px;margin:20px 0 6px}
+h5,h6{font-size:14px;margin:16px 0 6px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:0 0 5px}
+blockquote{margin:0 0 16px;padding:2px 0 2px 16px;border-left:3px solid #cbd5e1;color:var(--muted)}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+
+/* fase */
+article.fase{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 0 30px;margin:0 0 30px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.fase-head{padding:22px 34px 18px;border-bottom:1px solid var(--line);background:#fbfcfe;display:flex;gap:18px;align-items:flex-start}
+.fase-n{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:19px;font-weight:700}
+.fase.mk .fase-n{background:#b91c1c}
+.fase-t{min-width:0}
+.fase-t h2{font-family:var(--serif);font-size:24px;margin:0 0 4px;line-height:1.25}
+.fase-t .req{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.fase-body{padding:0 34px}
+.lead{margin:22px 0 4px;padding:16px 18px;background:var(--accent-soft);border:1px solid #d7e3ff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;font-size:16.5px}
+.lead p{margin:0}
+
+.step{margin-top:26px}
+.step > h3{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.step.test > h3{color:var(--ok)}
+.step.commit > h3{color:var(--warn)}
+
+/* código */
+.cb{margin:0 0 16px;border:1px solid #1e293b;border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 14px;background:#111c31;border-bottom:1px solid #1e293b}
+.cb-lang{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8ba0c4}
+.cb-actions{display:flex;gap:6px}
+.cb button{font:inherit;font-size:11.5px;font-family:var(--sans);background:#1e293b;color:#cbd5e1;border:1px solid #33415a;border-radius:6px;padding:3px 10px;cursor:pointer}
+.cb button:hover{background:#2a3a52;color:#fff}
+.cb button.done{background:#065f46;border-color:#047857;color:#d1fae5}
+.cb-body{margin:0;padding:14px 16px;overflow-x:auto;background:var(--code-bg)}
+.cb-body code{background:none;border:0;padding:0;white-space:pre;color:var(--code-ink);font-size:13px;line-height:1.6;font-family:var(--mono)}
+.cb-out{border-color:#cbd5e1;background:#f8fafc}
+.cb-out .cb-bar{background:#eef2f7;border-bottom-color:#dde3ec}
+.cb-out .cb-lang{color:#64748b}
+.cb-fig{border-style:dashed}
+.cb-fig .cb-bar{background:#0d1626}
+.cb-note{align-self:center;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:#8ba0c4;opacity:.8}
+.ln-new{font-weight:700;color:#fde047}
+.cb-out .cb-body{background:#f8fafc}
+.cb-out .cb-body code{color:#0f172a}
+.cb-diff code{white-space:pre}
+.dl{display:block}
+.dl.add{background:rgba(16,185,129,.14);color:#a7f3d0}
+.dl.del{background:rgba(239,68,68,.14);color:#fecaca}
+
+/* tabelas */
+.tw{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f4f6f9;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:0}
+
+/* diagramas */
+figure.diagram{margin:0 0 20px;padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.diagram-scroll{overflow-x:auto}
+svg.dg{display:block;width:100%;height:auto;max-width:100%;min-width:520px}
+figure.diagram figcaption{margin-top:10px;font-size:13px;color:var(--muted);text-align:center}
+.diagram.missing{color:#b91c1c;font-size:13px}
+
+/* professor */
+aside.prof{margin:18px 0;padding:16px 20px;background:var(--prof-soft);border:1px solid #ddd6fe;border-left:4px solid var(--prof);border-radius:0 10px 10px 0}
+aside.prof h4{margin:0 0 8px;color:var(--prof);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+aside.prof p:last-child{margin-bottom:0}
+.conc{margin:0 0 18px;padding:0;list-style:none}
+.conc li{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin:0 0 7px;font-size:15px}
+.conc li::before{content:"◆";color:var(--accent);flex:0 0 auto;font-size:11px;line-height:1.7}
+.refl{padding:18px 20px;background:#fffdf5;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:0 10px 10px 0}
+.refl p:last-child{margin-bottom:0}
+
+.callout{padding:16px 20px;border-radius:10px;border:1px solid var(--line);background:#f8fafc;margin:0 0 18px}
+.callout.good{background:var(--ok-soft);border-color:#a7f3d0}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}
+.entrevista{font-family:var(--serif);font-size:17.5px;line-height:1.75;background:#fffdf7;border:1px solid #e8e0cc;border-radius:12px;padding:26px 30px;position:relative}
+.entrevista::before{content:"\201C";position:absolute;top:-6px;left:14px;font-size:72px;color:#e0d5b8;font-family:var(--serif);line-height:1}
+.entrevista p{margin:0 0 12px;padding-left:26px}
+.entrevista .quem{padding-left:26px;font-family:var(--sans);font-size:13px;color:var(--muted);font-style:normal}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 18px}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-family:var(--serif);font-size:30px;line-height:1.1;color:var(--accent)}
+.stat span{font-size:13px;color:var(--muted)}
+
+footer{padding:40px 44px 60px;color:var(--muted);font-size:13.5px;text-align:center}
+.top{position:fixed;right:22px;bottom:22px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-size:13px;cursor:pointer;opacity:.85;font-family:var(--sans)}
+.top:hover{opacity:1}
+
+@media (max-width:1020px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);max-height:280px}
+  main{padding:0 18px 80px}
+  .hero{margin:0 -18px 28px;padding:36px 18px 30px}
+  .hero h1{font-size:29px}
+  section.doc,.fase-head,.fase-body{padding-left:18px;padding-right:18px}
+}
+@media print{
+  .side,.top,.cb button{display:none}
+  .wrap{display:block}
+  body{background:#fff;font-size:11pt}
+  .hero{background:#fff;color:#000;margin:0;padding:0 0 20px;border-bottom:2px solid #000}
+  .hero .chip{border-color:#999;background:#f2f2f2;color:#000}
+  article.fase,section.doc{break-inside:avoid-page;box-shadow:none;border-color:#ccc}
+  .cb{border-color:#ccc}
+  .cb-bar{background:#eee}.cb-lang{color:#333}
+  .cb-note{color:#555}
+  .ln-new{font-weight:700;color:#000}
+  .cb-body,.cb-body code{background:#f7f7f7;color:#000}
+  .dl.add{background:#e6f7ee;color:#065f46}.dl.del{background:#fdeaea;color:#991b1b}
+}
+/* gerar-fases:inicio */
+/* tokens de código, pré-renderizados pelo gerador */
+.cb-body i{font-style:normal}
+.cb-body{--t-com:#64748b;--t-str:#86efac;--t-num:#fca5a5;--t-kw:#c4b5fd;
+  --t-typ:#7dd3fc;--t-fn:#fdba74;--t-pun:#94a3b8;--t-key:#93c5fd;
+  --t-cmd:#fdba74;--t-flag:#c4b5fd}
+.cb-out .cb-body{--t-com:#64748b;--t-str:#15803d;--t-num:#b91c1c;--t-kw:#6d28d9;
+  --t-typ:#0369a1;--t-fn:#b45309;--t-pun:#64748b;--t-key:#1d4ed8;
+  --t-cmd:#b45309;--t-flag:#6d28d9}
+.t-com{color:var(--t-com);font-style:italic}
+.t-str{color:var(--t-str)}
+.t-num{color:var(--t-num)}
+.t-kw{color:var(--t-kw)}
+.t-typ{color:var(--t-typ)}
+.t-fn{color:var(--t-fn)}
+.t-pun{color:var(--t-pun)}
+.t-key{color:var(--t-key)}
+.t-cmd{color:var(--t-cmd);font-weight:600}
+.t-flag{color:var(--t-flag)}
+
+/* linha que a fase acrescenta: negrito e fundo, por cima dos tokens.
+   inline-block com min-width leva o fundo até a margem direita do bloco, para a
+   marcação virar uma faixa e não um borrão do tamanho do texto */
+.ln-new{display:inline-block;min-width:100%;font-weight:700;color:inherit;
+  background:rgba(253,224,71,.13);box-shadow:inset 3px 0 0 #fde047}
+.cb-out .ln-new{background:rgba(180,83,9,.11);box-shadow:inset 3px 0 0 #b45309}
+
+/* objetivo, no lugar do lead curto da versão de sala */
+.step.objetivo > h3{color:var(--accent)}
+.step.objetivo p{margin:0 0 12px}
+.step.objetivo p:last-child{margin-bottom:0}
+/* gerar-fases:fim */
+
+/* página de uma fase só: sem barra lateral, sem hero */
+body.solo{background:var(--bg)}
+.solo-wrap{max-width:900px;margin:0 auto;padding:0 24px 90px}
+.faixa{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;
+  margin:0 -24px 26px;padding:20px 24px;
+  background:linear-gradient(160deg,#0f172a 0%,#1e3a8a 100%);color:#fff}
+.faixa .pos{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.75}
+.faixa .marco{font-family:var(--serif);font-size:20px;font-weight:700}
+.faixa .br{margin-left:auto;font-family:var(--mono);font-size:12px;opacity:.85}
+.faixa .br code{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2);
+  color:#fff;white-space:nowrap}
+.solo article.fase{border-radius:14px}
+.solo-pe{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:13.5px}
+.solo-pe code{white-space:nowrap}
+
+</style>
+</head>
+<body class="solo">
+<div class="solo-wrap">
+<div class="faixa">
+  <span class="pos">Fase 36 de 53</span>
+  <span class="marco">O domínio</span>
+  <span class="br">branch <code>fase36</code></span>
+</div>
+<article class="fase" id="fase-36">
+<header class="fase-head">
+  <div class="fase-n">36</div>
+  <div class="fase-t"><h2>A política de limite de livros</h2></div>
+</header>
+<div class="fase-body">
+  <div class="step objetivo"><h3>🎯 Objetivo</h3>
+<p>Dar casa ao <strong>RF05</strong>, a regra que não cabe em nenhuma instância: ela fala do <em>conjunto</em> de livros de um autor, não de um livro específico. Nasce <code>LimiteDeLivros</code>, uma política de domínio que recebe o tipo do autor e a contagem no acervo, e decide.</p></div>
+  <figure class="diagram" id="dg-fase-36-classes"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 540" class="dg" preserveAspectRatio="xMidYMid meet">
+  <style> #dg-fase-36-classes text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-36-classes .t {fill:#111827} #dg-fase-36-classes .s {fill:#6b7280}</style>
+  <defs>
+    <marker id="fase-36-classes__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="fase-36-classes__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+    <marker id="fase-36-classes__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="fase-36-classes__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
+    <marker id="fase-36-classes__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="fase-36-classes__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
+    <marker id="fase-36-classes__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="fase-36-classes__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
+    <marker id="fase-36-classes__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="fase-36-classes__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+    <marker id="fase-36-classes__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+    <marker id="fase-36-classes__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+    <marker id="fase-36-classes__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-36-classes__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-36-classes__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="980" height="540" fill="#ffffff"/>
+  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 36 — a política de limite sai do serviço e vira domínio</text>
+  <text x="40" y="64" class="s" font-size="13">A pergunta "onde cada regra deveria morar?" ganha uma resposta por escrito.</text>
+  <rect x="350" y="106" width="290" height="127" rx="8" fill="#ffffff" stroke="#fed7aa" stroke-width="1.6"/>
+  <path d="M 358,106 h 274 a 8,8 0 0 1 8,8 v 42 h -290 v -42 a 8,8 0 0 1 8,-8 z" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.6"/>
+  <line x1="350" y1="156" x2="640" y2="156" stroke="#fed7aa" stroke-width="1.6"/>
+  <text x="495.0" y="123" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">«policy»</text>
+  <text x="495.0" y="140" font-size="13.5" text-anchor="middle" fill="#111827" font-weight="700">LimiteDeLivros</text>
+  <text x="363" y="174" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">- POR_TIPO = { literatura: 5,</text>
+  <text x="363" y="193" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">                didatico: 10 }</text>
+  <line x1="350" y1="198" x2="640" y2="198" stroke="#fed7aa" stroke-width="1.2"/>
+  <text x="363" y="216" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">+ static verificar(tipoDoAutor, noAcervo)</text>
+  <rect x="50" y="250" width="880" height="172" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="490" y="276" font-size="13" text-anchor="middle" fill="#111827" font-weight="700">Onde cada regra passou a morar</text>
+  <text x="78" y="306" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">RF04  o autor precisa existir</text>
+  <text x="392" y="306" font-size="11.5" text-anchor="start" fill="#ea580c" font-weight="600">caso de uso (fase 40)</text>
+  <text x="640" y="306" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">precisa perguntar ao repositório</text>
+  <text x="78" y="330" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">RF05  limite de livros por autor</text>
+  <text x="392" y="330" font-size="11.5" text-anchor="start" fill="#ea580c" font-weight="600">LimiteDeLivros</text>
+  <text x="640" y="330" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">é política, e muda sozinha</text>
+  <text x="78" y="354" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">RF07  formato do número</text>
+  <text x="392" y="354" font-size="11.5" text-anchor="start" fill="#ea580c" font-weight="600">NumeroRegistro</text>
+  <text x="640" y="354" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">é característica do valor</text>
+  <text x="78" y="378" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">RF08  ISBN já cadastrado</text>
+  <text x="392" y="378" font-size="11.5" text-anchor="start" fill="#ea580c" font-weight="600">UNIQUE no banco</text>
+  <text x="640" y="378" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">é identidade, e não muda nunca</text>
+  <text x="78" y="402" font-size="11.5" text-anchor="start" fill="#111827" font-weight="400">RF09  mesmo autor, mesmo título</text>
+  <text x="392" y="402" font-size="11.5" text-anchor="start" fill="#ea580c" font-weight="600">Livro.mesmoTituloQue()</text>
+  <text x="640" y="402" font-size="11.5" text-anchor="start" fill="#6b7280" font-weight="400">é semelhança, e semelhança é opinião</text>
+  <rect x="50" y="446" width="880" height="76" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="490" y="472" font-size="12" text-anchor="middle" fill="#111827" font-weight="400">Cinco lugares distintos, com nomes distintos, para as regras de UM dos dois casos de uso —</text>
+  <text x="490" y="492" font-size="12" text-anchor="middle" fill="#111827" font-weight="400">o outro não encostou em nenhum deles.</text>
+  <text x="490" y="512" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">E repare nas duas últimas: uma desceu para o banco, a outra não pôde. A diferença é identidade x semelhança.</text>
+</svg></div><figcaption>Domínio (classes) da fase 36</figcaption></figure>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p><code>LimiteDeLivros</code> não conhece banco, não conhece HTTP, não guarda estado.</p>
+
+<p><strong><code>src/domain/LimiteDeLivros.ts</code></strong> — arquivo novo</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c483">copiar</button></div></div>
+<pre class="cb-body" id="c483"><code><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">TipoDeAutor</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./Autor"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">RuleViolation</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./errors"</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">class</i> <i class="t-typ">LimiteDeLivrosExcedido</i> <i class="t-kw">extends</i> <i class="t-typ">RuleViolation</i> <i class="t-pun">{</i>
+  <i class="t-kw">constructor</i><i class="t-pun">(</i>limite<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">super</i><i class="t-pun">(</i><i class="t-str">`O autor já tem ${limite} livros no acervo`</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+<i class="t-pun">}</i>
+
+<i class="t-com">/**
+ * Esta regra não cabe em nenhuma instância de Livro: ela fala do CONJUNTO
+ * de livros de um autor. Também não cabe em Autor, que não conhece — nem
+ * deve conhecer — os livros dele. Por isso vive sozinha.
+ */</i>
+<i class="t-kw">export</i> <i class="t-kw">class</i> <i class="t-typ">LimiteDeLivros</i> <i class="t-pun">{</i>
+  <i class="t-kw">private</i> <i class="t-kw">static</i> <i class="t-kw">readonly</i> <i class="t-typ">POR_TIPO</i><i class="t-pun">:</i> <i class="t-typ">Record</i><i class="t-pun">&lt;</i><i class="t-typ">TipoDeAutor</i><i class="t-pun">,</i> <i class="t-typ">number</i><i class="t-pun">&gt;</i> <i class="t-pun">=</i> <i class="t-pun">{</i>
+    literatura<i class="t-pun">:</i> <i class="t-num">5</i><i class="t-pun">,</i>
+    didatico<i class="t-pun">:</i> <i class="t-num">10</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">;</i>
+
+  <i class="t-kw">static</i> <i class="t-fn">para</i><i class="t-pun">(</i>tipo<i class="t-pun">:</i> <i class="t-typ">TipoDeAutor</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">{</i>
+    <i class="t-kw">return</i> <i class="t-typ">LimiteDeLivros</i><i class="t-pun">.</i><i class="t-typ">POR_TIPO</i><i class="t-pun">[</i>tipo<i class="t-pun">]</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">static</i> <i class="t-fn">verificar</i><i class="t-pun">(</i>tipo<i class="t-pun">:</i> <i class="t-typ">TipoDeAutor</i><i class="t-pun">,</i> noAcervo<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-kw">void</i> <i class="t-pun">{</i>
+    <i class="t-kw">const</i> limite <i class="t-pun">=</i> <i class="t-typ">LimiteDeLivros</i><i class="t-pun">.</i><i class="t-fn">para</i><i class="t-pun">(</i>tipo<i class="t-pun">)</i><i class="t-pun">;</i>
+
+    <i class="t-kw">if</i> <i class="t-pun">(</i>noAcervo <i class="t-pun">&gt;</i><i class="t-pun">=</i> limite<i class="t-pun">)</i> <i class="t-pun">{</i>
+      <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">LimiteDeLivrosExcedido</i><i class="t-pun">(</i>limite<i class="t-pun">)</i><i class="t-pun">;</i>
+    <i class="t-pun">}</i>
+  <i class="t-pun">}</i>
+<i class="t-pun">}</i></code></pre>
+</div>
+<p><strong><code>src/services/livroService.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c484-diff" data-alt="c484-clean">ver o que mudou</button><button class="cp" data-code="c484-clean">copiar</button></div></div>
+<pre class="cb-body" id="c484-clean"><code><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Autor</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/Autor"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Livro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/Livro"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">AutorId</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/identifiers"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">Isbn</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/Isbn"</i><i class="t-pun">;</i>
+<strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">LimiteDeLivros</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/LimiteDeLivros"</i><i class="t-pun">;</i></strong>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">NumeroRegistro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/NumeroRegistro"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">RuleConflict</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../errors"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i>
+  contarCatalogadosNoAno<i class="t-pun">,</i>
+  contarNoAcervoDoAutor<i class="t-pun">,</i>
+  findLivroByIsbn<i class="t-pun">,</i>
+  findLivrosByAutorId<i class="t-pun">,</i>
+  insertLivro<i class="t-pun">,</i>
+  searchLivrosPorNomeDoAutor<i class="t-pun">,</i>
+  searchLivrosPorTitulo<i class="t-pun">,</i>
+<i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../repositories/livroRepository"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> buscarAutor <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./autorService"</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">LivroComAutor</i> <i class="t-pun">=</i> <i class="t-pun">{</i> livro<i class="t-pun">:</i> <i class="t-typ">Livro</i><i class="t-pun">;</i> autor<i class="t-pun">:</i> <i class="t-typ">Autor</i> <i class="t-pun">}</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">cadastrarLivro</i><i class="t-pun">(</i>
+  isbnBruto<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  autorIdBruto<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">,</i>
+<i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroComAutor</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> isbn <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Isbn</i><i class="t-pun">(</i>isbnBruto<i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-kw">const</i> autorId <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">AutorId</i><i class="t-pun">(</i>autorIdBruto<i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">const</i> autor <i class="t-pun">=</i> <i class="t-fn">buscarAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i>
+
+<strong class="ln-new">  <i class="t-typ">LimiteDeLivros</i><i class="t-pun">.</i><i class="t-fn">verificar</i><i class="t-pun">(</i>autor<i class="t-pun">.</i>tipo<i class="t-pun">,</i> <i class="t-fn">contarNoAcervoDoAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-fn">findLivroByIsbn</i><i class="t-pun">(</i>isbn<i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">RuleConflict</i><i class="t-pun">(</i><i class="t-str">"Livro já cadastrado"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> <i class="t-fn">findLivrosByAutorId</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">some</i><i class="t-pun">(</i><i class="t-pun">(</i>livro<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i>
+    livro<i class="t-pun">.</i><i class="t-fn">mesmoTituloQue</i><i class="t-pun">(</i>titulo<i class="t-pun">)</i><i class="t-pun">,</i>
+  <i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>mesmoTitulo<i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">RuleConflict</i><i class="t-pun">(</i><i class="t-str">"Este autor já tem um livro com este título"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">const</i> hoje <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toISOString</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-kw">const</i> ano <i class="t-pun">=</i> hoje<i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">4</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">const</i> sequencial <i class="t-pun">=</i> <i class="t-fn">contarCatalogadosNoAno</i><i class="t-pun">(</i>ano<i class="t-pun">)</i> <i class="t-pun">+</i> <i class="t-num">1</i><i class="t-pun">;</i>
+  <i class="t-kw">const</i> numeroRegistro <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">NumeroRegistro</i><i class="t-pun">(</i>
+    <i class="t-str">`${ano}-${String(sequencial).padStart(NumeroRegistro.DIGITOS_DO_SEQUENCIAL, "0")}`</i><i class="t-pun">,</i>
+  <i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> <i class="t-pun">{</i> livro<i class="t-pun">:</i> <i class="t-fn">insertLivro</i><i class="t-pun">(</i>numeroRegistro<i class="t-pun">,</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">,</i> hoje<i class="t-pun">)</i><i class="t-pun">,</i> autor <i class="t-pun">}</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">buscarLivros</i><i class="t-pun">(</i>q<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroComAutor</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i>
+  <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-typ">Isbn</i><i class="t-pun">.</i><i class="t-fn">isValid</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> <i class="t-fn">findLivroByIsbn</i><i class="t-pun">(</i><i class="t-kw">new</i> <i class="t-typ">Isbn</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+    <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-pun">[</i><i class="t-fn">comAutor</i><i class="t-pun">(</i>porIsbn<i class="t-pun">)</i><i class="t-pun">]</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> <i class="t-fn">searchLivrosPorTitulo</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> porTitulo<i class="t-pun">.</i><i class="t-fn">map</i><i class="t-pun">(</i>comAutor<i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> <i class="t-fn">searchLivrosPorNomeDoAutor</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">map</i><i class="t-pun">(</i>comAutor<i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">function</i> <i class="t-fn">comAutor</i><i class="t-pun">(</i>livro<i class="t-pun">:</i> <i class="t-typ">Livro</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroComAutor</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> <i class="t-pun">{</i> livro<i class="t-pun">,</i> autor<i class="t-pun">:</i> <i class="t-fn">buscarAutor</i><i class="t-pun">(</i>livro<i class="t-pun">.</i>autorId<i class="t-pun">)</i> <i class="t-pun">}</i><i class="t-pun">;</i>
+<i class="t-pun">}</i></code></pre>
+<pre class="cb-body cb-diff" id="c484-diff" hidden><code><span class="dl ctx"> import type { Autor } from "../domain/Autor";</span><span class="dl ctx"> import type { Livro } from "../domain/Livro";</span><span class="dl ctx"> import { AutorId } from "../domain/identifiers";</span><span class="dl ctx"> import { Isbn } from "../domain/Isbn";</span><span class="dl add">+import { LimiteDeLivros } from "../domain/LimiteDeLivros";</span><span class="dl ctx"> import { NumeroRegistro } from "../domain/NumeroRegistro";</span><span class="dl ctx"> import { RuleConflict } from "../errors";</span><span class="dl ctx"> import {</span><span class="dl ctx">   contarCatalogadosNoAno,</span><span class="dl ctx">   contarNoAcervoDoAutor,</span><span class="dl ctx">   findLivroByIsbn,</span><span class="dl ctx">   findLivrosByAutorId,</span><span class="dl ctx">   insertLivro,</span><span class="dl ctx">   searchLivrosPorNomeDoAutor,</span><span class="dl ctx">   searchLivrosPorTitulo,</span><span class="dl ctx"> } from "../repositories/livroRepository";</span><span class="dl ctx"> import { buscarAutor } from "./autorService";</span><span class="dl ctx"> </span><span class="dl ctx"> export type LivroComAutor = { livro: Livro; autor: Autor };</span><span class="dl ctx"> </span><span class="dl ctx"> export function cadastrarLivro(</span><span class="dl ctx">   isbnBruto: string,</span><span class="dl ctx">   titulo: string,</span><span class="dl ctx">   autorIdBruto: number,</span><span class="dl ctx"> ): LivroComAutor {</span><span class="dl ctx">   const isbn = new Isbn(isbnBruto);</span><span class="dl ctx">   const autorId = new AutorId(autorIdBruto);</span><span class="dl ctx"> </span><span class="dl ctx">   const autor = buscarAutor(autorId);</span><span class="dl ctx"> </span><span class="dl del">-  const noAcervo = contarNoAcervoDoAutor(autorId);</span><span class="dl del">-  const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl del">-</span><span class="dl del">-  if (noAcervo &gt;= limite) {</span><span class="dl del">-    throw new RuleConflict(`O autor já tem ${limite} livros no acervo`);</span><span class="dl del">-  }</span><span class="dl add">+  LimiteDeLivros.verificar(autor.tipo, contarNoAcervoDoAutor(autorId));</span><span class="dl ctx"> </span><span class="dl ctx">   if (findLivroByIsbn(isbn)) {</span><span class="dl ctx">     throw new RuleConflict("Livro já cadastrado");</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const mesmoTitulo = findLivrosByAutorId(autorId).some((livro) =&gt;</span><span class="dl ctx">     livro.mesmoTituloQue(titulo),</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl ctx">   if (mesmoTitulo) {</span><span class="dl ctx">     throw new RuleConflict("Este autor já tem um livro com este título");</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl ctx">   const ano = hoje.slice(0, 4);</span><span class="dl ctx"> </span><span class="dl ctx">   const sequencial = contarCatalogadosNoAno(ano) + 1;</span><span class="dl ctx">   const numeroRegistro = new NumeroRegistro(</span><span class="dl ctx">     `${ano}-${String(sequencial).padStart(NumeroRegistro.DIGITOS_DO_SEQUENCIAL, "0")}`,</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl ctx">   return { livro: insertLivro(numeroRegistro, isbn, titulo, autorId, hoje), autor };</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> export function buscarLivros(q: string): LivroComAutor[] {</span><span class="dl ctx">   if (Isbn.isValid(q)) {</span><span class="dl ctx">     const porIsbn = findLivroByIsbn(new Isbn(q));</span><span class="dl ctx"> </span><span class="dl ctx">     if (porIsbn) return [comAutor(porIsbn)];</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const porTitulo = searchLivrosPorTitulo(q);</span><span class="dl ctx"> </span><span class="dl ctx">   if (porTitulo.length &gt; 0) return porTitulo.map(comAutor);</span><span class="dl ctx"> </span><span class="dl ctx">   return searchLivrosPorNomeDoAutor(q).map(comAutor);</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> function comAutor(livro: Livro): LivroComAutor {</span><span class="dl ctx">   return { livro, autor: buscarAutor(livro.autorId) };</span><span class="dl ctx"> }</span></code></pre>
+</div>
+
+<div class="cb cb-fig">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c222-diff" data-alt="c222-clean">ver o que mudou</button></div></div>
+<pre class="cb-body" id="c222-clean"><code>  <i class="t-typ">LimiteDeLivros</i><i class="t-pun">.</i><i class="t-fn">verificar</i><i class="t-pun">(</i>autor<i class="t-pun">.</i>tipo<i class="t-pun">,</i> <i class="t-fn">contarNoAcervoDoAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c222-diff" hidden><code><span class="dl del">-  const noAcervo = contarNoAcervoDoAutor(autorId);</span><span class="dl del">-  const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl del">-</span><span class="dl del">-  if (noAcervo &gt;= limite) {</span><span class="dl del">-    throw new RuleConflict(`O autor já tem ${limite} livros no acervo`);</span><span class="dl del">-  }</span><span class="dl add">+  LimiteDeLivros.verificar(autor.tipo, contarNoAcervoDoAutor(autorId));</span></code></pre>
+</div>
+<p>O <code>RuleConflict</code> continua importado: o RF08 e o RF09 ainda são dele. Só o limite mudou de casa — e de tipo de erro, porque agora é uma <code>RuleViolation</code> do domínio, não um conflito da aplicação.</p></div>
+  <div class="step test"><h3>✅ Como testar</h3><div class="cb">
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c223">copiar</button></div></div>
+<pre class="cb-body" id="c223"><code><i class="t-cmd">bun</i> x tsc <i class="t-flag">--noEmit</i> <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun test
+<i class="t-cmd">grep</i> <i class="t-flag">-rn</i> <i class="t-str">"5\|10"</i> src/domain/LimiteDeLivros.ts</code></pre>
+</div>
+<div class="cb cb-out">
+<div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
+<pre class="cb-body" id="c224"><code> 3 pass
+ 1 todo
+ 0 fail
+
+src/domain/LimiteDeLivros.ts:17:    literatura: 5,
+src/domain/LimiteDeLivros.ts:18:    didatico: 10,</code></pre>
+</div>
+<p>Os dois números do RF05′ existem em <strong>um</strong> arquivo, com nome.</p></div>
+  <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c225">copiar</button></div></div>
+<pre class="cb-body" id="c225"><code><i class="t-cmd">git</i> add src/domain/LimiteDeLivros.ts src/services/livroService.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 36: politica de limite de livros no dominio"</i></code></pre>
+</div></div>
+</div>
+</article>
+<p class="solo-pe">Fase anterior: <code>git checkout fase35</code>. Próxima fase: <code>git checkout fase37</code>, e <code>git diff fase36 fase37 -- src tests</code> mostra só o que ela muda.</p>
+</div>
+<script>
+document.addEventListener("click", (e) => {
+  const cp = e.target.closest(".cp");
+  if (cp) {
+    const el = document.getElementById(cp.dataset.code);
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      const t = cp.textContent;
+      cp.textContent = "copiado!";
+      cp.classList.add("done");
+      setTimeout(() => { cp.textContent = t; cp.classList.remove("done"); }, 1400);
+    });
+    return;
+  }
+  const tg = e.target.closest(".tgl");
+  if (tg) {
+    const d = document.getElementById(tg.dataset.target);
+    const c = document.getElementById(tg.dataset.alt);
+    const showDiff = d.hidden;
+    d.hidden = !showDiff;
+    c.hidden = showDiff;
+    tg.textContent = showDiff ? "ver código final" : "ver o que mudou";
+  }
+});
+</script>
+</body>
+</html>

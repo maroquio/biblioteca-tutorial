@@ -53,7 +53,7 @@ const routes: Route[] = [
 
       const autor = db
         .query("SELECT * FROM autores WHERE id = ?")
-        .get(autorId);
+        .get(autorId) as { id: number; nome: string; orcid: string | null } | null;
 
       if (!autor) {
         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });
@@ -114,9 +114,15 @@ const routes: Route[] = [
 
       const livro = db
         .query("SELECT * FROM livros WHERE id = ?")
-        .get(result.lastInsertRowid as number);
+        .get(result.lastInsertRowid as number) as Record<string, unknown>;
 
-      return Response.json(livro, { status: 201 });
+      return Response.json(
+        { ...livro, autor: autor.nome },
+        {
+          status: 201,
+          headers: { Location: `/livros/${isbn}` },
+        },
+      );
     },
   },
   {

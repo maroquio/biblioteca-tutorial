@@ -19,12 +19,11 @@ let rejeitados = 0;
 for (const row of rows) {
   const [isbn, titulo, autorId] = row.split(",") as [string, string, string];
 
-  const result = cadastrarLivro(isbn, titulo, Number(autorId));
-
-  if (result.ok) {
+  try {
+    cadastrarLivro(isbn, titulo, Number(autorId));
     importados++;
-  } else {
-    console.log(`linha rejeitada (${result.error}): ${row}`);
+  } catch (error) {
+    console.log(`linha rejeitada (${(error as Error).message}): ${row}`);
     rejeitados++;
   }
 }

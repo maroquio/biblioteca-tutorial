@@ -1,11 +1,9 @@
+import type { Autor } from "../domain/Autor";
 import type { AutorId } from "../domain/identifiers";
 import { NotFound } from "../errors";
-import {
-  findAutorById,
-  type AutorRow,
-} from "../repositories/autorRepository";
+import { findAutorById } from "../repositories/autorRepository";
 
-export function buscarAutor(autorId: AutorId): AutorRow {
+export function buscarAutor(autorId: AutorId): Autor {
   const autor = findAutorById(autorId);
 
   if (!autor) {

@@ -1,10 +1,10 @@
+import type { Autor } from "../domain/Autor";
 import type { Livro } from "../domain/Livro";
 import { parseBusca, parseNovoLivro } from "../input";
-import type { AutorRow } from "../repositories/autorRepository";
 import type { Route } from "../router";
 import { buscarLivros, cadastrarLivro } from "../services/livroService";
 
-function toJson(livro: Livro, autor: AutorRow) {
+function toJson(livro: Livro, autor: Autor) {
   return {
     id: livro.id.value,
     numeroRegistro: livro.numeroRegistro.value,

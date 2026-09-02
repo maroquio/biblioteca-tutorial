@@ -1,15 +1,22 @@
 import { db } from "../db";
-import type { AutorId } from "../domain/identifiers";
+import { Autor, type TipoDeAutor } from "../domain/Autor";
+import { AutorId } from "../domain/identifiers";
 
-export type AutorRow = {
+type AutorRow = {
   id: number;
   nome: string;
   orcid: string | null;
   tipo: string;
 };
 
-export function findAutorById(autorId: AutorId): AutorRow | null {
-  return db
+function toAutor(row: AutorRow): Autor {
+  return new Autor(new AutorId(row.id), row.nome, row.tipo as TipoDeAutor);
+}
+
+export function findAutorById(autorId: AutorId): Autor | null {
+  const row = db
     .query("SELECT * FROM autores WHERE id = ?")
     .get(autorId.value) as AutorRow | null;
+
+  return row === null ? null : toAutor(row);
 }

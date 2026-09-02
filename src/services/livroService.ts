@@ -1,9 +1,9 @@
+import type { Autor } from "../domain/Autor";
 import type { Livro } from "../domain/Livro";
 import { AutorId } from "../domain/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { NumeroRegistro } from "../domain/NumeroRegistro";
 import { RuleConflict } from "../errors";
-import type { AutorRow } from "../repositories/autorRepository";
 import {
   contarCatalogadosNoAno,
   contarNoAcervoDoAutor,
@@ -15,7 +15,7 @@ import {
 } from "../repositories/livroRepository";
 import { buscarAutor } from "./autorService";
 
-export type LivroComAutor = { livro: Livro; autor: AutorRow };
+export type LivroComAutor = { livro: Livro; autor: Autor };
 
 export function cadastrarLivro(
   isbnBruto: string,

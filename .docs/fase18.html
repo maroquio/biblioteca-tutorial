@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 17 de 53 — RF09 — o mesmo autor, o mesmo título, duas vezes</title>
+<title>Fase 18 de 53 — RF10 — o ISBN é normalizado antes de gravar e de comparar</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,96 +211,25 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 17 de 53</span>
+  <span class="pos">Fase 18 de 53</span>
   <span class="marco">A API ingênua</span>
-  <span class="br">branch <code>fase17</code></span>
+  <span class="br">branch <code>fase18</code></span>
 </div>
-<article class="fase" id="fase-17">
+<article class="fase" id="fase-18">
 <header class="fase-head">
-  <div class="fase-n">17</div>
-  <div class="fase-t"><h2>RF09 — o mesmo autor, o mesmo título, duas vezes</h2><div class="req">Requisitos: RF09</div></div>
+  <div class="fase-n">18</div>
+  <div class="fase-t"><h2>RF10 — o ISBN é normalizado antes de gravar e de comparar</h2><div class="req">Requisitos: RF10</div></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Implementar o <strong>RF09</strong>: duas edições da mesma obra têm ISBNs <strong>diferentes</strong> — e continuam sendo a mesma obra. A biblioteca não quer <em>Orgulho e Preconceito</em> de Jane Austen catalogado duas vezes só porque a segunda entrada é outra edição.</p>
-<p>É a quarta regra dentro do mesmo handler, o que já começa a incomodar. E ela é de outra natureza que a anterior: a RF08 o banco consegue impor sozinho, com um <code>UNIQUE</code>. Esta, não.</p></div>
-  <figure class="diagram" id="dg-fase-17-atividade"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" class="dg" preserveAspectRatio="xMidYMid meet">
-  <style> #dg-fase-17-atividade text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-17-atividade .t {fill:#111827} #dg-fase-17-atividade .s {fill:#6b7280}</style>
-  <defs>
-    <marker id="fase-17-atividade__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
-    <marker id="fase-17-atividade__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
-    <marker id="fase-17-atividade__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
-    <marker id="fase-17-atividade__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
-    <marker id="fase-17-atividade__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
-    <marker id="fase-17-atividade__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
-    <marker id="fase-17-atividade__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
-    <marker id="fase-17-atividade__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
-    <marker id="fase-17-atividade__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
-    <marker id="fase-17-atividade__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
-    <marker id="fase-17-atividade__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
-    <marker id="fase-17-atividade__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
-    <marker id="fase-17-atividade__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-17-atividade__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
-    <marker id="fase-17-atividade__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
-  </defs>
-  <rect width="980" height="560" fill="#ffffff"/>
-  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 17 — RF09 — duplicata literal e duplicata lógica</text>
-  <text x="40" y="64" class="s" font-size="13">Duas edições da mesma obra têm ISBNs diferentes — e continuam sendo a mesma obra.</text>
-  <rect x="60" y="120" width="400" height="96" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
-  <text x="260.0" y="165.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">9780141439518</text>
-  <text x="260.0" y="183.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">Orgulho e Preconceito · Jane Austen</text>
-  <rect x="60" y="240" width="400" height="96" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
-  <text x="260.0" y="285.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">9780141439518</text>
-  <text x="260.0" y="303.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">Orgulho e Preconceito · Jane Austen</text>
-  <rect x="540" y="240" width="400" height="96" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
-  <text x="740.0" y="285.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">9780141439563</text>
-  <text x="740.0" y="303.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">orgulho e preconceito · Jane Austen</text>
-  <text x="260" y="106" font-size="12" text-anchor="middle" fill="#16a34a" font-weight="700">cadastrado</text>
-  <line x1="260" y1="216" x2="260" y2="236" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-17-atividade__a-gray)"/>
-  <line x1="460" y1="168" x2="536" y2="236" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-17-atividade__a-gray)"/>
-  <text x="500" y="190" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">outra edição</text>
-  <text x="260" y="356" font-size="12" text-anchor="middle" fill="#dc2626" font-weight="600">ISBN igual  —  duplicata literal</text>
-  <text x="740" y="356" font-size="12" text-anchor="middle" fill="#dc2626" font-weight="600">ISBN diferente  —  duplicata lógica</text>
-  <rect x="60" y="380" width="400" height="62" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
-  <text x="260.0" y="408.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">RF08</text>
-  <text x="260.0" y="426.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">o UNIQUE do banco resolve</text>
-  <rect x="540" y="380" width="400" height="62" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
-  <text x="740.0" y="408.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">RF09</text>
-  <text x="740.0" y="426.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">só o código resolve</text>
-  <rect x="60" y="462" width="880" height="82" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
-  <text x="500" y="488" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">A RF08 é sobre IDENTIDADE: o ISBN é ou não é o mesmo, e isso não muda nunca.</text>
-  <text x="500" y="510" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">A RF09 é sobre SEMELHANÇA — e semelhança é opinião: amanhã alguém decide ignorar subtítulo, ou acentuação.</text>
-  <text x="500" y="532" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">Invariante de identidade pode descer para o banco. Regra de negócio, não — migrar constraint é caro.</text>
-</svg></div><figcaption>Atividade da fase 17</figcaption></figure>
-  <div class="step"><h3>👨‍💻 O que você digita</h3><div class="cb cb-fig">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c82-diff" data-alt="c82-clean">ver o que mudou</button></div></div>
-<pre class="cb-body" id="c82-clean"><code>      <i class="t-kw">if</i> <i class="t-pun">(</i>jaExiste<i class="t-pun">)</i> <i class="t-pun">{</i>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Livro já cadastrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i>
-
-      <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> db
-        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
-          <i class="t-str">"SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)"</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">if</i> <i class="t-pun">(</i>mesmoTitulo<i class="t-pun">)</i> <i class="t-pun">{</i>
-        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
-          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Este autor já tem um livro com este título"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-        <i class="t-pun">)</i><i class="t-pun">;</i>
-      <i class="t-pun">}</i>
-
-      <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i></code></pre>
-<pre class="cb-body cb-diff" id="c82-diff" hidden><code><span class="dl ctx">       if (jaExiste) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "Livro já cadastrado" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl add">+      const mesmoTitulo = db</span><span class="dl add">+        .query(</span><span class="dl add">+          "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl add">+        )</span><span class="dl add">+        .get(body.autorId, body.titulo);</span><span class="dl add">+</span><span class="dl add">+      if (mesmoTitulo) {</span><span class="dl add">+        return Response.json(</span><span class="dl add">+          { error: "Este autor já tem um livro com este título" },</span><span class="dl add">+          { status: 409 },</span><span class="dl add">+        );</span><span class="dl add">+      }</span><span class="dl add">+</span><span class="dl ctx">       const result = db.run(</span></code></pre>
-</div>
+<p>Implementar o <strong>RF10</strong>: o ISBN chega do mundo real com hífens e espaços (<code>978-0-321-12521-7</code>), e precisa ser reduzido a dígitos antes de qualquer comparação. Sem isso, o mesmo livro entra duas vezes ou some da busca, dependendo de como o operador digitou.</p>
+<p>O identificador do autor não precisa de nada disso: ele é um inteiro, e o <code>positiveInt</code> da fase 27 já dá conta. É a primeira vez que a diferença entre uma chave artificial e uma chave natural aparece em código — a artificial não tem formato para normalizar.</p></div>
+  
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Três linhas no começo do handler, e todo o resto passa a usar <code>isbn</code> em vez de <code>body.isbn</code>. Só o ISBN é de fato normalizado — <code>titulo</code> e <code>autorId</code> ganham um nome curto e nada mais, para que daqui em diante o handler leia o mesmo em todos os pontos. Repare que a normalização acontece <strong>antes</strong> da primeira consulta, e não na hora de gravar: é isso que faz o RF08 e o RF09 compararem maçãs com maçãs.</p>
 <p><strong><code>src/index.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c419-diff" data-alt="c419-clean">ver o que mudou</button><button class="cp" data-code="c419-clean">copiar</button></div></div>
-<pre class="cb-body" id="c419-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c420-diff" data-alt="c420-clean">ver o que mudou</button><button class="cp" data-code="c420-clean">copiar</button></div></div>
+<pre class="cb-body" id="c420-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db<i class="t-pun">,</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
 
 <i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
@@ -349,9 +278,13 @@ body.solo{background:var(--bg)}
         autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
       <i class="t-pun">}</i><i class="t-pun">;</i>
 
+<strong class="ln-new">      <i class="t-kw">const</i> isbn <i class="t-pun">=</i> body<i class="t-pun">.</i>isbn<i class="t-pun">.</i><i class="t-fn">replace</i><i class="t-pun">(</i><i class="t-pun">/</i><i class="t-pun">[</i><i class="t-pun">^</i><i class="t-num">0</i><i class="t-pun">-</i><i class="t-num">9</i><i class="t-pun">]</i><i class="t-pun">/</i>g<i class="t-pun">,</i> <i class="t-str">""</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">      <i class="t-kw">const</i> titulo <i class="t-pun">=</i> body<i class="t-pun">.</i>titulo<i class="t-pun">;</i></strong>
+<strong class="ln-new">      <i class="t-kw">const</i> autorId <i class="t-pun">=</i> body<i class="t-pun">.</i>autorId<i class="t-pun">;</i></strong>
+
       <i class="t-kw">const</i> autor <i class="t-pun">=</i> db
         <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM autores WHERE id = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i>
+<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
       <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>autor<i class="t-pun">)</i> <i class="t-pun">{</i>
         <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Autor não cadastrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
@@ -359,7 +292,7 @@ body.solo{background:var(--bg)}
 
       <i class="t-kw">const</i> livrosDoAutor <i class="t-pun">=</i> db
         <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
+<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i></strong>
 
       <i class="t-kw">if</i> <i class="t-pun">(</i>livrosDoAutor<i class="t-pun">.</i>total <i class="t-pun">&gt;</i><i class="t-pun">=</i> <i class="t-num">3</i><i class="t-pun">)</i> <i class="t-pun">{</i>
         <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
@@ -370,7 +303,7 @@ body.solo{background:var(--bg)}
 
       <i class="t-kw">const</i> jaExiste <i class="t-pun">=</i> db
         <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT 1 FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i>
-        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>isbn<i class="t-pun">)</i><i class="t-pun">;</i>
+<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>isbn<i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
       <i class="t-kw">if</i> <i class="t-pun">(</i>jaExiste<i class="t-pun">)</i> <i class="t-pun">{</i>
         <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
@@ -379,18 +312,18 @@ body.solo{background:var(--bg)}
         <i class="t-pun">)</i><i class="t-pun">;</i>
       <i class="t-pun">}</i>
 
-<strong class="ln-new">      <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> db</strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i></strong>
-<strong class="ln-new">          <i class="t-str">"SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)"</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">        <i class="t-pun">)</i></strong>
-<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>body<i class="t-pun">.</i>autorId<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+      <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
+          <i class="t-str">"SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)"</i><i class="t-pun">,</i>
+        <i class="t-pun">)</i>
+<strong class="ln-new">        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">,</i> titulo<i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
-<strong class="ln-new">      <i class="t-kw">if</i> <i class="t-pun">(</i>mesmoTitulo<i class="t-pun">)</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i></strong>
-<strong class="ln-new">          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Este autor já tem um livro com este título"</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
-<strong class="ln-new">        <i class="t-pun">)</i><i class="t-pun">;</i></strong>
-<strong class="ln-new">      <i class="t-pun">}</i></strong>
+      <i class="t-kw">if</i> <i class="t-pun">(</i>mesmoTitulo<i class="t-pun">)</i> <i class="t-pun">{</i>
+        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
+          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Este autor já tem um livro com este título"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+        <i class="t-pun">)</i><i class="t-pun">;</i>
+      <i class="t-pun">}</i>
 
       <i class="t-kw">const</i> hoje <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toISOString</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
       <i class="t-kw">const</i> ano <i class="t-pun">=</i> hoje<i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">4</i><i class="t-pun">)</i><i class="t-pun">;</i>
@@ -407,7 +340,7 @@ body.solo{background:var(--bg)}
       <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>
         <i class="t-str">`INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
          VALUES (?, ?, ?, ?, ?)`</i><i class="t-pun">,</i>
-        <i class="t-pun">[</i>numeroRegistro<i class="t-pun">,</i> body<i class="t-pun">.</i>isbn<i class="t-pun">,</i> body<i class="t-pun">.</i>titulo<i class="t-pun">,</i> body<i class="t-pun">.</i>autorId<i class="t-pun">,</i> hoje<i class="t-pun">]</i><i class="t-pun">,</i>
+<strong class="ln-new">        <i class="t-pun">[</i>numeroRegistro<i class="t-pun">,</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">,</i> hoje<i class="t-pun">]</i><i class="t-pun">,</i></strong>
       <i class="t-pun">)</i><i class="t-pun">;</i>
 
       <i class="t-kw">const</i> livro <i class="t-pun">=</i> db
@@ -466,36 +399,68 @@ body.solo{background:var(--bg)}
 <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
 console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`Servidor executando em http://localhost:${server.port}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c419-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl ctx">       const autor = db</span><span class="dl ctx">         .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl ctx">         .get(body.autorId);</span><span class="dl ctx"> </span><span class="dl ctx">       if (!autor) {</span><span class="dl ctx">         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const livrosDoAutor = db</span><span class="dl ctx">         .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl ctx">         .get(body.autorId) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">       if (livrosDoAutor.total &gt;= 3) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "O autor já tem 3 livros no acervo" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const jaExiste = db</span><span class="dl ctx">         .query("SELECT 1 FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .get(body.isbn);</span><span class="dl ctx"> </span><span class="dl ctx">       if (jaExiste) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "Livro já cadastrado" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl add">+      const mesmoTitulo = db</span><span class="dl add">+        .query(</span><span class="dl add">+          "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl add">+        )</span><span class="dl add">+        .get(body.autorId, body.titulo);</span><span class="dl add">+</span><span class="dl add">+      if (mesmoTitulo) {</span><span class="dl add">+        return Response.json(</span><span class="dl add">+          { error: "Este autor já tem um livro com este título" },</span><span class="dl add">+          { status: 409 },</span><span class="dl add">+        );</span><span class="dl add">+      }</span><span class="dl add">+</span><span class="dl ctx">       const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl ctx">       const ano = hoje.slice(0, 4);</span><span class="dl ctx"> </span><span class="dl ctx">       const catalogadosNoAno = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT COUNT(*) AS total FROM livros</span><span class="dl ctx">             WHERE data_catalogacao LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .get(`${ano}%`) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">       const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl ctx"> </span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl ctx">         [numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, { status: 201 });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: 3000,</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
+<pre class="cb-body cb-diff" id="c420-diff" hidden><code><span class="dl ctx"> import { db, createDb } from "./db";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl ctx"> type Handler = (</span><span class="dl ctx">   request: Request,</span><span class="dl ctx">   params: Record&lt;string, string&gt;,</span><span class="dl ctx"> ) =&gt; Response | Promise&lt;Response&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> type Route = { method: string; pattern: string; handler: Handler };</span><span class="dl ctx"> </span><span class="dl ctx"> function match(pattern: string, path: string): Record&lt;string, string&gt; | null {</span><span class="dl ctx">   const patternParts = pattern.split("/").filter(Boolean);</span><span class="dl ctx">   const pathParts = path.split("/").filter(Boolean);</span><span class="dl ctx"> </span><span class="dl ctx">   if (patternParts.length !== pathParts.length) return null;</span><span class="dl ctx"> </span><span class="dl ctx">   const params: Record&lt;string, string&gt; = {};</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; patternParts.length; i++) {</span><span class="dl ctx">     const expected = patternParts[i]!;</span><span class="dl ctx">     const received = pathParts[i]!;</span><span class="dl ctx"> </span><span class="dl ctx">     if (expected.startsWith(":")) {</span><span class="dl ctx">       params[expected.slice(1)] = received;</span><span class="dl ctx">     } else if (expected !== received) {</span><span class="dl ctx">       return null;</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return params;</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const routes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/",</span><span class="dl ctx">     handler: () =&gt; Response.json({ message: "API da Biblioteca" }),</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const body = (await request.json()) as {</span><span class="dl ctx">         isbn: string;</span><span class="dl ctx">         titulo: string;</span><span class="dl ctx">         autorId: number;</span><span class="dl ctx">       };</span><span class="dl ctx"> </span><span class="dl add">+      const isbn = body.isbn.replace(/[^0-9]/g, "");</span><span class="dl add">+      const titulo = body.titulo;</span><span class="dl add">+      const autorId = body.autorId;</span><span class="dl add">+</span><span class="dl ctx">       const autor = db</span><span class="dl ctx">         .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl del">-        .get(body.autorId);</span><span class="dl add">+        .get(autorId);</span><span class="dl ctx"> </span><span class="dl ctx">       if (!autor) {</span><span class="dl ctx">         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const livrosDoAutor = db</span><span class="dl ctx">         .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl del">-        .get(body.autorId) as { total: number };</span><span class="dl add">+        .get(autorId) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">       if (livrosDoAutor.total &gt;= 3) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "O autor já tem 3 livros no acervo" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const jaExiste = db</span><span class="dl ctx">         .query("SELECT 1 FROM livros WHERE isbn = ?")</span><span class="dl del">-        .get(body.isbn);</span><span class="dl add">+        .get(isbn);</span><span class="dl ctx"> </span><span class="dl ctx">       if (jaExiste) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "Livro já cadastrado" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const mesmoTitulo = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl ctx">         )</span><span class="dl del">-        .get(body.autorId, body.titulo);</span><span class="dl add">+        .get(autorId, titulo);</span><span class="dl ctx"> </span><span class="dl ctx">       if (mesmoTitulo) {</span><span class="dl ctx">         return Response.json(</span><span class="dl ctx">           { error: "Este autor já tem um livro com este título" },</span><span class="dl ctx">           { status: 409 },</span><span class="dl ctx">         );</span><span class="dl ctx">       }</span><span class="dl ctx"> </span><span class="dl ctx">       const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl ctx">       const ano = hoje.slice(0, 4);</span><span class="dl ctx"> </span><span class="dl ctx">       const catalogadosNoAno = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT COUNT(*) AS total FROM livros</span><span class="dl ctx">             WHERE data_catalogacao LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .get(`${ano}%`) as { total: number };</span><span class="dl ctx"> </span><span class="dl ctx">       const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl ctx"> </span><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl del">-        [numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],</span><span class="dl add">+        [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl ctx">       );</span><span class="dl ctx"> </span><span class="dl ctx">       const livro = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl ctx">         .get(result.lastInsertRowid as number);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, { status: 201 });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt; {</span><span class="dl ctx">       const q = params.q!;</span><span class="dl ctx"> </span><span class="dl ctx">       const porIsbn = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl ctx">         .all(q);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porIsbn.length &gt; 0) return Response.json(porIsbn);</span><span class="dl ctx"> </span><span class="dl ctx">       const porTitulo = db</span><span class="dl ctx">         .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       if (porTitulo.length &gt; 0) return Response.json(porTitulo);</span><span class="dl ctx"> </span><span class="dl ctx">       const porAutor = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           `SELECT livros.* FROM livros</span><span class="dl ctx">              JOIN autores ON autores.id = livros.autor_id</span><span class="dl ctx">             WHERE autores.nome LIKE ?`,</span><span class="dl ctx">         )</span><span class="dl ctx">         .all(`%${q}%`);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(porAutor);</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span><span class="dl ctx"> </span><span class="dl ctx"> const server = Bun.serve({</span><span class="dl ctx">   port: 3000,</span><span class="dl ctx"> </span><span class="dl ctx">   async fetch(request) {</span><span class="dl ctx">     const url = new URL(request.url);</span><span class="dl ctx"> </span><span class="dl ctx">     for (const route of routes) {</span><span class="dl ctx">       if (route.method !== request.method) continue;</span><span class="dl ctx"> </span><span class="dl ctx">       const params = match(route.pattern, url.pathname);</span><span class="dl ctx">       if (params) return await route.handler(request, params);</span><span class="dl ctx">     }</span><span class="dl ctx"> </span><span class="dl ctx">     return Response.json({ error: "Recurso não encontrado" }, { status: 404 });</span><span class="dl ctx">   },</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`Servidor executando em http://localhost:${server.port}`);</span></code></pre>
+</div>
+
+<div class="cb cb-fig">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c87-diff" data-alt="c87-clean">ver o que mudou</button></div></div>
+<pre class="cb-body" id="c87-clean"><code>      <i class="t-kw">const</i> livrosDoAutor <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i>
+        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c87-diff" hidden><code><span class="dl ctx">       const livrosDoAutor = db</span><span class="dl ctx">         .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl del">-        .get(body.autorId) as { total: number };</span><span class="dl add">+        .get(autorId) as { total: number };</span></code></pre>
+</div>
+<p>A consulta do RF08 é a que mais importa aqui: é ela que precisa comparar o ISBN já reduzido a dígitos, senão <code>978-0-321-12521-7</code> passa direto por cima de <code>9780321125217</code>.</p>
+<div class="cb cb-fig">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c88-diff" data-alt="c88-clean">ver o que mudou</button></div></div>
+<pre class="cb-body" id="c88-clean"><code>      <i class="t-kw">const</i> jaExiste <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT 1 FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i>
+        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>isbn<i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c88-diff" hidden><code><span class="dl ctx">       const jaExiste = db</span><span class="dl ctx">         .query("SELECT 1 FROM livros WHERE isbn = ?")</span><span class="dl del">-        .get(body.isbn);</span><span class="dl add">+        .get(isbn);</span></code></pre>
+</div>
+<div class="cb cb-fig">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c89-diff" data-alt="c89-clean">ver o que mudou</button></div></div>
+<pre class="cb-body" id="c89-clean"><code>      <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> db
+        <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
+          <i class="t-str">"SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)"</i><i class="t-pun">,</i>
+        <i class="t-pun">)</i>
+        <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">,</i> titulo<i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c89-diff" hidden><code><span class="dl ctx">       const mesmoTitulo = db</span><span class="dl ctx">         .query(</span><span class="dl ctx">           "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl ctx">         )</span><span class="dl del">-        .get(body.autorId, body.titulo);</span><span class="dl add">+        .get(autorId, titulo);</span></code></pre>
+</div>
+<div class="cb cb-fig">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c90-diff" data-alt="c90-clean">ver o que mudou</button></div></div>
+<pre class="cb-body" id="c90-clean"><code>      <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>
+        <i class="t-str">`INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
+         VALUES (?, ?, ?, ?, ?)`</i><i class="t-pun">,</i>
+        <i class="t-pun">[</i>numeroRegistro<i class="t-pun">,</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">,</i> hoje<i class="t-pun">]</i><i class="t-pun">,</i>
+      <i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c90-diff" hidden><code><span class="dl ctx">       const result = db.run(</span><span class="dl ctx">         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl ctx">          VALUES (?, ?, ?, ?, ?)`,</span><span class="dl del">-        [numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],</span><span class="dl add">+        [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl ctx">       );</span></code></pre>
 </div></div>
-  <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c83">copiar</button></div></div>
-<pre class="cb-body" id="c83"><code><i class="t-cmd">rm</i> <i class="t-flag">-f</i> data/biblioteca.sqlite   # e reinicie o servidor
-
-<i class="t-com"># primeira edição</i>
+  <div class="step test"><h3>✅ Como testar</h3><p>Continuando de onde a fase 17 parou — um livro no acervo, <em>Orgulho e Preconceito</em>. Agora o mesmo ISBN, escrito de duas formas diferentes:</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c91">copiar</button></div></div>
+<pre class="cb-body" id="c91"><code><i class="t-com"># como o operador digitou, com hífens</i>
 <i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> <i class="t-flag">-X</i> POST localhost:3000/livros \
-  <i class="t-flag">-H</i> <i class="t-str">'Content-Type: application/json'</i> \
-  <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780141439518","titulo":"Orgulho e Preconceito","autorId":4}'</i>
+  <i class="t-flag">-H</i> <i class="t-str">'Content-Type: application/json'</i> <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"978-0-321-12521-7","titulo":"Domain-Driven Design","autorId":1}'</i>
 
-<i class="t-com"># outra edição da MESMA obra: ISBN diferente, título igual</i>
+<i class="t-com"># o mesmo ISBN, agora só com dígitos</i>
 <i class="t-cmd">curl</i> <i class="t-flag">-w</i> <i class="t-str">" [%{http_code}]\n"</i> <i class="t-flag">-X</i> POST localhost:3000/livros \
-  <i class="t-flag">-H</i> <i class="t-str">'Content-Type: application/json'</i> \
-  <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780141439563","titulo":"orgulho e preconceito","autorId":4}'</i></code></pre>
+  <i class="t-flag">-H</i> <i class="t-str">'Content-Type: application/json'</i> <i class="t-flag">-d</i> <i class="t-str">'{"isbn":"9780321125217","titulo":"Domain-Driven Design","autorId":1}'</i></code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c84"><code><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">1</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">201</i><i class="t-pun">]</i>
-<i class="t-pun">{</i><i class="t-key">"error"</i><i class="t-pun">:</i><i class="t-str">"Este autor já tem um livro com este título"</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">409</i><i class="t-pun">]</i></code></pre>
+<pre class="cb-body" id="c92"><code><i class="t-pun">{</i><i class="t-key">"id"</i><i class="t-pun">:</i><i class="t-num">2</i><i class="t-pun">,</i><i class="t-key">"numero_registro"</i><i class="t-pun">:</i><i class="t-str">"2026-000002"</i><i class="t-pun">,</i><i class="t-key">"isbn"</i><i class="t-pun">:</i><i class="t-str">"9780321125217"</i><i class="t-pun">,</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">201</i><i class="t-pun">]</i>
+<i class="t-pun">{</i><i class="t-key">"error"</i><i class="t-pun">:</i><i class="t-str">"Livro já cadastrado"</i><i class="t-pun">}</i> <i class="t-pun">[</i><i class="t-num">409</i><i class="t-pun">]</i></code></pre>
 </div>
-<p>Repare no <code>lower()</code> das duas pontas: <code>orgulho e preconceito</code> foi recusado. Isso é uma decisão de negócio disfarçada de detalhe de SQL — e ela vai reaparecer na fase 43, quando o dublê em memória tiver que decidir se compara do mesmo jeito.</p></div>
+<p>Duas coisas na primeira linha: o ISBN foi <strong>gravado</strong> sem os hífens, e não como chegou. E é por isso que a segunda linha funciona — o RF08 recusa a segunda tentativa mesmo ela estando escrita de outro jeito, porque as duas viraram a mesma string antes da comparação.</p>
+<p>Antes desta fase o par acima devolvia <code>201</code> duas vezes: o acervo ficava com o mesmo livro catalogado duas vezes, uma cópia com hífens e outra sem, e a busca por <code>9780321125217</code> só achava uma delas.</p></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c85">copiar</button></div></div>
-<pre class="cb-body" id="c85"><code><i class="t-cmd">git</i> add src/index.ts
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 17: RF09 mesmo autor nao repete titulo"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c93">copiar</button></div></div>
+<pre class="cb-body" id="c93"><code><i class="t-cmd">git</i> add src/index.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 18: RF10 normalizacao do ISBN"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase16</code>. Próxima fase: <code>git checkout fase18</code>, e <code>git diff fase17 fase18 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase17</code>. Próxima fase: <code>git checkout fase19</code>, e <code>git diff fase18 fase19 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

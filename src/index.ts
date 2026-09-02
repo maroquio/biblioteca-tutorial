@@ -47,9 +47,13 @@ const routes: Route[] = [
         autorId: number;
       };
 
+      const isbn = body.isbn.replace(/[^0-9]/g, "");
+      const titulo = body.titulo;
+      const autorId = body.autorId;
+
       const autor = db
         .query("SELECT * FROM autores WHERE id = ?")
-        .get(body.autorId);
+        .get(autorId);
 
       if (!autor) {
         return Response.json({ error: "Autor não cadastrado" }, { status: 404 });
@@ -57,7 +61,7 @@ const routes: Route[] = [
 
       const livrosDoAutor = db
         .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")
-        .get(body.autorId) as { total: number };
+        .get(autorId) as { total: number };
 
       if (livrosDoAutor.total >= 3) {
         return Response.json(
@@ -68,7 +72,7 @@ const routes: Route[] = [
 
       const jaExiste = db
         .query("SELECT 1 FROM livros WHERE isbn = ?")
-        .get(body.isbn);
+        .get(isbn);
 
       if (jaExiste) {
         return Response.json(
@@ -81,7 +85,7 @@ const routes: Route[] = [
         .query(
           "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",
         )
-        .get(body.autorId, body.titulo);
+        .get(autorId, titulo);
 
       if (mesmoTitulo) {
         return Response.json(
@@ -105,7 +109,7 @@ const routes: Route[] = [
       const result = db.run(
         `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
          VALUES (?, ?, ?, ?, ?)`,
-        [numeroRegistro, body.isbn, body.titulo, body.autorId, hoje],
+        [numeroRegistro, isbn, titulo, autorId, hoje],
       );
 
       const livro = db

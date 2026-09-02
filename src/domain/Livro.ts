@@ -1,12 +1,13 @@
 import { TituloVazio } from "./errors";
+import type { LivroId, AutorId } from "./identifiers";
 
 export class Livro {
   constructor(
-    readonly id: number,
+    readonly id: LivroId,
     readonly numeroRegistro: string,
     readonly isbn: string,
     readonly titulo: string,
-    readonly autorId: number,
+    readonly autorId: AutorId,
     readonly dataCatalogacao: string,
   ) {
     if (Livro.normalizar(titulo) === "") {

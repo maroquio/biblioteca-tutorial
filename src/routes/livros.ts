@@ -6,7 +6,7 @@ import { buscarLivros, cadastrarLivro } from "../services/livroService";
 
 function toJson(livro: Livro, autor: AutorRow) {
   return {
-    id: livro.id,
+    id: livro.id.value,
     numeroRegistro: livro.numeroRegistro,
     isbn: livro.isbn,
     titulo: livro.titulo,

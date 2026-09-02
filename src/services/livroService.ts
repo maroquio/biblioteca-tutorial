@@ -1,4 +1,5 @@
 import type { Livro } from "../domain/Livro";
+import { AutorId } from "../domain/identifiers";
 import { RuleConflict } from "../errors";
 import type { AutorRow } from "../repositories/autorRepository";
 import {
@@ -17,9 +18,10 @@ export type LivroComAutor = { livro: Livro; autor: AutorRow };
 export function cadastrarLivro(
   isbnBruto: string,
   titulo: string,
-  autorId: number,
+  autorIdBruto: number,
 ): LivroComAutor {
   const isbn = isbnBruto.replace(/[^0-9]/g, "");
+  const autorId = new AutorId(autorIdBruto);
 
   const autor = buscarAutor(autorId);
 

@@ -9,9 +9,7 @@ export const livroRoutes: Route[] = [
     handler: async (request) => {
       const data = parseNovoLivro(await request.json());
 
-      const livro = cadastrarLivro(data.isbn, data.titulo, data.autorId) as {
-        isbn: string;
-      };
+      const livro = cadastrarLivro(data.isbn, data.titulo, data.autorId);
 
       return Response.json(livro, {
         status: 201,

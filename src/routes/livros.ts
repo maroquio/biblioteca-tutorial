@@ -1,3 +1,4 @@
+import { parseBusca, parseNovoLivro } from "../input";
 import type { Route } from "../router";
 import { buscarLivros, cadastrarLivro } from "../services/livroService";
 
@@ -6,13 +7,9 @@ export const livroRoutes: Route[] = [
     method: "POST",
     pattern: "/livros",
     handler: async (request) => {
-      const body = (await request.json()) as {
-        isbn: string;
-        titulo: string;
-        autorId: number;
-      };
+      const data = parseNovoLivro(await request.json());
 
-      const result = cadastrarLivro(body.isbn, body.titulo, body.autorId);
+      const result = cadastrarLivro(data.isbn, data.titulo, data.autorId);
 
       if (!result.ok) {
         return Response.json({ error: result.error }, { status: result.status });
@@ -30,7 +27,7 @@ export const livroRoutes: Route[] = [
     method: "GET",
     pattern: "/livros/:q",
     handler: (_request, params) => {
-      return Response.json(buscarLivros(params.q!));
+      return Response.json(buscarLivros(parseBusca(params)));
     },
   },
 ];

@@ -1,5 +1,6 @@
 import { db } from "../db";
 import { Livro } from "../domain/Livro";
+import { LivroId, AutorId } from "../domain/identifiers";
 
 type LivroRow = {
   id: number;
@@ -12,19 +13,19 @@ type LivroRow = {
 
 function toLivro(row: LivroRow): Livro {
   return new Livro(
-    row.id,
+    new LivroId(row.id),
     row.numero_registro,
     row.isbn,
     row.titulo,
-    row.autor_id,
+    new AutorId(row.autor_id),
     row.data_catalogacao,
   );
 }
 
-export function contarNoAcervoDoAutor(autorId: number): number {
+export function contarNoAcervoDoAutor(autorId: AutorId): number {
   const row = db
     .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")
-    .get(autorId) as { total: number };
+    .get(autorId.value) as { total: number };
 
   return row.total;
 }
@@ -40,8 +41,8 @@ export function contarCatalogadosNoAno(ano: string): number {
   return row.total;
 }
 
-export function findLivroById(id: number): Livro | null {
-  const row = db.query("SELECT * FROM livros WHERE id = ?").get(id) as
+export function findLivroById(id: LivroId): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE id = ?").get(id.value) as
     | LivroRow
     | null;
 
@@ -56,10 +57,10 @@ export function findLivroByIsbn(isbn: string): Livro | null {
   return row === null ? null : toLivro(row);
 }
 
-export function findLivrosByAutorId(autorId: number): Livro[] {
+export function findLivrosByAutorId(autorId: AutorId): Livro[] {
   const rows = db
     .query("SELECT * FROM livros WHERE autor_id = ?")
-    .all(autorId) as LivroRow[];
+    .all(autorId.value) as LivroRow[];
 
   return rows.map(toLivro);
 }
@@ -68,16 +69,16 @@ export function insertLivro(
   numeroRegistro: string,
   isbn: string,
   titulo: string,
-  autorId: number,
+  autorId: AutorId,
   dataCatalogacao: string,
 ): Livro {
   const result = db.run(
     `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
      VALUES (?, ?, ?, ?, ?)`,
-    [numeroRegistro, isbn, titulo, autorId, dataCatalogacao],
+    [numeroRegistro, isbn, titulo, autorId.value, dataCatalogacao],
   );
 
-  return findLivroById(Number(result.lastInsertRowid))!;
+  return findLivroById(new LivroId(Number(result.lastInsertRowid)))!;
 }
 
 export function searchLivrosPorTitulo(termo: string): Livro[] {

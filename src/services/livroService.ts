@@ -1,4 +1,6 @@
+import type { Livro } from "../domain/Livro";
 import { RuleConflict } from "../errors";
+import type { AutorRow } from "../repositories/autorRepository";
 import {
   contarCatalogadosNoAno,
   contarNoAcervoDoAutor,
@@ -7,15 +9,16 @@ import {
   insertLivro,
   searchLivrosPorNomeDoAutor,
   searchLivrosPorTitulo,
-  type LivroRow,
 } from "../repositories/livroRepository";
 import { buscarAutor } from "./autorService";
+
+export type LivroComAutor = { livro: Livro; autor: AutorRow };
 
 export function cadastrarLivro(
   isbnBruto: string,
   titulo: string,
   autorId: number,
-): LivroRow & { autor: string } {
+): LivroComAutor {
   const isbn = isbnBruto.replace(/[^0-9]/g, "");
 
   const autor = buscarAutor(autorId);
@@ -31,8 +34,8 @@ export function cadastrarLivro(
     throw new RuleConflict("Livro já cadastrado");
   }
 
-  const mesmoTitulo = findLivrosByAutorId(autorId).some(
-    (livro) => livro.titulo.toLowerCase() === titulo.toLowerCase(),
+  const mesmoTitulo = findLivrosByAutorId(autorId).some((livro) =>
+    livro.mesmoTituloQue(titulo),
   );
 
   if (mesmoTitulo) {
@@ -45,19 +48,21 @@ export function cadastrarLivro(
   const sequencial = contarCatalogadosNoAno(ano) + 1;
   const numeroRegistro = `${ano}-${String(sequencial).padStart(6, "0")}`;
 
-  const livro = insertLivro(numeroRegistro, isbn, titulo, autorId, hoje);
-
-  return { ...livro, autor: autor.nome };
+  return { livro: insertLivro(numeroRegistro, isbn, titulo, autorId, hoje), autor };
 }
 
-export function buscarLivros(q: string): LivroRow[] {
+export function buscarLivros(q: string): LivroComAutor[] {
   const porIsbn = findLivroByIsbn(q);
 
-  if (porIsbn) return [porIsbn];
+  if (porIsbn) return [comAutor(porIsbn)];
 
   const porTitulo = searchLivrosPorTitulo(q);
 
-  if (porTitulo.length > 0) return porTitulo;
+  if (porTitulo.length > 0) return porTitulo.map(comAutor);
 
-  return searchLivrosPorNomeDoAutor(q);
+  return searchLivrosPorNomeDoAutor(q).map(comAutor);
+}
+
+function comAutor(livro: Livro): LivroComAutor {
+  return { livro, autor: buscarAutor(livro.autorId) };
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 29 de 53 — Repositório de autor — o SQL sai do serviço</title>
+<title>Fase 30 de 53 — Repositório de livro — o serviço passa a fazer perguntas de negócio</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,79 +211,289 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 29 de 53</span>
+  <span class="pos">Fase 30 de 53</span>
   <span class="marco">A primeira reação</span>
-  <span class="br">branch <code>fase29</code></span>
+  <span class="br">branch <code>fase30</code></span>
 </div>
-<article class="fase" id="fase-29">
+<article class="fase" id="fase-30">
 <header class="fase-head">
-  <div class="fase-n">29</div>
-  <div class="fase-t"><h2>Repositório de autor — o SQL sai do serviço</h2></div>
+  <div class="fase-n">30</div>
+  <div class="fase-t"><h2>Repositório de livro — o serviço passa a fazer perguntas de negócio</h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Tirar o SQL de dentro dos serviços e dar um nome ao acesso a dados: eles passam a chamar <code>findAutorById</code> em vez de escrever <code>SELECT</code>. Ainda não é inversão de dependência — é arrumação. Nesta fase, só o lado do autor, que tem uma consulta; o lado do livro, que tem oito, é a fase 30.</p></div>
-  
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Note que o repositório ainda importa <code>db</code> diretamente. Não é inversão de dependência — é só arrumação. A inversão vem na fase 38.</p>
+<p>Repetir o padrão para o livro. Repare nos nomes que aparecem aqui — <code>contarNoAcervoDoAutor</code> e <code>contarCatalogadosNoAno</code>: o serviço deixa de pedir linhas e passa a fazer <strong>perguntas de negócio</strong>. Ao final, nenhum serviço escreve SQL.</p></div>
+  <figure class="diagram" id="dg-fase-30-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 480" class="dg" preserveAspectRatio="xMidYMid meet">
+  <style> #dg-fase-30-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-30-arquitetura .t {fill:#111827} #dg-fase-30-arquitetura .s {fill:#6b7280}</style>
+  <defs>
+    <marker id="fase-30-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="fase-30-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+    <marker id="fase-30-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="fase-30-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
+    <marker id="fase-30-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="fase-30-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
+    <marker id="fase-30-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="fase-30-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
+    <marker id="fase-30-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="fase-30-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+    <marker id="fase-30-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+    <marker id="fase-30-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+    <marker id="fase-30-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-30-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-30-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="940" height="480" fill="#ffffff"/>
+  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 30 — rota, serviço e repositório — mas a seta ainda aponta para fora</text>
+  <text x="40" y="64" class="s" font-size="13">Cada camada tem nome, e o SQL está num lugar só. Ainda assim, o serviço depende do concreto.</text>
+  <rect x="340" y="108" width="260" height="58" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="470.0" y="142.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">routes/livros.ts</text>
+  <rect x="340" y="194" width="260" height="58" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="470.0" y="220.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">services/</text>
+  <text x="470.0" y="238.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">livroService, autorService</text>
+  <rect x="340" y="280" width="260" height="58" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="470.0" y="306.0" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="600">repositories/</text>
+  <text x="470.0" y="324.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">livroRepository, autorRepository</text>
+  <path d="M 370,371 a 100.0,9 0 0 1 200,0 v 56 a 100.0,9 0 0 1 -200,0 z" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <path d="M 370,371 a 100.0,9 0 0 0 200,0" fill="none" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="470.0" y="405.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">SQLite</text>
+  <line x1="470" y1="166" x2="470" y2="192" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-30-arquitetura__a-gray)"/>
+  <line x1="470" y1="252" x2="470" y2="278" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-30-arquitetura__a-gray)"/>
+  <line x1="470" y1="338" x2="470" y2="364" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-30-arquitetura__a-gray)"/>
+  <rect x="640" y="180" width="280" height="176" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
+  <text x="780" y="206" font-size="12.5" text-anchor="middle" fill="#dc2626" font-weight="700">O que ainda impede o teste</text>
+  <text x="780" y="232" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">O repositório importa db diretamente.</text>
+  <text x="780" y="250" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">O serviço chama new Date() sozinho.</text>
+  <text x="780" y="276" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">Para exercitar a regra do limite</text>
+  <text x="780" y="292" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">ainda é preciso um arquivo SQLite;</text>
+  <text x="780" y="308" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">para testar o número de 2027,</text>
+  <text x="780" y="324" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">é preciso esperar o ano virar.</text>
+  <text x="780" y="346" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="600">A inversão chega na fase 38.</text>
+  <line x1="634" y1="268" x2="606" y2="268" stroke="#dc2626" stroke-width="1.6" marker-end="url(#fase-30-arquitetura__a-red)"/>
+  <rect x="30" y="180" width="280" height="120" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.4"/>
+  <text x="170" y="206" font-size="12.5" text-anchor="middle" fill="#111827" font-weight="700">É arrumação, não inversão</text>
+  <text x="170" y="232" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">As setas continuam todas apontando</text>
+  <text x="170" y="248" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">para baixo, do abstrato para o</text>
+  <text x="170" y="264" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">concreto. Dar nome às camadas</text>
+  <text x="170" y="280" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">não muda a direção de nenhuma.</text>
+</svg></div><figcaption>Arquitetura da fase 30</figcaption></figure>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Oito funções, e os nomes são o assunto da fase: duas fazem <strong>perguntas de negócio</strong>, as outras seis são acesso a dados com nome de acesso a dados.</p>
 
-<p><strong><code>src/repositories/autorRepository.ts</code></strong> — arquivo novo</p>
+<p><strong><code>src/repositories/livroRepository.ts</code></strong> — arquivo novo</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c450">copiar</button></div></div>
-<pre class="cb-body" id="c450"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../db"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c452">copiar</button></div></div>
+<pre class="cb-body" id="c452"><code><i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../db"</i><i class="t-pun">;</i>
 
-<i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">AutorRow</i> <i class="t-pun">=</i> <i class="t-pun">{</i>
+<i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">LivroRow</i> <i class="t-pun">=</i> <i class="t-pun">{</i>
   id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
-  nome<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
-  orcid<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
-  tipo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
+  numero_registro<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
+  isbn<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
+  titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
+  autor_id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">;</i>
+  data_catalogacao<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">;</i>
 <i class="t-pun">}</i><i class="t-pun">;</i>
 
-<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">findAutorById</i><i class="t-pun">(</i>autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">AutorRow</i> <i class="t-pun">|</i> <i class="t-kw">null</i> <i class="t-pun">{</i>
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">contarNoAcervoDoAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> row <i class="t-pun">=</i> db
+    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i>
+    <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> row<i class="t-pun">.</i>total<i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">contarCatalogadosNoAno</i><i class="t-pun">(</i>ano<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> row <i class="t-pun">=</i> db
+    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
+      <i class="t-str">`SELECT COUNT(*) AS total FROM livros
+        WHERE data_catalogacao LIKE ?`</i><i class="t-pun">,</i>
+    <i class="t-pun">)</i>
+    <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i><i class="t-str">`${ano}%`</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">{</i> total<i class="t-pun">:</i> <i class="t-typ">number</i> <i class="t-pun">}</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> row<i class="t-pun">.</i>total<i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">findLivroById</i><i class="t-pun">(</i>id<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i> <i class="t-pun">|</i> <i class="t-kw">null</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> db<i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE id = ?"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>id<i class="t-pun">)</i> <i class="t-kw">as</i>
+    <i class="t-pun">|</i> <i class="t-typ">LivroRow</i>
+    <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">findLivroByIsbn</i><i class="t-pun">(</i>isbn<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i> <i class="t-pun">|</i> <i class="t-kw">null</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> db<i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE isbn = ?"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>isbn<i class="t-pun">)</i> <i class="t-kw">as</i>
+    <i class="t-pun">|</i> <i class="t-typ">LivroRow</i>
+    <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">findLivrosByAutorId</i><i class="t-pun">(</i>autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i>
   <i class="t-kw">return</i> db
-    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM autores WHERE id = ?"</i><i class="t-pun">)</i>
-    <i class="t-pun">.</i><i class="t-kw">get</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">AutorRow</i> <i class="t-pun">|</i> <i class="t-kw">null</i><i class="t-pun">;</i>
+    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE autor_id = ?"</i><i class="t-pun">)</i>
+    <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">insertLivro</i><i class="t-pun">(</i>
+  numeroRegistro<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  isbn<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">,</i>
+  dataCatalogacao<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+<i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> result <i class="t-pun">=</i> db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i>
+    <i class="t-str">`INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
+     VALUES (?, ?, ?, ?, ?)`</i><i class="t-pun">,</i>
+    <i class="t-pun">[</i>numeroRegistro<i class="t-pun">,</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">,</i> dataCatalogacao<i class="t-pun">]</i><i class="t-pun">,</i>
+  <i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> <i class="t-fn">findLivroById</i><i class="t-pun">(</i><i class="t-typ">Number</i><i class="t-pun">(</i>result<i class="t-pun">.</i>lastInsertRowid<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">!</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">searchLivrosPorTitulo</i><i class="t-pun">(</i>termo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> db
+    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i><i class="t-str">"SELECT * FROM livros WHERE titulo LIKE ?"</i><i class="t-pun">)</i>
+    <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${termo}%`</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-com">// ⚠️ ainda lê a tabela do outro lado da fronteira. Fase 50.</i>
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">searchLivrosPorNomeDoAutor</i><i class="t-pun">(</i>termo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> db
+    <i class="t-pun">.</i><i class="t-fn">query</i><i class="t-pun">(</i>
+      <i class="t-str">`SELECT livros.* FROM livros
+         JOIN autores ON autores.id = livros.autor_id
+        WHERE autores.nome LIKE ?`</i><i class="t-pun">,</i>
+    <i class="t-pun">)</i>
+    <i class="t-pun">.</i><i class="t-fn">all</i><i class="t-pun">(</i><i class="t-str">`%${termo}%`</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i><i class="t-pun">;</i>
 <i class="t-pun">}</i></code></pre>
 </div>
+<p>Repare no que mudou de forma no RF08 e no RF09. O <code>SELECT 1 ... WHERE isbn = ?</code> da fase 16 virou <code>findLivroByIsbn</code> — a <strong>mesma</strong> função que a busca por ISBN já precisava, e por isso as duas perguntas passam a ter uma resposta só. E o <code>lower(titulo) = lower(?)</code> da fase 17 não virou função nenhuma: o repositório devolve os livros do autor, e quem compara títulos é o serviço. A decisão de "o que é a mesma obra" acabou de sair do SQL — e ainda não chegou no lugar certo. Fase 31.</p>
 
-<p><strong><code>src/services/autorService.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<p>Não sobrou uma consulta nele, então vai inteiro:</p>
+<p><strong><code>src/services/livroService.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c451-diff" data-alt="c451-clean">ver o que mudou</button><button class="cp" data-code="c451-clean">copiar</button></div></div>
-<pre class="cb-body" id="c451-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">NotFound</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../errors"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c453-diff" data-alt="c453-clean">ver o que mudou</button><button class="cp" data-code="c453-clean">copiar</button></div></div>
+<pre class="cb-body" id="c453-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">RuleConflict</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../errors"</i><i class="t-pun">;</i>
 <strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i></strong>
-<strong class="ln-new">  findAutorById<i class="t-pun">,</i></strong>
-<strong class="ln-new">  <i class="t-kw">type</i> <i class="t-typ">AutorRow</i><i class="t-pun">,</i></strong>
-<strong class="ln-new"><i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../repositories/autorRepository"</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  contarCatalogadosNoAno<i class="t-pun">,</i></strong>
+<strong class="ln-new">  contarNoAcervoDoAutor<i class="t-pun">,</i></strong>
+<strong class="ln-new">  findLivroByIsbn<i class="t-pun">,</i></strong>
+<strong class="ln-new">  findLivrosByAutorId<i class="t-pun">,</i></strong>
+<strong class="ln-new">  insertLivro<i class="t-pun">,</i></strong>
+<strong class="ln-new">  searchLivrosPorNomeDoAutor<i class="t-pun">,</i></strong>
+<strong class="ln-new">  searchLivrosPorTitulo<i class="t-pun">,</i></strong>
+<strong class="ln-new">  <i class="t-kw">type</i> <i class="t-typ">LivroRow</i><i class="t-pun">,</i></strong>
+<strong class="ln-new"><i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../repositories/livroRepository"</i><i class="t-pun">;</i></strong>
+<i class="t-kw">import</i> <i class="t-pun">{</i> buscarAutor <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./autorService"</i><i class="t-pun">;</i>
 
-<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">buscarAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">AutorRow</i> <i class="t-pun">{</i>
-<strong class="ln-new">  <i class="t-kw">const</i> autor <i class="t-pun">=</i> <i class="t-fn">findAutorById</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">cadastrarLivro</i><i class="t-pun">(</i>
+  isbnBruto<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  titulo<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">,</i>
+  autorId<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">,</i>
+<strong class="ln-new"><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i> <i class="t-pun">&amp;</i> <i class="t-pun">{</i> autor<i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">}</i> <i class="t-pun">{</i></strong>
+  <i class="t-kw">const</i> isbn <i class="t-pun">=</i> isbnBruto<i class="t-pun">.</i><i class="t-fn">replace</i><i class="t-pun">(</i><i class="t-pun">/</i><i class="t-pun">[</i><i class="t-pun">^</i><i class="t-num">0</i><i class="t-pun">-</i><i class="t-num">9</i><i class="t-pun">]</i><i class="t-pun">/</i>g<i class="t-pun">,</i> <i class="t-str">""</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
-  <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>autor<i class="t-pun">)</i> <i class="t-pun">{</i>
-    <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">NotFound</i><i class="t-pun">(</i><i class="t-str">"Autor não cadastrado"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-kw">const</i> autor <i class="t-pun">=</i> <i class="t-fn">buscarAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i>
+
+<strong class="ln-new">  <i class="t-kw">const</i> noAcervo <i class="t-pun">=</i> <i class="t-fn">contarNoAcervoDoAutor</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+  <i class="t-kw">const</i> limite <i class="t-pun">=</i> autor<i class="t-pun">.</i>tipo <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> <i class="t-str">"didatico"</i> <i class="t-pun">?</i> <i class="t-num">10</i> <i class="t-pun">:</i> <i class="t-num">5</i><i class="t-pun">;</i>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>noAcervo <i class="t-pun">&gt;</i><i class="t-pun">=</i> limite<i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">RuleConflict</i><i class="t-pun">(</i><i class="t-str">`O autor já tem ${limite} livros no acervo`</i><i class="t-pun">)</i><i class="t-pun">;</i>
   <i class="t-pun">}</i>
 
-  <i class="t-kw">return</i> autor<i class="t-pun">;</i>
+<strong class="ln-new">  <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-fn">findLivroByIsbn</i><i class="t-pun">(</i>isbn<i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">{</i></strong>
+    <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">RuleConflict</i><i class="t-pun">(</i><i class="t-str">"Livro já cadastrado"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+<strong class="ln-new">  <i class="t-kw">const</i> mesmoTitulo <i class="t-pun">=</i> <i class="t-fn">findLivrosByAutorId</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">some</i><i class="t-pun">(</i></strong>
+<strong class="ln-new">    <i class="t-pun">(</i>livro<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> livro<i class="t-pun">.</i>titulo<i class="t-pun">.</i><i class="t-fn">toLowerCase</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> titulo<i class="t-pun">.</i><i class="t-fn">toLowerCase</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">  <i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>mesmoTitulo<i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">RuleConflict</i><i class="t-pun">(</i><i class="t-str">"Este autor já tem um livro com este título"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">const</i> hoje <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toISOString</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-kw">const</i> ano <i class="t-pun">=</i> hoje<i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">0</i><i class="t-pun">,</i> <i class="t-num">4</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<strong class="ln-new">  <i class="t-kw">const</i> sequencial <i class="t-pun">=</i> <i class="t-fn">contarCatalogadosNoAno</i><i class="t-pun">(</i>ano<i class="t-pun">)</i> <i class="t-pun">+</i> <i class="t-num">1</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">  <i class="t-kw">const</i> numeroRegistro <i class="t-pun">=</i> <i class="t-str">`${ano}-${String(sequencial).padStart(6, "0")}`</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-kw">const</i> livro <i class="t-pun">=</i> <i class="t-fn">insertLivro</i><i class="t-pun">(</i>numeroRegistro<i class="t-pun">,</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">,</i> hoje<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+  <i class="t-kw">return</i> <i class="t-pun">{</i> <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i>livro<i class="t-pun">,</i> autor<i class="t-pun">:</i> autor<i class="t-pun">.</i>nome <i class="t-pun">}</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">buscarLivros</i><i class="t-pun">(</i>q<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroRow</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i>
+<strong class="ln-new">  <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> <i class="t-fn">findLivroByIsbn</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-pun">[</i>porIsbn<i class="t-pun">]</i><i class="t-pun">;</i></strong>
+
+<strong class="ln-new">  <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> <i class="t-fn">searchLivrosPorTitulo</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> porTitulo<i class="t-pun">;</i>
+
+<strong class="ln-new">  <i class="t-kw">return</i> <i class="t-fn">searchLivrosPorNomeDoAutor</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i></strong>
 <i class="t-pun">}</i></code></pre>
-<pre class="cb-body cb-diff" id="c451-diff" hidden><code><span class="dl del">-import { db } from "../db";</span><span class="dl ctx"> import { NotFound } from "../errors";</span><span class="dl del">-</span><span class="dl del">-export type AutorRow = {</span><span class="dl del">-  id: number;</span><span class="dl del">-  nome: string;</span><span class="dl del">-  orcid: string | null;</span><span class="dl del">-  tipo: string;</span><span class="dl del">-};</span><span class="dl del">-</span><span class="dl del">-export function buscarAutorPorId(autorId: number): AutorRow | null {</span><span class="dl del">-  return db</span><span class="dl del">-    .query("SELECT * FROM autores WHERE id = ?")</span><span class="dl del">-    .get(autorId) as AutorRow | null;</span><span class="dl del">-}</span><span class="dl add">+import {</span><span class="dl add">+  findAutorById,</span><span class="dl add">+  type AutorRow,</span><span class="dl add">+} from "../repositories/autorRepository";</span><span class="dl ctx"> </span><span class="dl ctx"> export function buscarAutor(autorId: number): AutorRow {</span><span class="dl del">-  const autor = buscarAutorPorId(autorId);</span><span class="dl add">+  const autor = findAutorById(autorId);</span><span class="dl ctx"> </span><span class="dl ctx">   if (!autor) {</span><span class="dl ctx">     throw new NotFound("Autor não cadastrado");</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   return autor;</span><span class="dl ctx"> }</span></code></pre>
+<pre class="cb-body cb-diff" id="c453-diff" hidden><code><span class="dl del">-import { db } from "../db";</span><span class="dl ctx"> import { RuleConflict } from "../errors";</span><span class="dl add">+import {</span><span class="dl add">+  contarCatalogadosNoAno,</span><span class="dl add">+  contarNoAcervoDoAutor,</span><span class="dl add">+  findLivroByIsbn,</span><span class="dl add">+  findLivrosByAutorId,</span><span class="dl add">+  insertLivro,</span><span class="dl add">+  searchLivrosPorNomeDoAutor,</span><span class="dl add">+  searchLivrosPorTitulo,</span><span class="dl add">+  type LivroRow,</span><span class="dl add">+} from "../repositories/livroRepository";</span><span class="dl ctx"> import { buscarAutor } from "./autorService";</span><span class="dl del">-</span><span class="dl del">-export type LivroRow = {</span><span class="dl del">-  id: number;</span><span class="dl del">-  numero_registro: string;</span><span class="dl del">-  isbn: string;</span><span class="dl del">-  titulo: string;</span><span class="dl del">-  autor_id: number;</span><span class="dl del">-  data_catalogacao: string;</span><span class="dl del">-};</span><span class="dl ctx"> </span><span class="dl ctx"> export function cadastrarLivro(</span><span class="dl ctx">   isbnBruto: string,</span><span class="dl ctx">   titulo: string,</span><span class="dl ctx">   autorId: number,</span><span class="dl del">-): unknown {</span><span class="dl add">+): LivroRow &amp; { autor: string } {</span><span class="dl ctx">   const isbn = isbnBruto.replace(/[^0-9]/g, "");</span><span class="dl ctx"> </span><span class="dl ctx">   const autor = buscarAutor(autorId);</span><span class="dl ctx"> </span><span class="dl del">-  const livrosDoAutor = db</span><span class="dl del">-    .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")</span><span class="dl del">-    .get(autorId) as { total: number };</span><span class="dl del">-</span><span class="dl del">-  const noAcervo = livrosDoAutor.total;</span><span class="dl add">+  const noAcervo = contarNoAcervoDoAutor(autorId);</span><span class="dl ctx">   const limite = autor.tipo === "didatico" ? 10 : 5;</span><span class="dl ctx"> </span><span class="dl ctx">   if (noAcervo &gt;= limite) {</span><span class="dl ctx">     throw new RuleConflict(`O autor já tem ${limite} livros no acervo`);</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl del">-  const jaExiste = db.query("SELECT 1 FROM livros WHERE isbn = ?").get(isbn);</span><span class="dl del">-</span><span class="dl del">-  if (jaExiste) {</span><span class="dl add">+  if (findLivroByIsbn(isbn)) {</span><span class="dl ctx">     throw new RuleConflict("Livro já cadastrado");</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl del">-  const mesmoTitulo = db</span><span class="dl del">-    .query(</span><span class="dl del">-      "SELECT 1 FROM livros WHERE autor_id = ? AND lower(titulo) = lower(?)",</span><span class="dl del">-    )</span><span class="dl del">-    .get(autorId, titulo);</span><span class="dl add">+  const mesmoTitulo = findLivrosByAutorId(autorId).some(</span><span class="dl add">+    (livro) =&gt; livro.titulo.toLowerCase() === titulo.toLowerCase(),</span><span class="dl add">+  );</span><span class="dl ctx"> </span><span class="dl ctx">   if (mesmoTitulo) {</span><span class="dl ctx">     throw new RuleConflict("Este autor já tem um livro com este título");</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const hoje = new Date().toISOString().slice(0, 10);</span><span class="dl ctx">   const ano = hoje.slice(0, 4);</span><span class="dl ctx"> </span><span class="dl del">-  const catalogadosNoAno = db</span><span class="dl del">-    .query(</span><span class="dl del">-      `SELECT COUNT(*) AS total FROM livros</span><span class="dl del">-        WHERE data_catalogacao LIKE ?`,</span><span class="dl del">-    )</span><span class="dl del">-    .get(`${ano}%`) as { total: number };</span><span class="dl add">+  const sequencial = contarCatalogadosNoAno(ano) + 1;</span><span class="dl add">+  const numeroRegistro = `${ano}-${String(sequencial).padStart(6, "0")}`;</span><span class="dl ctx"> </span><span class="dl del">-  const numeroRegistro = `${ano}-${String(catalogadosNoAno.total + 1).padStart(6, "0")}`;</span><span class="dl del">-</span><span class="dl del">-  const result = db.run(</span><span class="dl del">-    `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)</span><span class="dl del">-     VALUES (?, ?, ?, ?, ?)`,</span><span class="dl del">-    [numeroRegistro, isbn, titulo, autorId, hoje],</span><span class="dl del">-  );</span><span class="dl del">-</span><span class="dl del">-  const livro = db</span><span class="dl del">-    .query("SELECT * FROM livros WHERE id = ?")</span><span class="dl del">-    .get(Number(result.lastInsertRowid)) as Record&lt;string, unknown&gt;;</span><span class="dl add">+  const livro = insertLivro(numeroRegistro, isbn, titulo, autorId, hoje);</span><span class="dl ctx"> </span><span class="dl ctx">   return { ...livro, autor: autor.nome };</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> export function buscarLivros(q: string): LivroRow[] {</span><span class="dl del">-  const porIsbn = db</span><span class="dl del">-    .query("SELECT * FROM livros WHERE isbn = ?")</span><span class="dl del">-    .all(q) as LivroRow[];</span><span class="dl add">+  const porIsbn = findLivroByIsbn(q);</span><span class="dl ctx"> </span><span class="dl del">-  if (porIsbn.length &gt; 0) return porIsbn;</span><span class="dl add">+  if (porIsbn) return [porIsbn];</span><span class="dl ctx"> </span><span class="dl del">-  const porTitulo = db</span><span class="dl del">-    .query("SELECT * FROM livros WHERE titulo LIKE ?")</span><span class="dl del">-    .all(`%${q}%`) as LivroRow[];</span><span class="dl add">+  const porTitulo = searchLivrosPorTitulo(q);</span><span class="dl ctx"> </span><span class="dl ctx">   if (porTitulo.length &gt; 0) return porTitulo;</span><span class="dl ctx"> </span><span class="dl del">-  // ⚠️ este JOIN lê a tabela do outro lado da fronteira. Fase 50.</span><span class="dl del">-  return db</span><span class="dl del">-    .query(</span><span class="dl del">-      `SELECT livros.* FROM livros</span><span class="dl del">-         JOIN autores ON autores.id = livros.autor_id</span><span class="dl del">-        WHERE autores.nome LIKE ?`,</span><span class="dl del">-    )</span><span class="dl del">-    .all(`%${q}%`) as LivroRow[];</span><span class="dl add">+  return searchLivrosPorNomeDoAutor(q);</span><span class="dl ctx"> }</span></code></pre>
 </div>
-<p>O <code>buscarAutorPorId</code> some: ele era só o <code>SELECT</code>, e o <code>SELECT</code> agora tem um nome no repositório. O que fica no serviço é a <strong>regra</strong> — "um autor pedido pelo id tem que existir" — e nada mais.</p></div>
+<p>O <code>buscarLivros</code> da fase 26 trocou as três consultas por três chamadas ao repositório, sem mudar uma vírgula da cascata. E o <code>LivroRow</code> mudou de dono: nasceu no serviço, na fase 26, e agora mora no repositório, ao lado do SQL que o produz.</p>
+<p><strong><code>src/routes/livros.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c454-diff" data-alt="c454-clean">ver o que mudou</button><button class="cp" data-code="c454-clean">copiar</button></div></div>
+<pre class="cb-body" id="c454-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> parseBusca<i class="t-pun">,</i> parseNovoLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../input"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Route</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../router"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> buscarLivros<i class="t-pun">,</i> cadastrarLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../services/livroService"</i><i class="t-pun">;</i>
+
+<i class="t-kw">export</i> <i class="t-kw">const</i> livroRoutes<i class="t-pun">:</i> <i class="t-typ">Route</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
+  <i class="t-pun">{</i>
+    method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i>
+    pattern<i class="t-pun">:</i> <i class="t-str">"/livros"</i><i class="t-pun">,</i>
+    handler<i class="t-pun">:</i> <i class="t-kw">async</i> <i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
+      <i class="t-kw">const</i> data <i class="t-pun">=</i> <i class="t-fn">parseNovoLivro</i><i class="t-pun">(</i><i class="t-kw">await</i> request<i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<strong class="ln-new">      <i class="t-kw">const</i> livro <i class="t-pun">=</i> <i class="t-fn">cadastrarLivro</i><i class="t-pun">(</i>data<i class="t-pun">.</i>isbn<i class="t-pun">,</i> data<i class="t-pun">.</i>titulo<i class="t-pun">,</i> data<i class="t-pun">.</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>livro<i class="t-pun">,</i> <i class="t-pun">{</i>
+        status<i class="t-pun">:</i> <i class="t-num">201</i><i class="t-pun">,</i>
+        headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-typ">Location</i><i class="t-pun">:</i> <i class="t-str">`/livros/${livro.isbn}`</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+      <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+    <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">{</i>
+    method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
+    pattern<i class="t-pun">:</i> <i class="t-str">"/livros/:q"</i><i class="t-pun">,</i>
+    handler<i class="t-pun">:</i> <i class="t-pun">(</i>_request<i class="t-pun">,</i> params<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i>
+      <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-fn">buscarLivros</i><i class="t-pun">(</i><i class="t-fn">parseBusca</i><i class="t-pun">(</i>params<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">,</i>
+<i class="t-pun">]</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c454-diff" hidden><code><span class="dl ctx"> import { parseBusca, parseNovoLivro } from "../input";</span><span class="dl ctx"> import type { Route } from "../router";</span><span class="dl ctx"> import { buscarLivros, cadastrarLivro } from "../services/livroService";</span><span class="dl ctx"> </span><span class="dl ctx"> export const livroRoutes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const data = parseNovoLivro(await request.json());</span><span class="dl ctx"> </span><span class="dl del">-      const livro = cadastrarLivro(data.isbn, data.titulo, data.autorId) as {</span><span class="dl del">-        isbn: string;</span><span class="dl del">-      };</span><span class="dl add">+      const livro = cadastrarLivro(data.isbn, data.titulo, data.autorId);</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, {</span><span class="dl ctx">         status: 201,</span><span class="dl ctx">         headers: { Location: `/livros/${livro.isbn}` },</span><span class="dl ctx">       });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt;</span><span class="dl ctx">       Response.json(buscarLivros(parseBusca(params))),</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span></code></pre>
+</div>
+
+<p>O <code>as { isbn: string }</code> da fase 28 morre: o serviço agora devolve um tipo com nome, e a rota não precisa mais afirmar nada.</p></div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c166">copiar</button></div></div>
-<pre class="cb-body" id="c166"><code><i class="t-cmd">bun</i> x tsc <i class="t-flag">--noEmit</i> <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun test</code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c172">copiar</button></div></div>
+<pre class="cb-body" id="c172"><code><i class="t-cmd">bun</i> test
+
+<i class="t-com"># quem ainda importa o módulo db: só os repositórios e os dois pontos de entrada</i>
+<i class="t-cmd">grep</i> <i class="t-flag">-rln</i> <i class="t-str">'from "\.\./db"\|from "\./db"'</i> src</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c167"><code> 3 pass
+<pre class="cb-body" id="c173"><code> 3 pass
  1 todo
- 0 fail</code></pre>
-</div></div>
+ 0 fail
+
+src/importar.ts
+src/repositories/livroRepository.ts
+src/index.ts
+src/repositories/autorRepository.ts</code></pre>
+</div>
+<p>Só os repositórios (e os dois pontos de entrada, que chamam <code>createDb</code>).</p></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c168">copiar</button></div></div>
-<pre class="cb-body" id="c168"><code><i class="t-cmd">git</i> add src/repositories/autorRepository.ts src/services/autorService.ts
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 29: repositorio de autor, o SQL sai do servico"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c174">copiar</button></div></div>
+<pre class="cb-body" id="c174"><code><i class="t-cmd">git</i> add src/repositories/livroRepository.ts src/routes/livros.ts src/services/livroService.ts
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 30: repositorio de livro com perguntas de negocio"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase28</code>. Próxima fase: <code>git checkout fase30</code>, e <code>git diff fase29 fase30 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase29</code>. Próxima fase: <code>git checkout fase31</code>, e <code>git diff fase30 fase31 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

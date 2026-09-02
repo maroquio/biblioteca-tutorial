@@ -4,6 +4,10 @@ export const db = new Database("data/biblioteca.sqlite", { create: true });
 
 db.run("PRAGMA foreign_keys = ON;");
 
+// dois processos podem abrir este arquivo ao mesmo tempo — o servidor e o
+// teste. Sem isto o segundo leva SQLITE_BUSY na hora, em vez de esperar.
+db.run("PRAGMA busy_timeout = 5000;");
+
 // O id vai explícito de propósito: é ele que faz o INSERT OR IGNORE ser
 // idempotente, e é ele que os exemplos deste documento referenciam.
 // O ORCID é nulo para os quatro — três morreram antes de ele existir.

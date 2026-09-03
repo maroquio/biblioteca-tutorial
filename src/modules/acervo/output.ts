@@ -7,6 +7,7 @@ export type LivroJson = {
   isbn: string;
   titulo: string;
   autor: string;
+  livrosDoAutor: number;
   dataCatalogacao: string;
 };
 
@@ -17,6 +18,7 @@ export function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {
     isbn: livro.isbn.value,
     titulo: livro.titulo,
     autor: autor.nome,
+    livrosDoAutor: autor.livrosNoAcervo,
     dataCatalogacao: livro.dataCatalogacao,
   };
 }

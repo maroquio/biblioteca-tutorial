@@ -1,11 +1,15 @@
 import { TituloVazio } from "./errors";
 import type { LivroId, AutorId } from "./identifiers";
 import type { Isbn } from "./Isbn";
-import type { NumeroRegistro } from "./NumeroRegistro";
+import { NumeroRegistro } from "./NumeroRegistro";
+
+export function toIso(dia: Date): string {
+  return dia.toISOString().slice(0, 10);
+}
 
 export class Livro {
   constructor(
-    readonly id: LivroId,
+    readonly id: LivroId | null,
     readonly numeroRegistro: NumeroRegistro,
     readonly isbn: Isbn,
     readonly titulo: string,
@@ -15,6 +19,38 @@ export class Livro {
     if (Livro.normalizar(titulo) === "") {
       throw new TituloVazio();
     }
+  }
+
+  /** Um livro nasce por aqui — e nasce válido. */
+  static catalogar(
+    isbn: Isbn,
+    titulo: string,
+    autorId: AutorId,
+    hoje: Date,
+    catalogadosNoAno: number,
+  ): Livro {
+    const dia = toIso(hoje);
+
+    return new Livro(
+      null,
+      NumeroRegistro.proximo(dia.slice(0, 4), catalogadosNoAno),
+      isbn,
+      titulo,
+      autorId,
+      dia,
+    );
+  }
+
+  /** Quem atribui a identidade é a persistência; a entidade aceita sem virar mutável. */
+  withId(id: LivroId): Livro {
+    return new Livro(
+      id,
+      this.numeroRegistro,
+      this.isbn,
+      this.titulo,
+      this.autorId,
+      this.dataCatalogacao,
+    );
   }
 
   /** O que conta como "a mesma obra" é decisão do negócio, não do SQL. */

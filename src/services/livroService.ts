@@ -1,9 +1,8 @@
 import type { Autor } from "../domain/Autor";
-import type { Livro } from "../domain/Livro";
+import { Livro, toIso } from "../domain/Livro";
 import { AutorId } from "../domain/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { LimiteDeLivros } from "../domain/LimiteDeLivros";
-import { NumeroRegistro } from "../domain/NumeroRegistro";
 import { RuleConflict } from "../errors";
 import {
   contarCatalogadosNoAno,
@@ -42,15 +41,18 @@ export function cadastrarLivro(
     throw new RuleConflict("Este autor já tem um livro com este título");
   }
 
-  const hoje = new Date().toISOString().slice(0, 10);
-  const ano = hoje.slice(0, 4);
+  const hoje = new Date();
+  const ano = toIso(hoje).slice(0, 4);
 
-  const sequencial = contarCatalogadosNoAno(ano) + 1;
-  const numeroRegistro = new NumeroRegistro(
-    `${ano}-${String(sequencial).padStart(NumeroRegistro.DIGITOS_DO_SEQUENCIAL, "0")}`,
+  const livro = Livro.catalogar(
+    isbn,
+    titulo,
+    autorId,
+    hoje,
+    contarCatalogadosNoAno(ano),
   );
 
-  return { livro: insertLivro(numeroRegistro, isbn, titulo, autorId, hoje), autor };
+  return { livro: insertLivro(livro), autor };
 }
 
 export function buscarLivros(q: string): LivroComAutor[] {

@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { LivroId, AutorId } from "../domain/identifiers";
+import { db } from "../../../infrastructure/db";
+import { LivroId, AutorId } from "../../../shared/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { Livro } from "../domain/Livro";
 import type { LivroRepository } from "../domain/LivroRepository";

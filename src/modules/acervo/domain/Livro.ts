@@ -1,7 +1,13 @@
-import { TituloVazio } from "./errors";
-import type { LivroId, AutorId } from "./identifiers";
+import { InvalidValue } from "../../../shared/domain-errors";
+import type { LivroId, AutorId } from "../../../shared/identifiers";
 import type { Isbn } from "./Isbn";
 import { NumeroRegistro } from "./NumeroRegistro";
+
+export class TituloVazio extends InvalidValue {
+  constructor() {
+    super("O título do livro é obrigatório");
+  }
+}
 
 export function toIso(dia: Date): string {
   return dia.toISOString().slice(0, 10);

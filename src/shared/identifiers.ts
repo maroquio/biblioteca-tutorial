@@ -1,4 +1,4 @@
-import { InvalidValue } from "./errors";
+import { InvalidValue } from "./domain-errors";
 
 class Identifier {
   constructor(readonly value: number) {

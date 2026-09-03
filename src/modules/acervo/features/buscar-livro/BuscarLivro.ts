@@ -1,8 +1,8 @@
-import type { AutorRepository } from "../../domain/AutorRepository";
+import type { AutorRepository } from "../../../autoria/domain/AutorRepository";
 import { Isbn } from "../../domain/Isbn";
 import type { Livro } from "../../domain/Livro";
 import type { LivroRepository } from "../../domain/LivroRepository";
-import { livroToJson, type LivroJson } from "../../shared/output";
+import { livroToJson, type LivroJson } from "../../output";
 
 export class BuscarLivro {
   constructor(

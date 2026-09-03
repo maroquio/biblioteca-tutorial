@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { Autor } from "../src/domain/Autor";
-import { AutorId } from "../src/domain/identifiers";
-import { CadastrarLivro } from "../src/features/cadastrar-livro/CadastrarLivro";
+import { Autor } from "../src/modules/autoria/domain/Autor";
+import { AutorId } from "../src/shared/identifiers";
+import { CadastrarLivro } from "../src/modules/acervo/features/cadastrar-livro/CadastrarLivro";
 import { InMemoryAutorRepository, InMemoryLivroRepository } from "./doubles";
 
 const AUSTEN = 4;

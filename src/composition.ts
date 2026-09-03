@@ -1,8 +1,8 @@
 import type { Clock } from "./shared/Clock";
-import { SqliteAutorRepository } from "./infrastructure/SqliteAutorRepository";
-import { SqliteLivroRepository } from "./infrastructure/SqliteLivroRepository";
-import { BuscarLivro } from "./features/buscar-livro/BuscarLivro";
-import { CadastrarLivro } from "./features/cadastrar-livro/CadastrarLivro";
+import { SqliteAutorRepository } from "./modules/autoria/infrastructure/SqliteAutorRepository";
+import { SqliteLivroRepository } from "./modules/acervo/infrastructure/SqliteLivroRepository";
+import { BuscarLivro } from "./modules/acervo/features/buscar-livro/BuscarLivro";
+import { CadastrarLivro } from "./modules/acervo/features/cadastrar-livro/CadastrarLivro";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;

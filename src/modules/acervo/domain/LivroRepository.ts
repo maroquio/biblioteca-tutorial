@@ -1,4 +1,4 @@
-import type { AutorId } from "./identifiers";
+import type { AutorId } from "../../../shared/identifiers";
 import type { Isbn } from "./Isbn";
 import type { Livro } from "./Livro";
 

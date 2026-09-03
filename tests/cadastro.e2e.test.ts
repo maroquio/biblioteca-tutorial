@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test";
-import { db } from "../src/db";
+import { db } from "../src/infrastructure/db";
 
 const BASE = "http://localhost:3999";
 const AUSTEN = 4;

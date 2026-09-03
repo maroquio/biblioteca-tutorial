@@ -32,7 +32,7 @@ let server: ReturnType<typeof Bun.spawn>;
 
 beforeAll(async () => {
   // não há como exercitar a regra sem subir a aplicação inteira
-  server = Bun.spawn(["bun", "src/index.ts"], { stdout: "ignore" });
+  server = Bun.spawn(["bun", "src/main.ts"], { stdout: "ignore" });
 
   // ... e sem esperar a porta abrir
   for (let tentativa = 0; tentativa < 50; tentativa++) {

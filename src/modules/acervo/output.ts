@@ -1,4 +1,4 @@
-import type { Autor } from "../autoria/domain/Autor";
+import type { Autor } from "../autoria";
 import type { Livro } from "./domain/Livro";
 
 export type LivroJson = {

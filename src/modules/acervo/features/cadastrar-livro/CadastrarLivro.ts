@@ -1,4 +1,4 @@
-import type { AutorRepository } from "../../../autoria/domain/AutorRepository";
+import type { AutorRepository } from "../../../autoria";
 import type { Clock } from "../../../../shared/Clock";
 import { Livro, toIso } from "../../domain/Livro";
 import type { LivroRepository } from "../../domain/LivroRepository";

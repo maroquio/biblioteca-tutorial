@@ -7,7 +7,8 @@
     "dev": "bun --watch src/main.ts",
     "start": "bun src/main.ts",
     "test": "bun test",
-    "importar": "bun src/importar.ts"
+    "importar": "bun src/importar.ts",
+    "verificar": "bun scripts/check-boundaries.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

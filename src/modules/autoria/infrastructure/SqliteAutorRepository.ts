@@ -31,4 +31,12 @@ export class SqliteAutorRepository
 
     return autor === null ? null : { nome: autor.nome, tipo: autor.tipo };
   }
+
+  idsPorNome(termo: string): AutorId[] {
+    const rows = db
+      .query("SELECT id FROM autores WHERE nome LIKE ?")
+      .all(`%${termo}%`) as { id: number }[];
+
+    return rows.map((row) => new AutorId(row.id));
+  }
 }

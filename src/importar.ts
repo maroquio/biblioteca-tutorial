@@ -1,7 +1,9 @@
 import { buildUseCases } from "./composition";
-import { createDb } from "./infrastructure/db";
+import { createAcervoTables } from "./modules/acervo";
+import { createAutoriaTables } from "./modules/autoria";
 
-createDb();
+createAutoriaTables();
+createAcervoTables();
 
 const { cadastrarLivro } = buildUseCases();
 

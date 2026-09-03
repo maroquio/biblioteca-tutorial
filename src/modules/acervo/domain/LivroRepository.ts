@@ -16,7 +16,5 @@ export interface LivroRepository {
   findByIsbn(isbn: Isbn): Livro | null;
   findByAutorId(autorId: AutorId): Livro[];
   searchByTitulo(termo: string): Livro[];
-
-  // ⚠️ uma pergunta sobre AUTORES, feita ao repositório de LIVROS. Fase 50.
-  searchByNomeDoAutor(termo: string): Livro[];
+  findByAutorIds(autorIds: AutorId[]): Livro[];
 }

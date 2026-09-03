@@ -1,8 +1,10 @@
 import { buildUseCases } from "./composition";
-import { createDb } from "./infrastructure/db";
+import { createAcervoTables } from "./modules/acervo";
+import { createAutoriaTables } from "./modules/autoria";
 import { createServer } from "./server";
 
-createDb();
+createAutoriaTables();
+createAcervoTables();
 
 const server = createServer(buildUseCases());
 

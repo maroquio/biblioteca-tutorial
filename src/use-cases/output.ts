@@ -1,0 +1,22 @@
+import type { Autor } from "../domain/Autor";
+import type { Livro } from "../domain/Livro";
+
+export type LivroJson = {
+  id: number;
+  numeroRegistro: string;
+  isbn: string;
+  titulo: string;
+  autor: string;
+  dataCatalogacao: string;
+};
+
+export function livroToJson(livro: Livro, autor: Autor): LivroJson {
+  return {
+    id: livro.id!.value,
+    numeroRegistro: livro.numeroRegistro.value,
+    isbn: livro.isbn.value,
+    titulo: livro.titulo,
+    autor: autor.nome,
+    dataCatalogacao: livro.dataCatalogacao,
+  };
+}

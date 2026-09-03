@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "bun:test";
-import { db, createDb } from "../src/db";
+import { db, createDb } from "../src/infrastructure/db";
 
 const AUSTEN = 4;
 const LIVROS = [

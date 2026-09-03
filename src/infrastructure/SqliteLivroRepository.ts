@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db } from "./db";
 import { LivroId, AutorId } from "../domain/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { Livro } from "../domain/Livro";

@@ -5,8 +5,8 @@ import type { LivroRepository } from "../domain/LivroRepository";
 import { AutorId } from "../domain/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { LimiteDeLivros } from "../domain/LimiteDeLivros";
-import { NotFound, RuleConflict } from "../errors";
-import type { NovoLivro } from "../input";
+import { NotFound, RuleConflict } from "./errors";
+import type { NovoLivro } from "./input";
 import { livroToJson, type LivroJson } from "./output";
 
 export class CadastrarLivro {

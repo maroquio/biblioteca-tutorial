@@ -1,5 +1,5 @@
-import type { UseCases } from "../composition";
-import { parseBusca, parseNovoLivro } from "../input";
+import type { UseCases } from "../../composition";
+import { parseBusca, parseNovoLivro } from "../../application/input";
 import type { Route } from "../router";
 
 export function livroRoutes(useCases: UseCases): Route[] {

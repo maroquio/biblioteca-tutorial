@@ -1,6 +1,6 @@
 import { buildUseCases } from "./composition";
-import { createDb } from "./db";
-import { createServer } from "./server";
+import { createDb } from "./infrastructure/db";
+import { createServer } from "./presentation/server";
 
 createDb();
 

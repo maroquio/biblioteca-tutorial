@@ -1,8 +1,8 @@
 import type { Clock } from "./domain/Clock";
-import { SqliteAutorRepository } from "./repositories/SqliteAutorRepository";
-import { SqliteLivroRepository } from "./repositories/SqliteLivroRepository";
-import { BuscarLivro } from "./use-cases/BuscarLivro";
-import { CadastrarLivro } from "./use-cases/CadastrarLivro";
+import { SqliteAutorRepository } from "./infrastructure/SqliteAutorRepository";
+import { SqliteLivroRepository } from "./infrastructure/SqliteLivroRepository";
+import { BuscarLivro } from "./application/BuscarLivro";
+import { CadastrarLivro } from "./application/CadastrarLivro";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;

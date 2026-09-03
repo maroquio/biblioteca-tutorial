@@ -1,8 +1,9 @@
 import { Hono } from "hono";
-import { InvalidInput, NotFound, RuleConflict } from "../application/errors";
-import type { UseCases } from "../composition";
-import { DomainError, InvalidValue } from "../domain/errors";
-import { livroRoutes } from "./routes/livros";
+import type { UseCases } from "./composition";
+import { DomainError, InvalidValue } from "./domain/errors";
+import { register as registerBuscarLivro } from "./features/buscar-livro/route";
+import { register as registerCadastrarLivro } from "./features/cadastrar-livro/route";
+import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";
 
 function errorResponse(error: unknown): Response {
   if (error instanceof InvalidInput || error instanceof InvalidValue) {
@@ -27,7 +28,8 @@ export function createServer(useCases: UseCases, porta = 3000) {
 
   app.get("/", (contexto) => contexto.json({ message: "API da Biblioteca" }));
 
-  app.route("/", livroRoutes(useCases));
+  registerCadastrarLivro(app, useCases);
+  registerBuscarLivro(app, useCases);
 
   app.notFound((contexto) =>
     contexto.json({ error: "Recurso não encontrado" }, 404),

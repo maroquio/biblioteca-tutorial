@@ -7,5 +7,10 @@ export type {
   ConsultaDeAutoria,
   Tiragem,
 } from "./domain/ConsultaDeAutoria";
+export type {
+  AcervoEvent,
+  EventPublisher,
+  LivroCatalogado,
+} from "./domain/events";
 export type { LivroJson } from "./output";
 export { registerRoutes } from "./routes";

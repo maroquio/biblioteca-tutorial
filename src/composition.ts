@@ -6,6 +6,7 @@ import {
 } from "./modules/acervo";
 import { SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
+import { EventBus } from "./shared/EventBus";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
@@ -21,9 +22,10 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   const livros = new SqliteLivroRepository();
   const autores = new SqliteAutorRepository();
   const autoria = new AutoriaComoConsulta(autores);
+  const bus = new EventBus();
 
   return {
-    cadastrarLivro: new CadastrarLivro(livros, autoria, now),
+    cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
   };
 }

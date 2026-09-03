@@ -1,6 +1,10 @@
 import { expect, test } from "bun:test";
 import { CadastrarLivro } from "../src/modules/acervo/features/cadastrar-livro/CadastrarLivro";
-import { InMemoryAutoria, InMemoryLivroRepository } from "./doubles";
+import {
+  FakeEventPublisher,
+  InMemoryAutoria,
+  InMemoryLivroRepository,
+} from "./doubles";
 
 const AUSTEN = 4;
 const LIVROS = [
@@ -39,9 +43,12 @@ function scenario(hoje = new Date("2026-03-10")) {
     [EVANS]: { nome: "Eric Evans", tiragem: "ampla" },
   });
 
+  const events = new FakeEventPublisher();
+
   return {
     livros,
-    useCase: new CadastrarLivro(livros, autoria, () => hoje),
+    events,
+    useCase: new CadastrarLivro(livros, autoria, () => hoje, events),
   };
 }
 
@@ -91,8 +98,21 @@ test("RF07: o sequencial recomeça a cada ano", () => {
     [AUSTEN]: { nome: "Jane Austen", tiragem: "curta" },
   });
 
-  const em2026 = new CadastrarLivro(livros, autoria, () => new Date("2026-12-31"));
-  const em2027 = new CadastrarLivro(livros, autoria, () => new Date("2027-01-02"));
+  const events = new FakeEventPublisher();
+
+  const em2026 = new CadastrarLivro(
+    livros,
+    autoria,
+    () => new Date("2026-12-31"),
+    events,
+  );
+
+  const em2027 = new CadastrarLivro(
+    livros,
+    autoria,
+    () => new Date("2027-01-02"),
+    events,
+  );
 
   expect(em2026.execute(deAusten(0)).numeroRegistro).toBe("2026-000001");
   expect(em2027.execute(deAusten(1)).numeroRegistro).toBe("2027-000001");
@@ -118,4 +138,19 @@ test("RF09: o mesmo autor não repete título, mesmo com outro ISBN", () => {
       autorId: AUSTEN,
     }),
   ).toThrow("Este autor já tem um livro com este título");
+});
+
+test("o cadastro anuncia LivroCatalogado", () => {
+  const { useCase, events } = scenario();
+
+  useCase.execute(deAusten(0));
+
+  expect(events.published).toEqual([
+    {
+      nome: "LivroCatalogado",
+      autorId: AUSTEN,
+      numeroRegistro: "2026-000001",
+      em: "2026-03-10",
+    },
+  ]);
 });

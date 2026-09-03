@@ -5,6 +5,10 @@ import type {
 import { AutorId, LivroId } from "../src/shared/identifiers";
 import type { Isbn } from "../src/modules/acervo/domain/Isbn";
 import type { Livro } from "../src/modules/acervo/domain/Livro";
+import type {
+  AcervoEvent,
+  EventPublisher,
+} from "../src/modules/acervo/domain/events";
 import type { LivroRepository } from "../src/modules/acervo/domain/LivroRepository";
 
 export class InMemoryLivroRepository implements LivroRepository {
@@ -61,5 +65,13 @@ export class InMemoryAutoria implements ConsultaDeAutoria {
     return Object.entries(this.items)
       .filter(([, autor]) => autor.nome.toLowerCase().includes(alvo))
       .map(([id]) => new AutorId(Number(id)));
+  }
+}
+
+export class FakeEventPublisher implements EventPublisher {
+  readonly published: AcervoEvent[] = [];
+
+  publish(event: AcervoEvent): void {
+    this.published.push(event);
   }
 }

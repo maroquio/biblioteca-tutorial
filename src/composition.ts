@@ -1,3 +1,4 @@
+import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
   BuscarLivro,
   CadastrarLivro,
@@ -19,9 +20,10 @@ export type UseCases = {
 export function buildUseCases(now: Clock = () => new Date()): UseCases {
   const livros = new SqliteLivroRepository();
   const autores = new SqliteAutorRepository();
+  const autoria = new AutoriaComoConsulta(autores);
 
   return {
-    cadastrarLivro: new CadastrarLivro(livros, autores, now),
-    buscarLivro: new BuscarLivro(livros, autores),
+    cadastrarLivro: new CadastrarLivro(livros, autoria, now),
+    buscarLivro: new BuscarLivro(livros, autoria),
   };
 }

@@ -1,8 +1,6 @@
 import { expect, test } from "bun:test";
-import { Autor } from "../src/modules/autoria/domain/Autor";
-import { AutorId } from "../src/shared/identifiers";
 import { CadastrarLivro } from "../src/modules/acervo/features/cadastrar-livro/CadastrarLivro";
-import { InMemoryAutorRepository, InMemoryLivroRepository } from "./doubles";
+import { InMemoryAutoria, InMemoryLivroRepository } from "./doubles";
 
 const AUSTEN = 4;
 const LIVROS = [
@@ -36,14 +34,14 @@ const deEvans = (n: number) => ({
 function scenario(hoje = new Date("2026-03-10")) {
   const livros = new InMemoryLivroRepository();
 
-  const autores = new InMemoryAutorRepository([
-    new Autor(new AutorId(AUSTEN), "Jane Austen", "literatura"),
-    new Autor(new AutorId(EVANS), "Eric Evans", "didatico"),
-  ]);
+  const autoria = new InMemoryAutoria({
+    [AUSTEN]: { nome: "Jane Austen", tiragem: "curta" },
+    [EVANS]: { nome: "Eric Evans", tiragem: "ampla" },
+  });
 
   return {
     livros,
-    useCase: new CadastrarLivro(livros, autores, () => hoje),
+    useCase: new CadastrarLivro(livros, autoria, () => hoje),
   };
 }
 
@@ -89,21 +87,12 @@ test("RF06 e RF07: a data e o número de registro vêm do servidor, sequenciais 
 test("RF07: o sequencial recomeça a cada ano", () => {
   const { livros } = scenario();
 
-  const em2026 = new CadastrarLivro(
-    livros,
-    new InMemoryAutorRepository([
-      new Autor(new AutorId(AUSTEN), "Jane Austen", "literatura"),
-    ]),
-    () => new Date("2026-12-31"),
-  );
+  const autoria = new InMemoryAutoria({
+    [AUSTEN]: { nome: "Jane Austen", tiragem: "curta" },
+  });
 
-  const em2027 = new CadastrarLivro(
-    livros,
-    new InMemoryAutorRepository([
-      new Autor(new AutorId(AUSTEN), "Jane Austen", "literatura"),
-    ]),
-    () => new Date("2027-01-02"),
-  );
+  const em2026 = new CadastrarLivro(livros, autoria, () => new Date("2026-12-31"));
+  const em2027 = new CadastrarLivro(livros, autoria, () => new Date("2027-01-02"));
 
   expect(em2026.execute(deAusten(0)).numeroRegistro).toBe("2026-000001");
   expect(em2027.execute(deAusten(1)).numeroRegistro).toBe("2027-000001");

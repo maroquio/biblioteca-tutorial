@@ -1,5 +1,7 @@
-import type { Autor } from "../src/modules/autoria/domain/Autor";
-import type { AutorRepository } from "../src/modules/autoria/domain/AutorRepository";
+import type {
+  AutorConhecido,
+  ConsultaDeAutoria,
+} from "../src/modules/acervo/domain/ConsultaDeAutoria";
 import { LivroId, type AutorId } from "../src/shared/identifiers";
 import type { Isbn } from "../src/modules/acervo/domain/Isbn";
 import type { Livro } from "../src/modules/acervo/domain/Livro";
@@ -46,10 +48,10 @@ export class InMemoryLivroRepository implements LivroRepository {
   }
 }
 
-export class InMemoryAutorRepository implements AutorRepository {
-  constructor(private readonly items: Autor[]) {}
+export class InMemoryAutoria implements ConsultaDeAutoria {
+  constructor(private readonly items: Record<number, AutorConhecido>) {}
 
-  findById(autorId: AutorId): Autor | null {
-    return this.items.find((item) => item.id.equals(autorId)) ?? null;
+  autor(autorId: AutorId): AutorConhecido | null {
+    return this.items[autorId.value] ?? null;
   }
 }

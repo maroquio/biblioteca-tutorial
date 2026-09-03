@@ -1,5 +1,5 @@
-import type { TipoDeAutor } from "../../autoria";
 import { RuleViolation } from "../../../shared/domain-errors";
+import type { Tiragem } from "./ConsultaDeAutoria";
 
 export class LimiteDeLivrosExcedido extends RuleViolation {
   constructor(limite: number) {
@@ -13,17 +13,17 @@ export class LimiteDeLivrosExcedido extends RuleViolation {
  * deve conhecer — os livros dele. Por isso vive sozinha.
  */
 export class LimiteDeLivros {
-  private static readonly POR_TIPO: Record<TipoDeAutor, number> = {
-    literatura: 5,
-    didatico: 10,
+  private static readonly POR_TIRAGEM: Record<Tiragem, number> = {
+    curta: 5,
+    ampla: 10,
   };
 
-  static para(tipo: TipoDeAutor): number {
-    return LimiteDeLivros.POR_TIPO[tipo];
+  static para(tiragem: Tiragem): number {
+    return LimiteDeLivros.POR_TIRAGEM[tiragem];
   }
 
-  static verificar(tipo: TipoDeAutor, noAcervo: number): void {
-    const limite = LimiteDeLivros.para(tipo);
+  static verificar(tiragem: Tiragem, noAcervo: number): void {
+    const limite = LimiteDeLivros.para(tiragem);
 
     if (noAcervo >= limite) {
       throw new LimiteDeLivrosExcedido(limite);

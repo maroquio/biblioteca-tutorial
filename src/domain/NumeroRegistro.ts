@@ -14,6 +14,16 @@ export class NumeroRegistro {
     this.value = raw;
   }
 
+  /** O número de registro nasce por aqui: ano da catalogação + sequencial daquele ano. */
+  static proximo(ano: string, catalogadosNoAno: number): NumeroRegistro {
+    const sequencial = String(catalogadosNoAno + 1).padStart(
+      NumeroRegistro.DIGITOS_DO_SEQUENCIAL,
+      "0",
+    );
+
+    return new NumeroRegistro(`${ano}-${sequencial}`);
+  }
+
   toString(): string {
     return this.value;
   }

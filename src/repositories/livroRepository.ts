@@ -43,14 +43,6 @@ export function contarCatalogadosNoAno(ano: string): number {
   return row.total;
 }
 
-export function findLivroById(id: LivroId): Livro | null {
-  const row = db.query("SELECT * FROM livros WHERE id = ?").get(id.value) as
-    | LivroRow
-    | null;
-
-  return row === null ? null : toLivro(row);
-}
-
 export function findLivroByIsbn(isbn: Isbn): Livro | null {
   const row = db.query("SELECT * FROM livros WHERE isbn = ?").get(isbn.value) as
     | LivroRow
@@ -67,20 +59,20 @@ export function findLivrosByAutorId(autorId: AutorId): Livro[] {
   return rows.map(toLivro);
 }
 
-export function insertLivro(
-  numeroRegistro: NumeroRegistro,
-  isbn: Isbn,
-  titulo: string,
-  autorId: AutorId,
-  dataCatalogacao: string,
-): Livro {
+export function insertLivro(livro: Livro): Livro {
   const result = db.run(
     `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
      VALUES (?, ?, ?, ?, ?)`,
-    [numeroRegistro.value, isbn.value, titulo, autorId.value, dataCatalogacao],
+    [
+      livro.numeroRegistro.value,
+      livro.isbn.value,
+      livro.titulo,
+      livro.autorId.value,
+      livro.dataCatalogacao,
+    ],
   );
 
-  return findLivroById(new LivroId(Number(result.lastInsertRowid)))!;
+  return livro.withId(new LivroId(Number(result.lastInsertRowid)));
 }
 
 export function searchLivrosPorTitulo(termo: string): Livro[] {

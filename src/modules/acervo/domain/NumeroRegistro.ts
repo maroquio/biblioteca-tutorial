@@ -1,4 +1,4 @@
-import { InvalidValue } from "./errors";
+import { InvalidValue } from "../../../shared/domain-errors";
 
 export class NumeroRegistro {
   /** O formato do número de registro é decisão do negócio, não do banco. */

@@ -1,9 +1,9 @@
-import type { Autor } from "../src/domain/Autor";
-import type { AutorRepository } from "../src/domain/AutorRepository";
-import { LivroId, type AutorId } from "../src/domain/identifiers";
-import type { Isbn } from "../src/domain/Isbn";
-import type { Livro } from "../src/domain/Livro";
-import type { LivroRepository } from "../src/domain/LivroRepository";
+import type { Autor } from "../src/modules/autoria/domain/Autor";
+import type { AutorRepository } from "../src/modules/autoria/domain/AutorRepository";
+import { LivroId, type AutorId } from "../src/shared/identifiers";
+import type { Isbn } from "../src/modules/acervo/domain/Isbn";
+import type { Livro } from "../src/modules/acervo/domain/Livro";
+import type { LivroRepository } from "../src/modules/acervo/domain/LivroRepository";
 
 export class InMemoryLivroRepository implements LivroRepository {
   private items: Livro[] = [];

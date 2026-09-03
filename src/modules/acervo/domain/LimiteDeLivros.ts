@@ -1,5 +1,5 @@
-import type { TipoDeAutor } from "./Autor";
-import { RuleViolation } from "./errors";
+import type { TipoDeAutor } from "../../autoria/domain/Autor";
+import { RuleViolation } from "../../../shared/domain-errors";
 
 export class LimiteDeLivrosExcedido extends RuleViolation {
   constructor(limite: number) {

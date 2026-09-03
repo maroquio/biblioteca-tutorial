@@ -1,5 +1,5 @@
 import type { Hono } from "hono";
-import type { UseCases } from "../../composition";
+import type { UseCases } from "../../../../composition";
 import { parseNovoLivro } from "./input";
 
 export function register(routes: Hono, useCases: UseCases): void {

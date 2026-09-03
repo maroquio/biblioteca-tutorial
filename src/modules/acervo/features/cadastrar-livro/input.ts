@@ -1,4 +1,4 @@
-import { getBodyAsObject, getFieldAsPositiveInt, getFieldAsText } from "../../shared/validation";
+import { getBodyAsObject, getFieldAsPositiveInt, getFieldAsText } from "../../../../shared/validation";
 
 export type NovoLivro = {
   isbn: string;

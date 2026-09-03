@@ -1,4 +1,4 @@
-import { InvalidValue } from "./errors";
+import { InvalidValue } from "../../../shared/domain-errors";
 
 export class Isbn {
   readonly value: string;

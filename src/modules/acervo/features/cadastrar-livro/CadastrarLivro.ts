@@ -1,13 +1,13 @@
-import type { AutorRepository } from "../../domain/AutorRepository";
-import type { Clock } from "../../shared/Clock";
+import type { AutorRepository } from "../../../autoria/domain/AutorRepository";
+import type { Clock } from "../../../../shared/Clock";
 import { Livro, toIso } from "../../domain/Livro";
 import type { LivroRepository } from "../../domain/LivroRepository";
-import { AutorId } from "../../domain/identifiers";
+import { AutorId } from "../../../../shared/identifiers";
 import { Isbn } from "../../domain/Isbn";
 import { LimiteDeLivros } from "../../domain/LimiteDeLivros";
-import { NotFound, RuleConflict } from "../../shared/errors";
+import { NotFound, RuleConflict } from "../../../../shared/errors";
 import type { NovoLivro } from "./input";
-import { livroToJson, type LivroJson } from "../../shared/output";
+import { livroToJson, type LivroJson } from "../../output";
 
 export class CadastrarLivro {
   constructor(

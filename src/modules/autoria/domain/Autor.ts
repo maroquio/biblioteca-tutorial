@@ -1,4 +1,4 @@
-import type { AutorId } from "./identifiers";
+import type { AutorId } from "../../../shared/identifiers";
 
 export type TipoDeAutor = "literatura" | "didatico";
 

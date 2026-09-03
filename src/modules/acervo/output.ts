@@ -1,5 +1,5 @@
-import type { Autor } from "../domain/Autor";
-import type { Livro } from "../domain/Livro";
+import type { Autor } from "../autoria/domain/Autor";
+import type { Livro } from "./domain/Livro";
 
 export type LivroJson = {
   id: number;

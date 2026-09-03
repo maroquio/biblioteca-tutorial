@@ -1,7 +1,7 @@
-import { db } from "./db";
+import { db } from "../../../infrastructure/db";
 import { Autor, type TipoDeAutor } from "../domain/Autor";
 import type { AutorRepository } from "../domain/AutorRepository";
-import { AutorId } from "../domain/identifiers";
+import { AutorId } from "../../../shared/identifiers";
 
 type AutorRow = {
   id: number;

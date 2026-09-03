@@ -1,5 +1,7 @@
 import { beforeEach, expect, test } from "bun:test";
-import { db, createDb } from "../src/infrastructure/db";
+import { db } from "../src/infrastructure/db";
+import { createAcervoTables } from "../src/modules/acervo";
+import { createAutoriaTables } from "../src/modules/autoria";
 
 const AUSTEN = 4;
 const LIVROS = [
@@ -11,7 +13,8 @@ const LIVROS = [
   { isbn: "9780141199689", titulo: "Lady Susan" },
 ];
 
-createDb();
+createAutoriaTables();
+createAcervoTables();
 
 beforeEach(() => {
   db.run("DELETE FROM livros");

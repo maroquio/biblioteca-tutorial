@@ -9,4 +9,5 @@ export type ResumoDoAutor = {
 /** Contrato de leitura publicado pela Autoria, no vocabulário da Autoria. */
 export interface ConsultaDeAutores {
   resumo(autorId: AutorId): ResumoDoAutor | null;
+  idsPorNome(termo: string): AutorId[];
 }

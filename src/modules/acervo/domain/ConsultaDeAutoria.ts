@@ -15,4 +15,5 @@ export type AutorConhecido = {
 /** Port de saída: tudo o que o Acervo precisa saber sobre um autor. */
 export interface ConsultaDeAutoria {
   autor(autorId: AutorId): AutorConhecido | null;
+  idsPorNome(termo: string): AutorId[];
 }

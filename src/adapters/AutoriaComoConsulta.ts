@@ -20,4 +20,8 @@ export class AutoriaComoConsulta implements ConsultaDeAutoria {
       tiragem: resumo.tipo === "didatico" ? "ampla" : "curta",
     };
   }
+
+  idsPorNome(termo: string): AutorId[] {
+    return this.autores.idsPorNome(termo);
+  }
 }

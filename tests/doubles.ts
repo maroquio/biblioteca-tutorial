@@ -2,7 +2,7 @@ import type {
   AutorConhecido,
   ConsultaDeAutoria,
 } from "../src/modules/acervo/domain/ConsultaDeAutoria";
-import { LivroId, type AutorId } from "../src/shared/identifiers";
+import { AutorId, LivroId } from "../src/shared/identifiers";
 import type { Isbn } from "../src/modules/acervo/domain/Isbn";
 import type { Livro } from "../src/modules/acervo/domain/Livro";
 import type { LivroRepository } from "../src/modules/acervo/domain/LivroRepository";
@@ -41,10 +41,10 @@ export class InMemoryLivroRepository implements LivroRepository {
     return this.items.filter((item) => item.titulo.toLowerCase().includes(alvo));
   }
 
-  searchByNomeDoAutor(_termo: string): Livro[] {
-    // ⚠️ o dublê não sabe responder: esta é uma pergunta sobre AUTORES, e um
-    // repositório de livros em memória não tem como conhecê-los. Fase 50.
-    throw new Error("searchByNomeDoAutor não tem como ser respondido em memória");
+  findByAutorIds(autorIds: AutorId[]): Livro[] {
+    return this.items.filter((item) =>
+      autorIds.some((autorId) => item.autorId.equals(autorId)),
+    );
   }
 }
 
@@ -53,5 +53,13 @@ export class InMemoryAutoria implements ConsultaDeAutoria {
 
   autor(autorId: AutorId): AutorConhecido | null {
     return this.items[autorId.value] ?? null;
+  }
+
+  idsPorNome(termo: string): AutorId[] {
+    const alvo = termo.toLowerCase();
+
+    return Object.entries(this.items)
+      .filter(([, autor]) => autor.nome.toLowerCase().includes(alvo))
+      .map(([id]) => new AutorId(Number(id)));
   }
 }

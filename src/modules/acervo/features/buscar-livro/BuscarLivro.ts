@@ -21,8 +21,10 @@ export class BuscarLivro {
 
     if (porTitulo.length > 0) return porTitulo.map((l) => this.comAutor(l));
 
-    // ⚠️ a pergunta que não é do acervo. Fase 50.
-    return this.livros.searchByNomeDoAutor(q).map((l) => this.comAutor(l));
+    // pergunta à autoria QUEM bate com o nome, e filtra os próprios livros
+    const autorIds = this.autoria.idsPorNome(q);
+
+    return this.livros.findByAutorIds(autorIds).map((l) => this.comAutor(l));
   }
 
   private comAutor(livro: Livro): LivroJson {

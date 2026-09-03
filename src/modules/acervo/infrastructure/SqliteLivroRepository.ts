@@ -85,15 +85,13 @@ export class SqliteLivroRepository implements LivroRepository {
     return rows.map(toLivro);
   }
 
-  // ⚠️ ainda lê a tabela do outro lado da fronteira. Fase 50.
-  searchByNomeDoAutor(termo: string): Livro[] {
+  findByAutorIds(autorIds: AutorId[]): Livro[] {
+    if (autorIds.length === 0) return [];
+
+    const placeholders = autorIds.map(() => "?").join(", ");
     const rows = db
-      .query(
-        `SELECT livros.* FROM livros
-           JOIN autores ON autores.id = livros.autor_id
-          WHERE autores.nome LIKE ?`,
-      )
-      .all(`%${termo}%`) as LivroRow[];
+      .query(`SELECT * FROM livros WHERE autor_id IN (${placeholders})`)
+      .all(...autorIds.map((autorId) => autorId.value)) as LivroRow[];
 
     return rows.map(toLivro);
   }

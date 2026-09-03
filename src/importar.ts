@@ -1,7 +1,13 @@
 import { createDb } from "./db";
+import { SqliteAutorRepository } from "./repositories/SqliteAutorRepository";
+import { SqliteLivroRepository } from "./repositories/SqliteLivroRepository";
 import { cadastrarLivro } from "./services/livroService";
 
 createDb();
+
+// ⚠️ o mesmo defeito proposital da rota: some na fase 42.
+const livros = new SqliteLivroRepository();
+const autores = new SqliteAutorRepository();
 
 const path = process.argv[2];
 
@@ -20,7 +26,7 @@ for (const row of rows) {
   const [isbn, titulo, autorId] = row.split(",") as [string, string, string];
 
   try {
-    cadastrarLivro(isbn, titulo, Number(autorId));
+    cadastrarLivro(livros, autores, isbn, titulo, Number(autorId));
     importados++;
   } catch (error) {
     console.log(`linha rejeitada (${(error as Error).message}): ${row}`);

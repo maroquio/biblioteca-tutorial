@@ -1,8 +1,15 @@
 import type { Autor } from "../domain/Autor";
 import type { Livro } from "../domain/Livro";
 import { parseBusca, parseNovoLivro } from "../input";
+import { SqliteAutorRepository } from "../repositories/SqliteAutorRepository";
+import { SqliteLivroRepository } from "../repositories/SqliteLivroRepository";
 import type { Route } from "../router";
 import { buscarLivros, cadastrarLivro } from "../services/livroService";
+
+// ⚠️ defeito proposital: a rota não deveria escolher a implementação.
+// Isto some na fase 42, quando o composition root existir.
+const livros = new SqliteLivroRepository();
+const autores = new SqliteAutorRepository();
 
 function toJson(livro: Livro, autor: Autor) {
   return {
@@ -22,7 +29,13 @@ export const livroRoutes: Route[] = [
     handler: async (request) => {
       const data = parseNovoLivro(await request.json());
 
-      const { livro, autor } = cadastrarLivro(data.isbn, data.titulo, data.autorId);
+      const { livro, autor } = cadastrarLivro(
+        livros,
+        autores,
+        data.isbn,
+        data.titulo,
+        data.autorId,
+      );
 
       return Response.json(toJson(livro, autor), {
         status: 201,
@@ -35,8 +48,8 @@ export const livroRoutes: Route[] = [
     pattern: "/livros/:q",
     handler: (_request, params) =>
       Response.json(
-        buscarLivros(parseBusca(params)).map(({ livro, autor }) =>
-          toJson(livro, autor),
+        buscarLivros(livros, autores, parseBusca(params)).map(
+          ({ livro, autor }) => toJson(livro, autor),
         ),
       ),
   },

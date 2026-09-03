@@ -1,10 +1,10 @@
 import type { Autor } from "../domain/Autor";
+import type { AutorRepository } from "../domain/AutorRepository";
 import type { AutorId } from "../domain/identifiers";
 import { NotFound } from "../errors";
-import { findAutorById } from "../repositories/autorRepository";
 
-export function buscarAutor(autorId: AutorId): Autor {
-  const autor = findAutorById(autorId);
+export function buscarAutor(autores: AutorRepository, autorId: AutorId): Autor {
+  const autor = autores.findById(autorId);
 
   if (!autor) {
     throw new NotFound("Autor não cadastrado");

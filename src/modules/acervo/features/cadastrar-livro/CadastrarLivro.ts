@@ -1,5 +1,6 @@
 import type { Clock } from "../../../../shared/Clock";
 import type { ConsultaDeAutoria } from "../../domain/ConsultaDeAutoria";
+import type { EventPublisher } from "../../domain/events";
 import { Livro, toIso } from "../../domain/Livro";
 import type { LivroRepository } from "../../domain/LivroRepository";
 import { AutorId } from "../../../../shared/identifiers";
@@ -14,6 +15,7 @@ export class CadastrarLivro {
     private readonly livros: LivroRepository,
     private readonly autoria: ConsultaDeAutoria,
     private readonly now: Clock,
+    private readonly events: EventPublisher,
   ) {}
 
   execute(input: NovoLivro): LivroJson {
@@ -55,6 +57,13 @@ export class CadastrarLivro {
         this.livros.contarCatalogadosNoAno(ano),
       ),
     );
+
+    this.events.publish({
+      nome: "LivroCatalogado",
+      autorId: livro.autorId.value,
+      numeroRegistro: livro.numeroRegistro.value,
+      em: livro.dataCatalogacao,
+    });
 
     return livroToJson(livro, autor);
   }

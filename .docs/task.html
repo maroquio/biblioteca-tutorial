@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fase 41 de 53 — O caso de uso BuscarLivro, e o fim da pasta services</title>
+<title>Fase 42 de 53 — Composition root — ninguém mais escolhe a implementação</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 <style>
 
@@ -211,126 +211,405 @@ body.solo{background:var(--bg)}
 <body class="solo">
 <div class="solo-wrap">
 <div class="faixa">
-  <span class="pos">Fase 41 de 53</span>
+  <span class="pos">Fase 42 de 53</span>
   <span class="marco">Ports, casos de uso, payoff</span>
-  <span class="br">branch <code>fase41</code></span>
+  <span class="br">branch <code>fase42</code></span>
 </div>
-<article class="fase" id="fase-41">
+<article class="fase" id="fase-42">
 <header class="fase-head">
-  <div class="fase-n">41</div>
-  <div class="fase-t"><h2>O caso de uso <code>BuscarLivro</code>, e o fim da pasta <code>services</code></h2></div>
+  <div class="fase-n">42</div>
+  <div class="fase-t"><h2>Composition root — ninguém mais escolhe a implementação</h2></div>
 </header>
 <div class="fase-body">
   <div class="step objetivo"><h3>🎯 Objetivo</h3>
-<p>Repetir o padrão para a operação de consulta. Fase mecânica, mas é ela que faz a pasta <code>src/services</code> deixar de existir: <strong>toda</strong> operação do sistema passa a ser um caso de uso com nome de requisito.</p></div>
-  
-  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Um caso de uso novo, e a pasta <code>src/services</code> desaparece. A rota da busca vira três linhas.</p>
+<p>Recolher todos os <code>new Sqlite...</code> espalhados pelas rotas para um único arquivo, e transformar as rotas em funções que <strong>recebem</strong> os casos de uso.</p></div>
+  <figure class="diagram" id="dg-fase-42-arquitetura"><div class="diagram-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" class="dg" preserveAspectRatio="xMidYMid meet">
+  <style> #dg-fase-42-arquitetura text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; } #dg-fase-42-arquitetura .t {fill:#111827} #dg-fase-42-arquitetura .s {fill:#6b7280}</style>
+  <defs>
+    <marker id="fase-42-arquitetura__a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="fase-42-arquitetura__b-blue" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+    <marker id="fase-42-arquitetura__a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="fase-42-arquitetura__b-red" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#dc2626"/></marker>
+    <marker id="fase-42-arquitetura__a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="fase-42-arquitetura__b-green" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#16a34a"/></marker>
+    <marker id="fase-42-arquitetura__a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="fase-42-arquitetura__b-purple" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#9333ea"/></marker>
+    <marker id="fase-42-arquitetura__a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="fase-42-arquitetura__b-orange" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+    <marker id="fase-42-arquitetura__a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+    <marker id="fase-42-arquitetura__b-gray" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+    <marker id="fase-42-arquitetura__tri" markerWidth="14" markerHeight="12" refX="13" refY="6" orient="auto"><polygon points="0 0, 13 6, 0 12" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-42-arquitetura__dia-open" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#ffffff" stroke="#6b7280" stroke-width="1.3"/></marker>
+    <marker id="fase-42-arquitetura__dia-full" markerWidth="16" markerHeight="10" refX="15" refY="5" orient="auto"><polygon points="0 5, 8 0, 15 5, 8 10" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="980" height="520" fill="#ffffff"/>
+  <text x="40" y="42" class="t" font-size="18" font-weight="600">Fase 42 — composition root — ninguém mais escolhe a implementação</text>
+  <text x="40" y="64" class="s" font-size="13">Um único arquivo sabe, ao mesmo tempo, que existem casos de uso e que existe SQLite.</text>
+  <rect x="400" y="106" width="240" height="62" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="520.0" y="134.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">main.ts</text>
+  <text x="520.0" y="152.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">ponto de entrada</text>
+  <rect x="380" y="200" width="280" height="76" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.5"/>
+  <text x="520.0" y="235.0" font-size="14" text-anchor="middle" fill="#111827" font-weight="600">composition.ts</text>
+  <text x="520.0" y="253.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">buildUseCases()</text>
+  <line x1="520" y1="168" x2="520" y2="196" stroke="#6b7280" stroke-width="1.6" marker-end="url(#fase-42-arquitetura__a-gray)"/>
+  <rect x="80" y="330" width="230" height="66" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="195.0" y="368.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">CadastrarLivro</text>
+  <rect x="375" y="330" width="230" height="66" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="490.0" y="368.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">BuscarLivro</text>
+  <rect x="670" y="330" width="250" height="66" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="795.0" y="360.0" font-size="13" text-anchor="middle" fill="#111827" font-weight="600">Sqlite...Repository</text>
+  <text x="795.0" y="378.0" font-size="11.5" text-anchor="middle" fill="#6b7280" font-weight="400">as duas linhas que mudam</text>
+  <line x1="440" y1="276" x2="240" y2="326" stroke="#9333ea" stroke-width="1.6" marker-end="url(#fase-42-arquitetura__a-purple)"/>
+  <line x1="500" y1="276" x2="480" y2="326" stroke="#9333ea" stroke-width="1.6" marker-end="url(#fase-42-arquitetura__a-purple)"/>
+  <line x1="600" y1="276" x2="750" y2="326" stroke="#9333ea" stroke-width="1.6" marker-end="url(#fase-42-arquitetura__a-purple)"/>
+  <rect x="80" y="428" width="840" height="76" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.5"/>
+  <text x="500" y="454" font-size="13" text-anchor="middle" fill="#9333ea" font-weight="700">Quantas linhas eu preciso mudar para este sistema rodar em PostgreSQL?   Duas.</text>
+  <text x="500" y="478" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">Nada de domínio, nada de caso de uso, nada de rota. É a primeira vez no percurso em que a resposta é um número pequeno.</text>
+  <text x="500" y="496" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="400">E a unidade de trabalho, anotada como buraco na fase 16, teria endereço aqui: um decorador em volta de execute().</text>
+</svg></div><figcaption>Arquitetura da fase 42</figcaption></figure>
+  <div class="step"><h3>👨‍💻 O que você digita</h3><p>Quatro peças:</p>
+<ul><li><code>src/composition.ts</code> — o único arquivo que sabe, ao mesmo tempo, que existem casos de uso e que existe SQLite;</li><li><code>src/server.ts</code> — recebe <code>UseCases</code> e monta o <code>Bun.serve</code>;</li><li><code>src/main.ts</code> — o ponto de entrada;</li><li>as rotas viram <code>livroRoutes(useCases)</code>.</li></ul>
+<p><code>src/index.ts</code> deixa de existir; os scripts do <code>package.json</code> e o teste e2e passam a apontar para <code>src/main.ts</code>.</p>
 
-<p><strong><code>src/use-cases/BuscarLivro.ts</code></strong> — arquivo novo</p>
+<p><strong><code>src/composition.ts</code></strong> — arquivo novo</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c504">copiar</button></div></div>
-<pre class="cb-body" id="c504"><code><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">AutorRepository</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/AutorRepository"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">Isbn</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/Isbn"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Livro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/Livro"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">LivroRepository</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../domain/LivroRepository"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-pun">{</i> livroToJson<i class="t-pun">,</i> <i class="t-kw">type</i> <i class="t-typ">LivroJson</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./output"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c506">copiar</button></div></div>
+<pre class="cb-body" id="c506"><code><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Clock</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./domain/Clock"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">SqliteAutorRepository</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./repositories/SqliteAutorRepository"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">SqliteLivroRepository</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./repositories/SqliteLivroRepository"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">BuscarLivro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./use-cases/BuscarLivro"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">CadastrarLivro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./use-cases/CadastrarLivro"</i><i class="t-pun">;</i>
 
-<i class="t-kw">export</i> <i class="t-kw">class</i> <i class="t-typ">BuscarLivro</i> <i class="t-pun">{</i>
-  <i class="t-kw">constructor</i><i class="t-pun">(</i>
-    <i class="t-kw">private</i> <i class="t-kw">readonly</i> livros<i class="t-pun">:</i> <i class="t-typ">LivroRepository</i><i class="t-pun">,</i>
-    <i class="t-kw">private</i> <i class="t-kw">readonly</i> autores<i class="t-pun">:</i> <i class="t-typ">AutorRepository</i><i class="t-pun">,</i>
-  <i class="t-pun">)</i> <i class="t-pun">{</i><i class="t-pun">}</i>
+<i class="t-kw">export</i> <i class="t-kw">type</i> <i class="t-typ">UseCases</i> <i class="t-pun">=</i> <i class="t-pun">{</i>
+  cadastrarLivro<i class="t-pun">:</i> <i class="t-typ">CadastrarLivro</i><i class="t-pun">;</i>
+  buscarLivro<i class="t-pun">:</i> <i class="t-typ">BuscarLivro</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">;</i>
 
-  <i class="t-fn">execute</i><i class="t-pun">(</i>q<i class="t-pun">:</i> <i class="t-typ">string</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroJson</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i>
-    <i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-typ">Isbn</i><i class="t-pun">.</i><i class="t-fn">isValid</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">{</i>
-      <i class="t-kw">const</i> porIsbn <i class="t-pun">=</i> <i class="t-kw">this</i><i class="t-pun">.</i>livros<i class="t-pun">.</i><i class="t-fn">findByIsbn</i><i class="t-pun">(</i><i class="t-kw">new</i> <i class="t-typ">Isbn</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-com">/**
+ * Composition root: este é o ÚNICO lugar do sistema que sabe, ao mesmo tempo,
+ * que existem casos de uso e que existe SQLite. Trocar de banco é trocar as
+ * duas linhas de `new Sqlite...` daqui.
+ */</i>
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">buildUseCases</i><i class="t-pun">(</i>now<i class="t-pun">:</i> <i class="t-typ">Clock</i> <i class="t-pun">=</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">UseCases</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> livros <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">SqliteLivroRepository</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-kw">const</i> autores <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">SqliteAutorRepository</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
 
-      <i class="t-kw">if</i> <i class="t-pun">(</i>porIsbn<i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-pun">[</i><i class="t-kw">this</i><i class="t-pun">.</i><i class="t-fn">comAutor</i><i class="t-pun">(</i>porIsbn<i class="t-pun">)</i><i class="t-pun">]</i><i class="t-pun">;</i>
-    <i class="t-pun">}</i>
-
-    <i class="t-kw">const</i> porTitulo <i class="t-pun">=</i> <i class="t-kw">this</i><i class="t-pun">.</i>livros<i class="t-pun">.</i><i class="t-fn">searchByTitulo</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">;</i>
-
-    <i class="t-kw">if</i> <i class="t-pun">(</i>porTitulo<i class="t-pun">.</i>length <i class="t-pun">&gt;</i> <i class="t-num">0</i><i class="t-pun">)</i> <i class="t-kw">return</i> porTitulo<i class="t-pun">.</i><i class="t-fn">map</i><i class="t-pun">(</i><i class="t-pun">(</i>l<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-kw">this</i><i class="t-pun">.</i><i class="t-fn">comAutor</i><i class="t-pun">(</i>l<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-    <i class="t-com">// ⚠️ a pergunta que não é do acervo. Fase 50.</i>
-    <i class="t-kw">return</i> <i class="t-kw">this</i><i class="t-pun">.</i>livros<i class="t-pun">.</i><i class="t-fn">searchByNomeDoAutor</i><i class="t-pun">(</i>q<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">map</i><i class="t-pun">(</i><i class="t-pun">(</i>l<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-kw">this</i><i class="t-pun">.</i><i class="t-fn">comAutor</i><i class="t-pun">(</i>l<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
-
-  <i class="t-kw">private</i> <i class="t-fn">comAutor</i><i class="t-pun">(</i>livro<i class="t-pun">:</i> <i class="t-typ">Livro</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">LivroJson</i> <i class="t-pun">{</i>
-    <i class="t-kw">const</i> autor <i class="t-pun">=</i> <i class="t-kw">this</i><i class="t-pun">.</i>autores<i class="t-pun">.</i><i class="t-fn">findById</i><i class="t-pun">(</i>livro<i class="t-pun">.</i>autorId<i class="t-pun">)</i><i class="t-pun">;</i>
-
-    <i class="t-kw">return</i> <i class="t-fn">livroToJson</i><i class="t-pun">(</i>livro<i class="t-pun">,</i> autor<i class="t-pun">!</i><i class="t-pun">)</i><i class="t-pun">;</i>
-  <i class="t-pun">}</i>
+  <i class="t-kw">return</i> <i class="t-pun">{</i>
+    cadastrarLivro<i class="t-pun">:</i> <i class="t-kw">new</i> <i class="t-typ">CadastrarLivro</i><i class="t-pun">(</i>livros<i class="t-pun">,</i> autores<i class="t-pun">,</i> now<i class="t-pun">)</i><i class="t-pun">,</i>
+    buscarLivro<i class="t-pun">:</i> <i class="t-kw">new</i> <i class="t-typ">BuscarLivro</i><i class="t-pun">(</i>livros<i class="t-pun">,</i> autores<i class="t-pun">)</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">;</i>
 <i class="t-pun">}</i></code></pre>
 </div>
-<p>Repare no que <strong>não</strong> está aqui: nenhum <code>throw</code>. Este caso de uso não tem como falhar — no pior caso devolve lista vazia. Compare com <code>CadastrarLivro</code>, que tem quatro motivos distintos para recusar. É a mesma desproporção da tabela da especificação, agora medida em linhas de código.</p>
-<p>(O <code>autor!</code> é honesto: um livro que está no acervo tem autor na base — a chave estrangeira da fase 06 garante. Guarde o <code>!</code>, porque a fase 50 vai remover essa chave e a pergunta volta.)</p>
-<p><code>src/services/livroService.ts</code> e <code>src/services/autorService.ts</code> são <strong>apagados</strong> (<code>git rm -r src/services</code>), e com eles o <code>toJson</code> da rota. O arquivo de rotas fica assim:</p>
+
+<p><strong><code>src/server.ts</code></strong> — arquivo novo</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c507">copiar</button></div></div>
+<pre class="cb-body" id="c507"><code><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">UseCases</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./composition"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">DomainError</i><i class="t-pun">,</i> <i class="t-typ">InvalidValue</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./domain/errors"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">InvalidInput</i><i class="t-pun">,</i> <i class="t-typ">NotFound</i><i class="t-pun">,</i> <i class="t-typ">RuleConflict</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./errors"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> match<i class="t-pun">,</i> <i class="t-kw">type</i> <i class="t-typ">Route</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./router"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> livroRoutes <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./routes/livros"</i><i class="t-pun">;</i>
+
+<i class="t-kw">function</i> <i class="t-fn">errorResponse</i><i class="t-pun">(</i>error<i class="t-pun">:</i> <i class="t-typ">unknown</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">Response</i> <i class="t-pun">{</i>
+  <i class="t-kw">if</i> <i class="t-pun">(</i>error <i class="t-kw">instanceof</i> <i class="t-typ">InvalidInput</i> <i class="t-pun">|</i><i class="t-pun">|</i> error <i class="t-kw">instanceof</i> <i class="t-typ">InvalidValue</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> error<i class="t-pun">.</i>message <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">400</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>error <i class="t-kw">instanceof</i> <i class="t-typ">NotFound</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> error<i class="t-pun">.</i>message <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">if</i> <i class="t-pun">(</i>error <i class="t-kw">instanceof</i> <i class="t-typ">RuleConflict</i> <i class="t-pun">|</i><i class="t-pun">|</i> error <i class="t-kw">instanceof</i> <i class="t-typ">DomainError</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> error<i class="t-pun">.</i>message <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">409</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  console<i class="t-pun">.</i><i class="t-fn">error</i><i class="t-pun">(</i>error<i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Erro interno"</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">500</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">createServer</i><i class="t-pun">(</i>useCases<i class="t-pun">:</i> <i class="t-typ">UseCases</i><i class="t-pun">,</i> porta <i class="t-pun">=</i> <i class="t-fn">Number</i><i class="t-pun">(</i>process<i class="t-pun">.</i>env<i class="t-pun">.</i><i class="t-typ">PORT</i> <i class="t-pun">??</i> <i class="t-num">3000</i><i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> routes<i class="t-pun">:</i> <i class="t-typ">Route</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
+    <i class="t-pun">{</i>
+      method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
+      pattern<i class="t-pun">:</i> <i class="t-str">"/"</i><i class="t-pun">,</i>
+      handler<i class="t-pun">:</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">{</i> message<i class="t-pun">:</i> <i class="t-str">"API da Biblioteca"</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">,</i>
+    <i class="t-pun">}</i><i class="t-pun">,</i>
+    <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i><i class="t-fn">livroRoutes</i><i class="t-pun">(</i>useCases<i class="t-pun">)</i><i class="t-pun">,</i>
+  <i class="t-pun">]</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">serve</i><i class="t-pun">(</i><i class="t-pun">{</i>
+    port<i class="t-pun">:</i> porta<i class="t-pun">,</i>
+
+    <i class="t-kw">async</i> <i class="t-fn">fetch</i><i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">{</i>
+      <i class="t-kw">const</i> url <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">URL</i><i class="t-pun">(</i>request<i class="t-pun">.</i>url<i class="t-pun">)</i><i class="t-pun">;</i>
+
+      <i class="t-kw">try</i> <i class="t-pun">{</i>
+        <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">const</i> route <i class="t-kw">of</i> routes<i class="t-pun">)</i> <i class="t-pun">{</i>
+          <i class="t-kw">if</i> <i class="t-pun">(</i>route<i class="t-pun">.</i>method <i class="t-pun">!</i><i class="t-pun">=</i><i class="t-pun">=</i> request<i class="t-pun">.</i>method<i class="t-pun">)</i> <i class="t-kw">continue</i><i class="t-pun">;</i>
+
+          <i class="t-kw">const</i> params <i class="t-pun">=</i> <i class="t-fn">match</i><i class="t-pun">(</i>route<i class="t-pun">.</i>pattern<i class="t-pun">,</i> url<i class="t-pun">.</i>pathname<i class="t-pun">)</i><i class="t-pun">;</i>
+          <i class="t-kw">if</i> <i class="t-pun">(</i>params<i class="t-pun">)</i> <i class="t-kw">return</i> <i class="t-kw">await</i> route<i class="t-pun">.</i><i class="t-fn">handler</i><i class="t-pun">(</i>request<i class="t-pun">,</i> params<i class="t-pun">)</i><i class="t-pun">;</i>
+        <i class="t-pun">}</i>
+
+        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>
+          <i class="t-pun">{</i> error<i class="t-pun">:</i> <i class="t-str">"Recurso não encontrado"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+          <i class="t-pun">{</i> status<i class="t-pun">:</i> <i class="t-num">404</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+        <i class="t-pun">)</i><i class="t-pun">;</i>
+      <i class="t-pun">}</i> <i class="t-kw">catch</i> <i class="t-pun">(</i>error<i class="t-pun">)</i> <i class="t-pun">{</i>
+        <i class="t-kw">return</i> <i class="t-fn">errorResponse</i><i class="t-pun">(</i>error<i class="t-pun">)</i><i class="t-pun">;</i>
+      <i class="t-pun">}</i>
+    <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i></code></pre>
+</div>
+
+<p><strong><code>src/main.ts</code></strong> — arquivo novo</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="cp" data-code="c508">copiar</button></div></div>
+<pre class="cb-body" id="c508"><code><i class="t-kw">import</i> <i class="t-pun">{</i> buildUseCases <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./composition"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> createServer <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./server"</i><i class="t-pun">;</i>
+
+<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-kw">const</i> server <i class="t-pun">=</i> <i class="t-fn">createServer</i><i class="t-pun">(</i><i class="t-fn">buildUseCases</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`Servidor executando em http://localhost:${server.port}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+</div>
 
 <p><strong><code>src/routes/livros.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c505-diff" data-alt="c505-clean">ver o que mudou</button><button class="cp" data-code="c505-clean">copiar</button></div></div>
-<pre class="cb-body" id="c505-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> parseBusca<i class="t-pun">,</i> parseNovoLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../input"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">SqliteAutorRepository</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../repositories/SqliteAutorRepository"</i><i class="t-pun">;</i>
-<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">SqliteLivroRepository</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../repositories/SqliteLivroRepository"</i><i class="t-pun">;</i>
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c509-diff" data-alt="c509-clean">ver o que mudou</button><button class="cp" data-code="c509-clean">copiar</button></div></div>
+<pre class="cb-body" id="c509-clean"><code><strong class="ln-new"><i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">UseCases</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../composition"</i><i class="t-pun">;</i></strong>
+<i class="t-kw">import</i> <i class="t-pun">{</i> parseBusca<i class="t-pun">,</i> parseNovoLivro <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../input"</i><i class="t-pun">;</i>
 <i class="t-kw">import</i> <i class="t-kw">type</i> <i class="t-pun">{</i> <i class="t-typ">Route</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../router"</i><i class="t-pun">;</i>
-<strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">BuscarLivro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../use-cases/BuscarLivro"</i><i class="t-pun">;</i></strong>
-<i class="t-kw">import</i> <i class="t-pun">{</i> <i class="t-typ">CadastrarLivro</i> <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../use-cases/CadastrarLivro"</i><i class="t-pun">;</i>
 
-<i class="t-com">// ⚠️ defeito proposital: a rota não deveria escolher a implementação.</i>
-<i class="t-com">// Isto some na fase 42, quando o composition root existir.</i>
-<i class="t-kw">const</i> livros <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">SqliteLivroRepository</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-kw">const</i> autores <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">SqliteAutorRepository</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<i class="t-kw">const</i> cadastrarLivro <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">CadastrarLivro</i><i class="t-pun">(</i>livros<i class="t-pun">,</i> autores<i class="t-pun">,</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-kw">new</i> <i class="t-typ">Date</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
-<strong class="ln-new"><i class="t-kw">const</i> buscarLivro <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-typ">BuscarLivro</i><i class="t-pun">(</i>livros<i class="t-pun">,</i> autores<i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<strong class="ln-new"><i class="t-kw">export</i> <i class="t-kw">function</i> <i class="t-fn">livroRoutes</i><i class="t-pun">(</i>useCases<i class="t-pun">:</i> <i class="t-typ">UseCases</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">Route</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">  <i class="t-kw">return</i> <i class="t-pun">[</i></strong>
+<strong class="ln-new">    <i class="t-pun">{</i></strong>
+<strong class="ln-new">      method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">      pattern<i class="t-pun">:</i> <i class="t-str">"/livros"</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">      handler<i class="t-pun">:</i> <i class="t-kw">async</i> <i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">        <i class="t-kw">const</i> livro <i class="t-pun">=</i> useCases<i class="t-pun">.</i>cadastrarLivro<i class="t-pun">.</i><i class="t-fn">execute</i><i class="t-pun">(</i></strong>
+<strong class="ln-new">          <i class="t-fn">parseNovoLivro</i><i class="t-pun">(</i><i class="t-kw">await</i> request<i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">        <i class="t-pun">)</i><i class="t-pun">;</i></strong>
 
-<i class="t-kw">export</i> <i class="t-kw">const</i> livroRoutes<i class="t-pun">:</i> <i class="t-typ">Route</i><i class="t-pun">[</i><i class="t-pun">]</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
-  <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i>
-    pattern<i class="t-pun">:</i> <i class="t-str">"/livros"</i><i class="t-pun">,</i>
-    handler<i class="t-pun">:</i> <i class="t-kw">async</i> <i class="t-pun">(</i>request<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
-      <i class="t-kw">const</i> livro <i class="t-pun">=</i> cadastrarLivro<i class="t-pun">.</i><i class="t-fn">execute</i><i class="t-pun">(</i><i class="t-fn">parseNovoLivro</i><i class="t-pun">(</i><i class="t-kw">await</i> request<i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
-
-      <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>livro<i class="t-pun">,</i> <i class="t-pun">{</i>
-        status<i class="t-pun">:</i> <i class="t-num">201</i><i class="t-pun">,</i>
-        headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-typ">Location</i><i class="t-pun">:</i> <i class="t-str">`/livros/${livro.isbn}`</i> <i class="t-pun">}</i><i class="t-pun">,</i>
-      <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<strong class="ln-new">        <i class="t-kw">return</i> <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>livro<i class="t-pun">,</i> <i class="t-pun">{</i></strong>
+<strong class="ln-new">          status<i class="t-pun">:</i> <i class="t-num">201</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">          headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-typ">Location</i><i class="t-pun">:</i> <i class="t-str">`/livros/${livro.isbn}`</i> <i class="t-pun">}</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">        <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+<strong class="ln-new">      <i class="t-pun">}</i><i class="t-pun">,</i></strong>
     <i class="t-pun">}</i><i class="t-pun">,</i>
+<strong class="ln-new">    <i class="t-pun">{</i></strong>
+<strong class="ln-new">      method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">      pattern<i class="t-pun">:</i> <i class="t-str">"/livros/:q"</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">      handler<i class="t-pun">:</i> <i class="t-pun">(</i>_request<i class="t-pun">,</i> params<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i></strong>
+<strong class="ln-new">        <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>useCases<i class="t-pun">.</i>buscarLivro<i class="t-pun">.</i><i class="t-fn">execute</i><i class="t-pun">(</i><i class="t-fn">parseBusca</i><i class="t-pun">(</i>params<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">    <i class="t-pun">}</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">  <i class="t-pun">]</i><i class="t-pun">;</i></strong>
+<strong class="ln-new"><i class="t-pun">}</i></strong></code></pre>
+<pre class="cb-body cb-diff" id="c509-diff" hidden><code><span class="dl add">+import type { UseCases } from "../composition";</span><span class="dl ctx"> import { parseBusca, parseNovoLivro } from "../input";</span><span class="dl del">-import { SqliteAutorRepository } from "../repositories/SqliteAutorRepository";</span><span class="dl del">-import { SqliteLivroRepository } from "../repositories/SqliteLivroRepository";</span><span class="dl ctx"> import type { Route } from "../router";</span><span class="dl del">-import { BuscarLivro } from "../use-cases/BuscarLivro";</span><span class="dl del">-import { CadastrarLivro } from "../use-cases/CadastrarLivro";</span><span class="dl ctx"> </span><span class="dl del">-// ⚠️ defeito proposital: a rota não deveria escolher a implementação.</span><span class="dl del">-// Isto some na fase 42, quando o composition root existir.</span><span class="dl del">-const livros = new SqliteLivroRepository();</span><span class="dl del">-const autores = new SqliteAutorRepository();</span><span class="dl del">-const cadastrarLivro = new CadastrarLivro(livros, autores, () =&gt; new Date());</span><span class="dl del">-const buscarLivro = new BuscarLivro(livros, autores);</span><span class="dl add">+export function livroRoutes(useCases: UseCases): Route[] {</span><span class="dl add">+  return [</span><span class="dl add">+    {</span><span class="dl add">+      method: "POST",</span><span class="dl add">+      pattern: "/livros",</span><span class="dl add">+      handler: async (request) =&gt; {</span><span class="dl add">+        const livro = useCases.cadastrarLivro.execute(</span><span class="dl add">+          parseNovoLivro(await request.json()),</span><span class="dl add">+        );</span><span class="dl ctx"> </span><span class="dl del">-export const livroRoutes: Route[] = [</span><span class="dl del">-  {</span><span class="dl del">-    method: "POST",</span><span class="dl del">-    pattern: "/livros",</span><span class="dl del">-    handler: async (request) =&gt; {</span><span class="dl del">-      const livro = cadastrarLivro.execute(parseNovoLivro(await request.json()));</span><span class="dl del">-</span><span class="dl del">-      return Response.json(livro, {</span><span class="dl del">-        status: 201,</span><span class="dl del">-        headers: { Location: `/livros/${livro.isbn}` },</span><span class="dl del">-      });</span><span class="dl add">+        return Response.json(livro, {</span><span class="dl add">+          status: 201,</span><span class="dl add">+          headers: { Location: `/livros/${livro.isbn}` },</span><span class="dl add">+        });</span><span class="dl add">+      },</span><span class="dl ctx">     },</span><span class="dl del">-  },</span><span class="dl del">-  {</span><span class="dl del">-    method: "GET",</span><span class="dl del">-    pattern: "/livros/:q",</span><span class="dl del">-    handler: (_request, params) =&gt;</span><span class="dl del">-      Response.json(buscarLivro.execute(parseBusca(params))),</span><span class="dl del">-  },</span><span class="dl del">-];</span><span class="dl add">+    {</span><span class="dl add">+      method: "GET",</span><span class="dl add">+      pattern: "/livros/:q",</span><span class="dl add">+      handler: (_request, params) =&gt;</span><span class="dl add">+        Response.json(useCases.buscarLivro.execute(parseBusca(params))),</span><span class="dl add">+    },</span><span class="dl add">+  ];</span><span class="dl add">+}</span></code></pre>
+</div>
+<p>E <code>src/importar.ts</code> para de escolher a implementação — ele pede as suas dependências ao composition root:</p>
+<div class="cb cb-fig">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><span class="cb-note">trecho ilustrativo</span><button class="tgl" data-target="c270-diff" data-alt="c270-clean">ver o que mudou</button></div></div>
+<pre class="cb-body" id="c270-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> buildUseCases <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./composition"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
+
+<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-kw">const</i> <i class="t-pun">{</i> cadastrarLivro <i class="t-pun">}</i> <i class="t-pun">=</i> <i class="t-fn">buildUseCases</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c270-diff" hidden><code><span class="dl add">+import { buildUseCases } from "./composition";</span><span class="dl ctx"> import { createDb } from "./db";</span><span class="dl del">-import { SqliteAutorRepository } from "./repositories/SqliteAutorRepository";</span><span class="dl del">-import { SqliteLivroRepository } from "./repositories/SqliteLivroRepository";</span><span class="dl del">-import { CadastrarLivro } from "./use-cases/CadastrarLivro";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl del">-// ⚠️ o mesmo defeito proposital da rota: some na fase 42.</span><span class="dl del">-const livros = new SqliteLivroRepository();</span><span class="dl del">-const autores = new SqliteAutorRepository();</span><span class="dl del">-const cadastrarLivro = new CadastrarLivro(livros, autores, () =&gt; new Date());</span><span class="dl add">+const { cadastrarLivro } = buildUseCases();</span></code></pre>
+</div>
+<p>O laço não muda: <code>cadastrarLivro.execute(...)</code> já era a chamada desde a fase</p>
+<ol><li>Por fim, <code>package.json</code> troca <code>src/index.ts</code> por <code>src/main.ts</code> nos scripts</li></ol>
+<p><code>dev</code> e <code>start</code> (e no campo <code>module</code>), e o <code>Bun.spawn</code> do teste e2e faz o mesmo.</p>
+<p><strong><code>package.json</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c510-diff" data-alt="c510-clean">ver o que mudou</button><button class="cp" data-code="c510-clean">copiar</button></div></div>
+<pre class="cb-body" id="c510-clean"><code><i class="t-pun">{</i>
+  <i class="t-key">"name"</i><i class="t-pun">:</i> <i class="t-str">"biblioteca"</i><i class="t-pun">,</i>
+<strong class="ln-new">  <i class="t-key">"module"</i><i class="t-pun">:</i> <i class="t-str">"src/main.ts"</i><i class="t-pun">,</i></strong>
+  <i class="t-key">"type"</i><i class="t-pun">:</i> <i class="t-str">"module"</i><i class="t-pun">,</i>
+  <i class="t-key">"private"</i><i class="t-pun">:</i> <i class="t-kw">true</i><i class="t-pun">,</i>
+  <i class="t-key">"scripts"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
+<strong class="ln-new">    <i class="t-key">"dev"</i><i class="t-pun">:</i> <i class="t-str">"bun --watch src/main.ts"</i><i class="t-pun">,</i></strong>
+<strong class="ln-new">    <i class="t-key">"start"</i><i class="t-pun">:</i> <i class="t-str">"bun src/main.ts"</i><i class="t-pun">,</i></strong>
+    <i class="t-key">"test"</i><i class="t-pun">:</i> <i class="t-str">"bun test"</i><i class="t-pun">,</i>
+    <i class="t-key">"importar"</i><i class="t-pun">:</i> <i class="t-str">"bun src/importar.ts"</i>
   <i class="t-pun">}</i><i class="t-pun">,</i>
-  <i class="t-pun">{</i>
-    method<i class="t-pun">:</i> <i class="t-str">"GET"</i><i class="t-pun">,</i>
-    pattern<i class="t-pun">:</i> <i class="t-str">"/livros/:q"</i><i class="t-pun">,</i>
-    handler<i class="t-pun">:</i> <i class="t-pun">(</i>_request<i class="t-pun">,</i> params<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i>
-<strong class="ln-new">      <i class="t-typ">Response</i><i class="t-pun">.</i><i class="t-fn">json</i><i class="t-pun">(</i>buscarLivro<i class="t-pun">.</i><i class="t-fn">execute</i><i class="t-pun">(</i><i class="t-fn">parseBusca</i><i class="t-pun">(</i>params<i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">,</i></strong>
+  <i class="t-key">"devDependencies"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
+    <i class="t-key">"@types/bun"</i><i class="t-pun">:</i> <i class="t-str">"latest"</i>
   <i class="t-pun">}</i><i class="t-pun">,</i>
-<i class="t-pun">]</i><i class="t-pun">;</i></code></pre>
-<pre class="cb-body cb-diff" id="c505-diff" hidden><code><span class="dl del">-import type { Autor } from "../domain/Autor";</span><span class="dl del">-import type { Livro } from "../domain/Livro";</span><span class="dl ctx"> import { parseBusca, parseNovoLivro } from "../input";</span><span class="dl ctx"> import { SqliteAutorRepository } from "../repositories/SqliteAutorRepository";</span><span class="dl ctx"> import { SqliteLivroRepository } from "../repositories/SqliteLivroRepository";</span><span class="dl ctx"> import type { Route } from "../router";</span><span class="dl del">-import { buscarLivros } from "../services/livroService";</span><span class="dl add">+import { BuscarLivro } from "../use-cases/BuscarLivro";</span><span class="dl ctx"> import { CadastrarLivro } from "../use-cases/CadastrarLivro";</span><span class="dl ctx"> </span><span class="dl ctx"> // ⚠️ defeito proposital: a rota não deveria escolher a implementação.</span><span class="dl ctx"> // Isto some na fase 42, quando o composition root existir.</span><span class="dl ctx"> const livros = new SqliteLivroRepository();</span><span class="dl ctx"> const autores = new SqliteAutorRepository();</span><span class="dl ctx"> const cadastrarLivro = new CadastrarLivro(livros, autores, () =&gt; new Date());</span><span class="dl del">-</span><span class="dl del">-function toJson(livro: Livro, autor: Autor) {</span><span class="dl del">-  return {</span><span class="dl del">-    id: livro.id!.value,</span><span class="dl del">-    numeroRegistro: livro.numeroRegistro.value,</span><span class="dl del">-    isbn: livro.isbn.value,</span><span class="dl del">-    titulo: livro.titulo,</span><span class="dl del">-    autor: autor.nome,</span><span class="dl del">-    dataCatalogacao: livro.dataCatalogacao,</span><span class="dl del">-  };</span><span class="dl del">-}</span><span class="dl add">+const buscarLivro = new BuscarLivro(livros, autores);</span><span class="dl ctx"> </span><span class="dl ctx"> export const livroRoutes: Route[] = [</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     pattern: "/livros",</span><span class="dl ctx">     handler: async (request) =&gt; {</span><span class="dl ctx">       const livro = cadastrarLivro.execute(parseNovoLivro(await request.json()));</span><span class="dl ctx"> </span><span class="dl ctx">       return Response.json(livro, {</span><span class="dl ctx">         status: 201,</span><span class="dl ctx">         headers: { Location: `/livros/${livro.isbn}` },</span><span class="dl ctx">       });</span><span class="dl ctx">     },</span><span class="dl ctx">   },</span><span class="dl ctx">   {</span><span class="dl ctx">     method: "GET",</span><span class="dl ctx">     pattern: "/livros/:q",</span><span class="dl ctx">     handler: (_request, params) =&gt;</span><span class="dl del">-      Response.json(</span><span class="dl del">-        buscarLivros(livros, autores, parseBusca(params)).map(</span><span class="dl del">-          ({ livro, autor }) =&gt; toJson(livro, autor),</span><span class="dl del">-        ),</span><span class="dl del">-      ),</span><span class="dl add">+      Response.json(buscarLivro.execute(parseBusca(params))),</span><span class="dl ctx">   },</span><span class="dl ctx"> ];</span></code></pre>
+  <i class="t-key">"peerDependencies"</i><i class="t-pun">:</i> <i class="t-pun">{</i>
+    <i class="t-key">"typescript"</i><i class="t-pun">:</i> <i class="t-str">"^7"</i>
+  <i class="t-pun">}</i>
+<i class="t-pun">}</i></code></pre>
+<pre class="cb-body cb-diff" id="c510-diff" hidden><code><span class="dl ctx"> {</span><span class="dl ctx">   "name": "biblioteca",</span><span class="dl del">-  "module": "src/index.ts",</span><span class="dl add">+  "module": "src/main.ts",</span><span class="dl ctx">   "type": "module",</span><span class="dl ctx">   "private": true,</span><span class="dl ctx">   "scripts": {</span><span class="dl del">-    "dev": "bun --watch src/index.ts",</span><span class="dl del">-    "start": "bun src/index.ts",</span><span class="dl add">+    "dev": "bun --watch src/main.ts",</span><span class="dl add">+    "start": "bun src/main.ts",</span><span class="dl ctx">     "test": "bun test",</span><span class="dl ctx">     "importar": "bun src/importar.ts"</span><span class="dl ctx">   },</span><span class="dl ctx">   "devDependencies": {</span><span class="dl ctx">     "@types/bun": "latest"</span><span class="dl ctx">   },</span><span class="dl ctx">   "peerDependencies": {</span><span class="dl ctx">     "typescript": "^7"</span><span class="dl ctx">   }</span><span class="dl ctx"> }</span></code></pre>
+</div>
+<p><strong><code>src/importar.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c511-diff" data-alt="c511-clean">ver o que mudou</button><button class="cp" data-code="c511-clean">copiar</button></div></div>
+<pre class="cb-body" id="c511-clean"><code><strong class="ln-new"><i class="t-kw">import</i> <i class="t-pun">{</i> buildUseCases <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./composition"</i><i class="t-pun">;</i></strong>
+<i class="t-kw">import</i> <i class="t-pun">{</i> createDb <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"./db"</i><i class="t-pun">;</i>
+
+<i class="t-fn">createDb</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<strong class="ln-new"><i class="t-kw">const</i> <i class="t-pun">{</i> cadastrarLivro <i class="t-pun">}</i> <i class="t-pun">=</i> <i class="t-fn">buildUseCases</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i></strong>
+
+<i class="t-kw">const</i> path <i class="t-pun">=</i> process<i class="t-pun">.</i>argv<i class="t-pun">[</i><i class="t-num">2</i><i class="t-pun">]</i><i class="t-pun">;</i>
+
+<i class="t-kw">if</i> <i class="t-pun">(</i><i class="t-pun">!</i>path<i class="t-pun">)</i> <i class="t-pun">{</i>
+  console<i class="t-pun">.</i><i class="t-fn">error</i><i class="t-pun">(</i><i class="t-str">"uso: bun run importar &lt;arquivo.csv&gt;"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  process<i class="t-pun">.</i><i class="t-fn">exit</i><i class="t-pun">(</i><i class="t-num">1</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">const</i> content <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">file</i><i class="t-pun">(</i>path<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">text</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-kw">const</i> rows <i class="t-pun">=</i> content<i class="t-pun">.</i><i class="t-fn">trim</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">split</i><i class="t-pun">(</i><i class="t-str">"\n"</i><i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">slice</i><i class="t-pun">(</i><i class="t-num">1</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-kw">let</i> importados <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i>
+<i class="t-kw">let</i> rejeitados <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i>
+
+<i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">const</i> row <i class="t-kw">of</i> rows<i class="t-pun">)</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> <i class="t-pun">[</i>isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">]</i> <i class="t-pun">=</i> row<i class="t-pun">.</i><i class="t-fn">split</i><i class="t-pun">(</i><i class="t-str">","</i><i class="t-pun">)</i> <i class="t-kw">as</i> <i class="t-pun">[</i><i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">,</i> <i class="t-typ">string</i><i class="t-pun">]</i><i class="t-pun">;</i>
+
+  <i class="t-kw">try</i> <i class="t-pun">{</i>
+    cadastrarLivro<i class="t-pun">.</i><i class="t-fn">execute</i><i class="t-pun">(</i><i class="t-pun">{</i> isbn<i class="t-pun">,</i> titulo<i class="t-pun">,</i> autorId<i class="t-pun">:</i> <i class="t-typ">Number</i><i class="t-pun">(</i>autorId<i class="t-pun">)</i> <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+    importados<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i> <i class="t-kw">catch</i> <i class="t-pun">(</i>error<i class="t-pun">)</i> <i class="t-pun">{</i>
+    console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`linha rejeitada (${(error as Error).message}): ${row}`</i><i class="t-pun">)</i><i class="t-pun">;</i>
+    rejeitados<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+<i class="t-pun">}</i>
+
+console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i class="t-str">`importados: ${importados} | rejeitados: ${rejeitados}`</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c511-diff" hidden><code><span class="dl add">+import { buildUseCases } from "./composition";</span><span class="dl ctx"> import { createDb } from "./db";</span><span class="dl del">-import { SqliteAutorRepository } from "./repositories/SqliteAutorRepository";</span><span class="dl del">-import { SqliteLivroRepository } from "./repositories/SqliteLivroRepository";</span><span class="dl del">-import { CadastrarLivro } from "./use-cases/CadastrarLivro";</span><span class="dl ctx"> </span><span class="dl ctx"> createDb();</span><span class="dl ctx"> </span><span class="dl del">-// ⚠️ o mesmo defeito proposital da rota: some na fase 42.</span><span class="dl del">-const livros = new SqliteLivroRepository();</span><span class="dl del">-const autores = new SqliteAutorRepository();</span><span class="dl del">-const cadastrarLivro = new CadastrarLivro(livros, autores, () =&gt; new Date());</span><span class="dl add">+const { cadastrarLivro } = buildUseCases();</span><span class="dl ctx"> </span><span class="dl ctx"> const path = process.argv[2];</span><span class="dl ctx"> </span><span class="dl ctx"> if (!path) {</span><span class="dl ctx">   console.error("uso: bun run importar &lt;arquivo.csv&gt;");</span><span class="dl ctx">   process.exit(1);</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const content = await Bun.file(path).text();</span><span class="dl ctx"> const rows = content.trim().split("\n").slice(1);</span><span class="dl ctx"> </span><span class="dl ctx"> let importados = 0;</span><span class="dl ctx"> let rejeitados = 0;</span><span class="dl ctx"> </span><span class="dl ctx"> for (const row of rows) {</span><span class="dl ctx">   const [isbn, titulo, autorId] = row.split(",") as [string, string, string];</span><span class="dl ctx"> </span><span class="dl ctx">   try {</span><span class="dl ctx">     cadastrarLivro.execute({ isbn, titulo, autorId: Number(autorId) });</span><span class="dl ctx">     importados++;</span><span class="dl ctx">   } catch (error) {</span><span class="dl ctx">     console.log(`linha rejeitada (${(error as Error).message}): ${row}`);</span><span class="dl ctx">     rejeitados++;</span><span class="dl ctx">   }</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> console.log(`importados: ${importados} | rejeitados: ${rejeitados}`);</span></code></pre>
+</div>
+<p><strong><code>tests/cadastro.e2e.test.ts</code></strong> — arquivo completo, com as mudanças marcadas</p>
+<div class="cb">
+<div class="cb-bar"><span class="cb-lang">typescript</span><div class="cb-actions"><button class="tgl" data-target="c512-diff" data-alt="c512-clean">ver o que mudou</button><button class="cp" data-code="c512-clean">copiar</button></div></div>
+<pre class="cb-body" id="c512-clean"><code><i class="t-kw">import</i> <i class="t-pun">{</i> afterAll<i class="t-pun">,</i> beforeAll<i class="t-pun">,</i> beforeEach<i class="t-pun">,</i> expect<i class="t-pun">,</i> test <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"bun:test"</i><i class="t-pun">;</i>
+<i class="t-kw">import</i> <i class="t-pun">{</i> db <i class="t-pun">}</i> <i class="t-kw">from</i> <i class="t-str">"../src/db"</i><i class="t-pun">;</i>
+
+<i class="t-kw">const</i> <i class="t-typ">BASE</i> <i class="t-pun">=</i> <i class="t-str">"http://localhost:3999"</i><i class="t-pun">;</i>
+<i class="t-kw">const</i> <i class="t-typ">AUSTEN</i> <i class="t-pun">=</i> <i class="t-num">4</i><i class="t-pun">;</i>
+<i class="t-kw">const</i> <i class="t-typ">LIVROS</i> <i class="t-pun">=</i> <i class="t-pun">[</i>
+  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439518"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Orgulho e Preconceito"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439662"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Razão e Sensibilidade"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439587"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Emma"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439761"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Persuasão"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141439563"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"A Abadia de Northanger"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">{</i> isbn<i class="t-pun">:</i> <i class="t-str">"9780141199689"</i><i class="t-pun">,</i> titulo<i class="t-pun">:</i> <i class="t-str">"Lady Susan"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+<i class="t-pun">]</i><i class="t-pun">;</i>
+<i class="t-kw">const</i> <i class="t-typ">EVANS</i> <i class="t-pun">=</i> <i class="t-num">1</i><i class="t-pun">;</i>
+
+<i class="t-com">/** ISBN-13 sintético com dígito verificador correto — a fase 34 vai conferir. */</i>
+<i class="t-kw">function</i> <i class="t-fn">isbnSintetico</i><i class="t-pun">(</i>seq<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i><i class="t-pun">:</i> <i class="t-typ">string</i> <i class="t-pun">{</i>
+  <i class="t-kw">const</i> doze <i class="t-pun">=</i> <i class="t-str">`97800000${String(seq).padStart(4, "0")}`</i><i class="t-pun">;</i>
+  <i class="t-kw">let</i> soma <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i>
+
+  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">12</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> soma <i class="t-pun">+</i><i class="t-pun">=</i> <i class="t-typ">Number</i><i class="t-pun">(</i>doze<i class="t-pun">[</i>i<i class="t-pun">]</i><i class="t-pun">!</i><i class="t-pun">)</i> <i class="t-pun">*</i> <i class="t-pun">(</i>i <i class="t-pun">%</i> <i class="t-num">2</i> <i class="t-pun">=</i><i class="t-pun">=</i><i class="t-pun">=</i> <i class="t-num">0</i> <i class="t-pun">?</i> <i class="t-num">1</i> <i class="t-pun">:</i> <i class="t-num">3</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-kw">return</i> doze <i class="t-pun">+</i> <i class="t-pun">(</i><i class="t-pun">(</i><i class="t-num">10</i> <i class="t-pun">-</i> <i class="t-pun">(</i>soma <i class="t-pun">%</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">)</i> <i class="t-pun">%</i> <i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">const</i> <i class="t-typ">LIVROS_DE_EVANS</i> <i class="t-pun">=</i> <i class="t-typ">Array</i><i class="t-pun">.</i><i class="t-kw">from</i><i class="t-pun">(</i><i class="t-pun">{</i> length<i class="t-pun">:</i> <i class="t-num">11</i> <i class="t-pun">}</i><i class="t-pun">,</i> <i class="t-pun">(</i>_<i class="t-pun">,</i> i<i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">(</i><i class="t-pun">{</i>
+  isbn<i class="t-pun">:</i> <i class="t-fn">isbnSintetico</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">,</i>
+  titulo<i class="t-pun">:</i> <i class="t-str">`Título didático ${i + 1}`</i><i class="t-pun">,</i>
+<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-kw">let</i> server<i class="t-pun">:</i> <i class="t-typ">ReturnType</i><i class="t-pun">&lt;</i><i class="t-kw">typeof</i> <i class="t-typ">Bun</i><i class="t-pun">.</i>spawn<i class="t-pun">&gt;</i><i class="t-pun">;</i>
+
+<i class="t-fn">beforeAll</i><i class="t-pun">(</i><i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
+  <i class="t-com">// não há como exercitar a regra sem subir a aplicação inteira</i>
+<strong class="ln-new">  server <i class="t-pun">=</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">spawn</i><i class="t-pun">(</i><i class="t-pun">[</i><i class="t-str">"bun"</i><i class="t-pun">,</i> <i class="t-str">"src/main.ts"</i><i class="t-pun">]</i><i class="t-pun">,</i> <i class="t-pun">{</i></strong>
+    stdout<i class="t-pun">:</i> <i class="t-str">"ignore"</i><i class="t-pun">,</i>
+    <i class="t-com">// porta própria: a sonda abaixo só passa quando ESTE servidor subir</i>
+    env<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-pun">...</i>process<i class="t-pun">.</i>env<i class="t-pun">,</i> <i class="t-typ">PORT</i><i class="t-pun">:</i> <i class="t-str">"3999"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-com">// ... e sem esperar a porta abrir</i>
+  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> tentativa <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">tentativa</i> <i class="t-pun">&lt;</i> <i class="t-num">50</i><i class="t-pun">;</i> tentativa<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">try</i> <i class="t-pun">{</i>
+      <i class="t-kw">await</i> <i class="t-fn">fetch</i><i class="t-pun">(</i><i class="t-typ">BASE</i><i class="t-pun">)</i><i class="t-pun">;</i>
+      <i class="t-kw">return</i><i class="t-pun">;</i>
+    <i class="t-pun">}</i> <i class="t-kw">catch</i> <i class="t-pun">{</i>
+      <i class="t-kw">await</i> <i class="t-typ">Bun</i><i class="t-pun">.</i><i class="t-fn">sleep</i><i class="t-pun">(</i><i class="t-num">100</i><i class="t-pun">)</i><i class="t-pun">;</i>
+    <i class="t-pun">}</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-typ">Error</i><i class="t-pun">(</i><i class="t-str">"o servidor não subiu"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-fn">afterAll</i><i class="t-pun">(</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
+  server<i class="t-pun">.</i><i class="t-fn">kill</i><i class="t-pun">(</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-fn">beforeEach</i><i class="t-pun">(</i><i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
+  <i class="t-com">// ... e sem limpar o banco de verdade entre um teste e outro</i>
+  db<i class="t-pun">.</i><i class="t-fn">run</i><i class="t-pun">(</i><i class="t-str">"DELETE FROM livros"</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-kw">function</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>n<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">,</i> autorId <i class="t-pun">=</i> <i class="t-typ">AUSTEN</i><i class="t-pun">,</i> livros <i class="t-pun">=</i> <i class="t-typ">LIVROS</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+  <i class="t-kw">return</i> <i class="t-fn">fetch</i><i class="t-pun">(</i><i class="t-str">`${BASE}/livros`</i><i class="t-pun">,</i> <i class="t-pun">{</i>
+    method<i class="t-pun">:</i> <i class="t-str">"POST"</i><i class="t-pun">,</i>
+    headers<i class="t-pun">:</i> <i class="t-pun">{</i> <i class="t-str">"Content-Type"</i><i class="t-pun">:</i> <i class="t-str">"application/json"</i> <i class="t-pun">}</i><i class="t-pun">,</i>
+    body<i class="t-pun">:</i> <i class="t-typ">JSON</i><i class="t-pun">.</i><i class="t-fn">stringify</i><i class="t-pun">(</i><i class="t-pun">{</i> <i class="t-pun">.</i><i class="t-pun">.</i><i class="t-pun">.</i>livros<i class="t-pun">[</i>n<i class="t-pun">]</i><i class="t-pun">,</i> autorId <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">,</i>
+  <i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i>
+
+<i class="t-kw">const</i> cadastrarDeEvans <i class="t-pun">=</i> <i class="t-pun">(</i>n<i class="t-pun">:</i> <i class="t-typ">number</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>n<i class="t-pun">,</i> <i class="t-typ">EVANS</i><i class="t-pun">,</i> <i class="t-typ">LIVROS_DE_EVANS</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05: um autor de literatura vai até 5 livros no acervo"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
+  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">5</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">const</i> response <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">;</i>
+    <i class="t-fn">expect</i><i class="t-pun">(</i>response<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">201</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">const</i> sexto <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrar</i><i class="t-pun">(</i><i class="t-num">5</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-fn">expect</i><i class="t-pun">(</i>sexto<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">409</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+<i class="t-fn">test</i><i class="t-pun">(</i><i class="t-str">"RF05′: um autor didático vai até 10 livros no acervo"</i><i class="t-pun">,</i> <i class="t-kw">async</i> <i class="t-pun">(</i><i class="t-pun">)</i> <i class="t-pun">=</i><i class="t-pun">&gt;</i> <i class="t-pun">{</i>
+  <i class="t-kw">for</i> <i class="t-pun">(</i><i class="t-kw">let</i> i <i class="t-pun">=</i> <i class="t-num">0</i><i class="t-pun">;</i> <i class="t-fn">i</i> <i class="t-pun">&lt;</i> <i class="t-num">10</i><i class="t-pun">;</i> i<i class="t-pun">+</i><i class="t-pun">+</i><i class="t-pun">)</i> <i class="t-pun">{</i>
+    <i class="t-kw">const</i> response <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrarDeEvans</i><i class="t-pun">(</i>i<i class="t-pun">)</i><i class="t-pun">;</i>
+    <i class="t-fn">expect</i><i class="t-pun">(</i>response<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">201</i><i class="t-pun">)</i><i class="t-pun">;</i>
+  <i class="t-pun">}</i>
+
+  <i class="t-kw">const</i> decimoPrimeiro <i class="t-pun">=</i> <i class="t-kw">await</i> <i class="t-fn">cadastrarDeEvans</i><i class="t-pun">(</i><i class="t-num">10</i><i class="t-pun">)</i><i class="t-pun">;</i>
+
+  <i class="t-fn">expect</i><i class="t-pun">(</i>decimoPrimeiro<i class="t-pun">.</i>status<i class="t-pun">)</i><i class="t-pun">.</i><i class="t-fn">toBe</i><i class="t-pun">(</i><i class="t-num">409</i><i class="t-pun">)</i><i class="t-pun">;</i>
+<i class="t-pun">}</i><i class="t-pun">)</i><i class="t-pun">;</i></code></pre>
+<pre class="cb-body cb-diff" id="c512-diff" hidden><code><span class="dl ctx"> import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test";</span><span class="dl ctx"> import { db } from "../src/db";</span><span class="dl ctx"> </span><span class="dl ctx"> const BASE = "http://localhost:3999";</span><span class="dl ctx"> const AUSTEN = 4;</span><span class="dl ctx"> const LIVROS = [</span><span class="dl ctx">   { isbn: "9780141439518", titulo: "Orgulho e Preconceito" },</span><span class="dl ctx">   { isbn: "9780141439662", titulo: "Razão e Sensibilidade" },</span><span class="dl ctx">   { isbn: "9780141439587", titulo: "Emma" },</span><span class="dl ctx">   { isbn: "9780141439761", titulo: "Persuasão" },</span><span class="dl ctx">   { isbn: "9780141439563", titulo: "A Abadia de Northanger" },</span><span class="dl ctx">   { isbn: "9780141199689", titulo: "Lady Susan" },</span><span class="dl ctx"> ];</span><span class="dl ctx"> const EVANS = 1;</span><span class="dl ctx"> </span><span class="dl ctx"> /** ISBN-13 sintético com dígito verificador correto — a fase 34 vai conferir. */</span><span class="dl ctx"> function isbnSintetico(seq: number): string {</span><span class="dl ctx">   const doze = `97800000${String(seq).padStart(4, "0")}`;</span><span class="dl ctx">   let soma = 0;</span><span class="dl ctx"> </span><span class="dl ctx">   for (let i = 0; i &lt; 12; i++) soma += Number(doze[i]!) * (i % 2 === 0 ? 1 : 3);</span><span class="dl ctx"> </span><span class="dl ctx">   return doze + ((10 - (soma % 10)) % 10);</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const LIVROS_DE_EVANS = Array.from({ length: 11 }, (_, i) =&gt; ({</span><span class="dl ctx">   isbn: isbnSintetico(i),</span><span class="dl ctx">   titulo: `Título didático ${i + 1}`,</span><span class="dl ctx"> }));</span><span class="dl ctx"> </span><span class="dl ctx"> let server: ReturnType&lt;typeof Bun.spawn&gt;;</span><span class="dl ctx"> </span><span class="dl ctx"> beforeAll(async () =&gt; {</span><span class="dl ctx">   // não há como exercitar a regra sem subir a aplicação inteira</span><span class="dl del">-  server = Bun.spawn(["bun", "src/index.ts"], {</span><span class="dl add">+  server = Bun.spawn(["bun", "src/main.ts"], {</span><span class="dl ctx">     stdout: "ignore",</span><span class="dl ctx">     // porta própria: a sonda abaixo só passa quando ESTE servidor subir</span><span class="dl ctx">     env: { ...process.env, PORT: "3999" },</span><span class="dl ctx">   });</span><span class="dl ctx"> </span><span class="dl ctx">   // ... e sem esperar a porta abrir</span><span class="dl ctx">   for (let tentativa = 0; tentativa &lt; 50; tentativa++) {</span><span class="dl ctx">     try {</span><span class="dl ctx">       await fetch(BASE);</span><span class="dl ctx">       return;</span><span class="dl ctx">     } catch {</span><span class="dl ctx">       await Bun.sleep(100);</span><span class="dl ctx">     }</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   throw new Error("o servidor não subiu");</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> afterAll(() =&gt; {</span><span class="dl ctx">   server.kill();</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> beforeEach(() =&gt; {</span><span class="dl ctx">   // ... e sem limpar o banco de verdade entre um teste e outro</span><span class="dl ctx">   db.run("DELETE FROM livros");</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> function cadastrar(n: number, autorId = AUSTEN, livros = LIVROS) {</span><span class="dl ctx">   return fetch(`${BASE}/livros`, {</span><span class="dl ctx">     method: "POST",</span><span class="dl ctx">     headers: { "Content-Type": "application/json" },</span><span class="dl ctx">     body: JSON.stringify({ ...livros[n], autorId }),</span><span class="dl ctx">   });</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> const cadastrarDeEvans = (n: number) =&gt; cadastrar(n, EVANS, LIVROS_DE_EVANS);</span><span class="dl ctx"> </span><span class="dl ctx"> test("RF05: um autor de literatura vai até 5 livros no acervo", async () =&gt; {</span><span class="dl ctx">   for (let i = 0; i &lt; 5; i++) {</span><span class="dl ctx">     const response = await cadastrar(i);</span><span class="dl ctx">     expect(response.status).toBe(201);</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const sexto = await cadastrar(5);</span><span class="dl ctx"> </span><span class="dl ctx">   expect(sexto.status).toBe(409);</span><span class="dl ctx"> });</span><span class="dl ctx"> </span><span class="dl ctx"> test("RF05′: um autor didático vai até 10 livros no acervo", async () =&gt; {</span><span class="dl ctx">   for (let i = 0; i &lt; 10; i++) {</span><span class="dl ctx">     const response = await cadastrarDeEvans(i);</span><span class="dl ctx">     expect(response.status).toBe(201);</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   const decimoPrimeiro = await cadastrarDeEvans(10);</span><span class="dl ctx"> </span><span class="dl ctx">   expect(decimoPrimeiro.status).toBe(409);</span><span class="dl ctx"> });</span></code></pre>
 </div></div>
   <div class="step test"><h3>✅ Como testar</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c263">copiar</button></div></div>
-<pre class="cb-body" id="c263"><code><i class="t-cmd">bun</i> x tsc <i class="t-flag">--noEmit</i> <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun test
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c271">copiar</button></div></div>
+<pre class="cb-body" id="c271"><code><i class="t-cmd">bun</i> x tsc <i class="t-flag">--noEmit</i> <i class="t-pun">&amp;</i><i class="t-pun">&amp;</i> bun test
 
-<i class="t-com"># a pasta services/ sumiu; no lugar dela, use-cases/</i>
-<i class="t-cmd">ls</i> src/</code></pre>
+<i class="t-com"># quem conhece o db agora: só os adapters SQLite e os dois pontos de entrada</i>
+<i class="t-cmd">grep</i> <i class="t-flag">-rln</i> <i class="t-str">'from "./db"\|from "../db"'</i> src</code></pre>
 </div>
 <div class="cb cb-out">
 <div class="cb-bar"><span class="cb-lang">saída</span><div class="cb-actions"></div></div>
-<pre class="cb-body" id="c264"><code> 3 pass
+<pre class="cb-body" id="c272"><code> 3 pass
  1 todo
  0 fail
 
-db.ts         errors.ts     index.ts      repositories  routes
-domain        importar.ts   input.ts      router.ts     use-cases</code></pre>
-</div>
-<p>Sem <code>services/</code>.</p></div>
+src/main.ts
+src/repositories/SqliteAutorRepository.ts
+src/repositories/SqliteLivroRepository.ts
+src/importar.ts</code></pre>
+</div></div>
   <div class="step commit"><h3>📌 Commit da fase</h3><div class="cb">
-<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c265">copiar</button></div></div>
-<pre class="cb-body" id="c265"><code><i class="t-cmd">git</i> add src
-<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 41: caso de uso BuscarLivro, fim da pasta services"</i></code></pre>
+<div class="cb-bar"><span class="cb-lang">terminal</span><div class="cb-actions"><button class="cp" data-code="c273">copiar</button></div></div>
+<pre class="cb-body" id="c273"><code><i class="t-cmd">git</i> add package.json src tests
+<i class="t-cmd">git</i> commit <i class="t-flag">-m</i> <i class="t-str">"fase 42: composition root, ninguem mais escolhe implementacao"</i></code></pre>
 </div></div>
 </div>
 </article>
-<p class="solo-pe">Fase anterior: <code>git checkout fase40</code>. Próxima fase: <code>git checkout fase42</code>, e <code>git diff fase41 fase42 -- src tests</code> mostra só o que ela muda.</p>
+<p class="solo-pe">Fase anterior: <code>git checkout fase41</code>. Próxima fase: <code>git checkout fase43</code>, e <code>git diff fase42 fase43 -- src tests</code> mostra só o que ela muda.</p>
 </div>
 <script>
 document.addEventListener("click", (e) => {

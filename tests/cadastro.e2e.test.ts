@@ -32,7 +32,7 @@ let server: ReturnType<typeof Bun.spawn>;
 
 beforeAll(async () => {
   // não há como exercitar a regra sem subir a aplicação inteira
-  server = Bun.spawn(["bun", "src/index.ts"], {
+  server = Bun.spawn(["bun", "src/main.ts"], {
     stdout: "ignore",
     // porta própria: a sonda abaixo só passa quando ESTE servidor subir
     env: { ...process.env, PORT: "3999" },

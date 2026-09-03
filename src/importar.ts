@@ -1,14 +1,9 @@
+import { buildUseCases } from "./composition";
 import { createDb } from "./db";
-import { SqliteAutorRepository } from "./repositories/SqliteAutorRepository";
-import { SqliteLivroRepository } from "./repositories/SqliteLivroRepository";
-import { CadastrarLivro } from "./use-cases/CadastrarLivro";
 
 createDb();
 
-// ⚠️ o mesmo defeito proposital da rota: some na fase 42.
-const livros = new SqliteLivroRepository();
-const autores = new SqliteAutorRepository();
-const cadastrarLivro = new CadastrarLivro(livros, autores, () => new Date());
+const { cadastrarLivro } = buildUseCases();
 
 const path = process.argv[2];
 

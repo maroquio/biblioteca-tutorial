@@ -1,7 +1,7 @@
+import { Hono } from "hono";
+import { InvalidInput, NotFound, RuleConflict } from "../application/errors";
 import type { UseCases } from "../composition";
 import { DomainError, InvalidValue } from "../domain/errors";
-import { InvalidInput, NotFound, RuleConflict } from "../application/errors";
-import { match, type Route } from "./router";
 import { livroRoutes } from "./routes/livros";
 
 function errorResponse(error: unknown): Response {
@@ -23,36 +23,17 @@ function errorResponse(error: unknown): Response {
 }
 
 export function createServer(useCases: UseCases, porta = 3000) {
-  const routes: Route[] = [
-    {
-      method: "GET",
-      pattern: "/",
-      handler: () => Response.json({ message: "API da Biblioteca" }),
-    },
-    ...livroRoutes(useCases),
-  ];
+  const app = new Hono();
 
-  return Bun.serve({
-    port: porta,
+  app.get("/", (contexto) => contexto.json({ message: "API da Biblioteca" }));
 
-    async fetch(request) {
-      const url = new URL(request.url);
+  app.route("/", livroRoutes(useCases));
 
-      try {
-        for (const route of routes) {
-          if (route.method !== request.method) continue;
+  app.notFound((contexto) =>
+    contexto.json({ error: "Recurso não encontrado" }, 404),
+  );
 
-          const params = match(route.pattern, url.pathname);
-          if (params) return await route.handler(request, params);
-        }
+  app.onError((error) => errorResponse(error));
 
-        return Response.json(
-          { error: "Recurso não encontrado" },
-          { status: 404 },
-        );
-      } catch (error) {
-        return errorResponse(error);
-      }
-    },
-  });
+  return Bun.serve({ port: porta, fetch: app.fetch });
 }

@@ -1,28 +1,23 @@
-import type { UseCases } from "../../composition";
+import { Hono } from "hono";
 import { parseBusca, parseNovoLivro } from "../../application/input";
-import type { Route } from "../router";
+import type { UseCases } from "../../composition";
 
-export function livroRoutes(useCases: UseCases): Route[] {
-  return [
-    {
-      method: "POST",
-      pattern: "/livros",
-      handler: async (request) => {
-        const livro = useCases.cadastrarLivro.execute(
-          parseNovoLivro(await request.json()),
-        );
+export function livroRoutes(useCases: UseCases): Hono {
+  const routes = new Hono();
 
-        return Response.json(livro, {
-          status: 201,
-          headers: { Location: `/livros/${livro.isbn}` },
-        });
-      },
-    },
-    {
-      method: "GET",
-      pattern: "/livros/:q",
-      handler: (_request, params) =>
-        Response.json(useCases.buscarLivro.execute(parseBusca(params))),
-    },
-  ];
+  routes.post("/livros", async (contexto) => {
+    const livro = useCases.cadastrarLivro.execute(
+      parseNovoLivro(await contexto.req.json()),
+    );
+
+    contexto.header("Location", `/livros/${livro.isbn}`);
+
+    return contexto.json(livro, 201);
+  });
+
+  routes.get("/livros/:q", (contexto) =>
+    contexto.json(useCases.buscarLivro.execute(parseBusca(contexto.req.param()))),
+  );
+
+  return routes;
 }

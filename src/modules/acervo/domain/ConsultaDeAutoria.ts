@@ -10,6 +10,8 @@ export type Tiragem = "curta" | "ampla";
 export type AutorConhecido = {
   nome: string;
   tiragem: Tiragem;
+  /** Cópia local da verdade, mantida pela Autoria. Serve para mostrar, não para decidir. */
+  livrosNoAcervo: number;
 };
 
 /** Port de saída: tudo o que o Acervo precisa saber sobre um autor. */

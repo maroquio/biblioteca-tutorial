@@ -18,6 +18,7 @@ export class AutoriaComoConsulta implements ConsultaDeAutoria {
     return {
       nome: resumo.nome,
       tiragem: resumo.tipo === "didatico" ? "ampla" : "curta",
+      livrosNoAcervo: resumo.livrosNoAcervo,
     };
   }
 

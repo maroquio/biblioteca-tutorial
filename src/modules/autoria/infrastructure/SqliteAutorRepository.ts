@@ -9,10 +9,16 @@ type AutorRow = {
   nome: string;
   orcid: string | null;
   tipo: string;
+  livros_no_acervo: number;
 };
 
 function toAutor(row: AutorRow): Autor {
-  return new Autor(new AutorId(row.id), row.nome, row.tipo as TipoDeAutor);
+  return new Autor(
+    new AutorId(row.id),
+    row.nome,
+    row.tipo as TipoDeAutor,
+    row.livros_no_acervo,
+  );
 }
 
 export class SqliteAutorRepository
@@ -29,7 +35,20 @@ export class SqliteAutorRepository
   resumo(autorId: AutorId): ResumoDoAutor | null {
     const autor = this.findById(autorId);
 
-    return autor === null ? null : { nome: autor.nome, tipo: autor.tipo };
+    if (autor === null) return null;
+
+    return {
+      nome: autor.nome,
+      tipo: autor.tipo,
+      livrosNoAcervo: autor.livrosNoAcervo,
+    };
+  }
+
+  ajustarLivrosNoAcervo(autorId: AutorId, delta: number): void {
+    db.run(
+      "UPDATE autores SET livros_no_acervo = livros_no_acervo + ? WHERE id = ?",
+      [delta, autorId.value],
+    );
   }
 
   idsPorNome(termo: string): AutorId[] {

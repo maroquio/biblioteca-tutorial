@@ -39,8 +39,8 @@ function scenario(hoje = new Date("2026-03-10")) {
   const livros = new InMemoryLivroRepository();
 
   const autoria = new InMemoryAutoria({
-    [AUSTEN]: { nome: "Jane Austen", tiragem: "curta" },
-    [EVANS]: { nome: "Eric Evans", tiragem: "ampla" },
+    [AUSTEN]: { nome: "Jane Austen", tiragem: "curta", livrosNoAcervo: 0 },
+    [EVANS]: { nome: "Eric Evans", tiragem: "ampla", livrosNoAcervo: 0 },
   });
 
   const events = new FakeEventPublisher();
@@ -95,7 +95,7 @@ test("RF07: o sequencial recomeça a cada ano", () => {
   const { livros } = scenario();
 
   const autoria = new InMemoryAutoria({
-    [AUSTEN]: { nome: "Jane Austen", tiragem: "curta" },
+    [AUSTEN]: { nome: "Jane Austen", tiragem: "curta", livrosNoAcervo: 0 },
   });
 
   const events = new FakeEventPublisher();

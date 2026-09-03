@@ -2,11 +2,13 @@ import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
   BuscarLivro,
   CadastrarLivro,
+  type LivroCatalogado,
   SqliteLivroRepository,
 } from "./modules/acervo";
-import { SqliteAutorRepository } from "./modules/autoria";
+import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
+import { AutorId } from "./shared/identifiers";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
@@ -23,6 +25,11 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   const autores = new SqliteAutorRepository();
   const autoria = new AutoriaComoConsulta(autores);
   const bus = new EventBus();
+  const projecao = new ProjecaoDeLivros(autores);
+
+  bus.subscribe<LivroCatalogado>("LivroCatalogado", (event) =>
+    projecao.registrarEntrada(new AutorId(event.autorId)),
+  );
 
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),

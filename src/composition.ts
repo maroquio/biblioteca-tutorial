@@ -1,8 +1,10 @@
+import {
+  BuscarLivro,
+  CadastrarLivro,
+  SqliteLivroRepository,
+} from "./modules/acervo";
+import { SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
-import { SqliteAutorRepository } from "./modules/autoria/infrastructure/SqliteAutorRepository";
-import { SqliteLivroRepository } from "./modules/acervo/infrastructure/SqliteLivroRepository";
-import { BuscarLivro } from "./modules/acervo/features/buscar-livro/BuscarLivro";
-import { CadastrarLivro } from "./modules/acervo/features/cadastrar-livro/CadastrarLivro";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;

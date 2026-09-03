@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import type { UseCases } from "./composition";
 import { DomainError, InvalidValue } from "./shared/domain-errors";
-import { register as registerBuscarLivro } from "./modules/acervo/features/buscar-livro/route";
-import { register as registerCadastrarLivro } from "./modules/acervo/features/cadastrar-livro/route";
+import { registerRoutes as registerAcervo } from "./modules/acervo";
 import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";
 
 function errorResponse(error: unknown): Response {
@@ -28,8 +27,7 @@ export function createServer(useCases: UseCases, porta = 3000) {
 
   app.get("/", (contexto) => contexto.json({ message: "API da Biblioteca" }));
 
-  registerCadastrarLivro(app, useCases);
-  registerBuscarLivro(app, useCases);
+  registerAcervo(app, useCases);
 
   app.notFound((contexto) =>
     contexto.json({ error: "Recurso não encontrado" }, 404),

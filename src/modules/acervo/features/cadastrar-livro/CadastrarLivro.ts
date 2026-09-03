@@ -1,5 +1,5 @@
-import type { AutorRepository } from "../../../autoria";
 import type { Clock } from "../../../../shared/Clock";
+import type { ConsultaDeAutoria } from "../../domain/ConsultaDeAutoria";
 import { Livro, toIso } from "../../domain/Livro";
 import type { LivroRepository } from "../../domain/LivroRepository";
 import { AutorId } from "../../../../shared/identifiers";
@@ -12,7 +12,7 @@ import { livroToJson, type LivroJson } from "../../output";
 export class CadastrarLivro {
   constructor(
     private readonly livros: LivroRepository,
-    private readonly autores: AutorRepository,
+    private readonly autoria: ConsultaDeAutoria,
     private readonly now: Clock,
   ) {}
 
@@ -20,14 +20,14 @@ export class CadastrarLivro {
     const isbn = new Isbn(input.isbn);
     const autorId = new AutorId(input.autorId);
 
-    const autor = this.autores.findById(autorId);
+    const autor = this.autoria.autor(autorId);
 
     if (!autor) {
       throw new NotFound("Autor não cadastrado");
     }
 
     LimiteDeLivros.verificar(
-      autor.tipo,
+      autor.tiragem,
       this.livros.contarNoAcervoDoAutor(autorId),
     );
 

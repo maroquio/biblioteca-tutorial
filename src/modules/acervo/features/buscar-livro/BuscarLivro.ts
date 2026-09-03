@@ -1,4 +1,4 @@
-import type { AutorRepository } from "../../../autoria";
+import type { ConsultaDeAutoria } from "../../domain/ConsultaDeAutoria";
 import { Isbn } from "../../domain/Isbn";
 import type { Livro } from "../../domain/Livro";
 import type { LivroRepository } from "../../domain/LivroRepository";
@@ -7,7 +7,7 @@ import { livroToJson, type LivroJson } from "../../output";
 export class BuscarLivro {
   constructor(
     private readonly livros: LivroRepository,
-    private readonly autores: AutorRepository,
+    private readonly autoria: ConsultaDeAutoria,
   ) {}
 
   execute(q: string): LivroJson[] {
@@ -26,7 +26,7 @@ export class BuscarLivro {
   }
 
   private comAutor(livro: Livro): LivroJson {
-    const autor = this.autores.findById(livro.autorId);
+    const autor = this.autoria.autor(livro.autorId);
 
     return livroToJson(livro, autor!);
   }

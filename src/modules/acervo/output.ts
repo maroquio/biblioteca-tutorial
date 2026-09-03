@@ -1,4 +1,4 @@
-import type { Autor } from "../autoria";
+import type { AutorConhecido } from "./domain/ConsultaDeAutoria";
 import type { Livro } from "./domain/Livro";
 
 export type LivroJson = {
@@ -10,7 +10,7 @@ export type LivroJson = {
   dataCatalogacao: string;
 };
 
-export function livroToJson(livro: Livro, autor: Autor): LivroJson {
+export function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {
   return {
     id: livro.id!.value,
     numeroRegistro: livro.numeroRegistro.value,

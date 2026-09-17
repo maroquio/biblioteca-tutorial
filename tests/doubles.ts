@@ -8,6 +8,7 @@ import type {
 import { AutorId, LivroId } from "../src/shared/identifiers";
 import type { Isbn } from "../src/modules/acervo/domain/Isbn";
 import type { Livro } from "../src/modules/acervo/domain/Livro";
+import type { NumeroRegistro } from "../src/modules/acervo/domain/NumeroRegistro";
 import type {
   AcervoEvent,
   EventPublisher,
@@ -17,10 +18,6 @@ import type { LivroRepository } from "../src/modules/acervo/domain/LivroReposito
 export class InMemoryLivroRepository implements LivroRepository {
   private items: Livro[] = [];
   private nextId = 1;
-
-  contarNoAcervoDoAutor(autorId: AutorId): number {
-    return this.items.filter((item) => item.autorId.equals(autorId)).length;
-  }
 
   contarCatalogadosNoAno(ano: string): number {
     return this.items.filter((item) => item.dataCatalogacao.startsWith(ano))
@@ -38,6 +35,13 @@ export class InMemoryLivroRepository implements LivroRepository {
     return this.items.find((item) => item.isbn.equals(isbn)) ?? null;
   }
 
+  findByNumeroRegistro(numero: NumeroRegistro): Livro | null {
+    return (
+      this.items.find((item) => item.numeroRegistro.value === numero.value) ??
+      null
+    );
+  }
+
   findByAutorId(autorId: AutorId): Livro[] {
     return this.items.filter((item) => item.autorId.equals(autorId));
   }
@@ -53,10 +57,16 @@ export class InMemoryLivroRepository implements LivroRepository {
       autorIds.some((autorId) => item.autorId.equals(autorId)),
     );
   }
+
+  registrarBaixa(livro: Livro): void {
+    this.items = this.items.map((item) =>
+      item.id!.equals(livro.id!) ? livro : item,
+    );
+  }
 }
 
 export class InMemoryAutoria implements ConsultaDeAutoria {
-  constructor(private readonly items: Record<number, AutorConhecido>) { }
+  constructor(private readonly items: Record<number, AutorConhecido>) {}
 
   autor(autorId: AutorId): AutorConhecido | null {
     return this.items[autorId.value] ?? null;

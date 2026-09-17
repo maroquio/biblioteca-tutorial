@@ -28,18 +28,20 @@ export class CadastrarLivro {
       throw new NotFound("Autor não cadastrado");
     }
 
-    LimiteDeLivros.verificar(
-      autor.tiragem,
-      this.livros.contarNoAcervoDoAutor(autorId),
-    );
+    // livro que já saiu do acervo não conta no limite nem bloqueia o título
+    const noAcervo = this.livros
+      .findByAutorId(autorId)
+      .filter((livro) => livro.estaNoAcervo());
+
+    LimiteDeLivros.verificar(autor.tiragem, noAcervo.length);
 
     if (this.livros.findByIsbn(isbn)) {
       throw new RuleConflict("Livro já cadastrado");
     }
 
-    const mesmoTitulo = this.livros
-      .findByAutorId(autorId)
-      .some((livro) => livro.mesmoTituloQue(input.titulo));
+    const mesmoTitulo = noAcervo.some((livro) =>
+      livro.mesmoTituloQue(input.titulo),
+    );
 
     if (mesmoTitulo) {
       throw new RuleConflict("Este autor já tem um livro com este título");

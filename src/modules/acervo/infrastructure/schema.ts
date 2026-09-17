@@ -6,7 +6,9 @@ const COLUMNS = `
   isbn TEXT NOT NULL UNIQUE,
   titulo TEXT NOT NULL,
   autor_id INTEGER NOT NULL,
-  data_catalogacao TEXT NOT NULL
+  data_catalogacao TEXT NOT NULL,
+  baixa_motivo TEXT,
+  baixa_em TEXT
 `;
 
 /**
@@ -19,6 +21,7 @@ export function createAcervoTables(): void {
   db.run(`CREATE TABLE IF NOT EXISTS livros (${COLUMNS});`);
 
   dropCrossModuleForeignKeys();
+  addBaixaIfMissing();
 }
 
 function dropCrossModuleForeignKeys(): void {
@@ -41,4 +44,18 @@ function dropCrossModuleForeignKeys(): void {
   console.log(
     `Migração aplicada: ${foreignKeys.length} chave(s) estrangeira(s) cruzada(s) removida(s) de livros`,
   );
+}
+
+/** Banco criado antes desta atividade não tem as colunas — e nenhum livro saiu ainda. */
+function addBaixaIfMissing(): void {
+  const colunas = db.query("PRAGMA table_info(livros)").all() as {
+    name: string;
+  }[];
+
+  if (colunas.some((coluna) => coluna.name === "baixa_em")) return;
+
+  db.run("ALTER TABLE livros ADD COLUMN baixa_motivo TEXT");
+  db.run("ALTER TABLE livros ADD COLUMN baixa_em TEXT");
+
+  console.log("Migração aplicada: colunas de baixa acrescentadas a livros");
 }

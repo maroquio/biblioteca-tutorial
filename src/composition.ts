@@ -2,6 +2,8 @@ import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
   BuscarLivro,
   CadastrarLivro,
+  DarBaixa,
+  type LivroBaixado,
   type LivroCatalogado,
   SqliteLivroRepository,
 } from "./modules/acervo";
@@ -17,6 +19,7 @@ import { AutorId } from "./shared/identifiers";
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  darBaixa: DarBaixa;
   cadastrarAutor: CadastrarAutor;
 };
 
@@ -36,9 +39,14 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
     projecao.registrarEntrada(new AutorId(event.autorId)),
   );
 
+  bus.subscribe<LivroBaixado>("LivroBaixado", (event) =>
+    projecao.registrarSaida(new AutorId(event.autorId)),
+  );
+
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
+    darBaixa: new DarBaixa(livros, autoria, now, bus),
     cadastrarAutor: new CadastrarAutor(autores),
   };
 }

@@ -1,11 +1,18 @@
-import { InvalidValue } from "../../../shared/domain-errors";
+import { InvalidValue, RuleViolation } from "../../../shared/domain-errors";
 import type { LivroId, AutorId } from "../../../shared/identifiers";
+import type { Baixa } from "./Baixa";
 import type { Isbn } from "./Isbn";
 import { NumeroRegistro } from "./NumeroRegistro";
 
 export class TituloVazio extends InvalidValue {
   constructor() {
     super("O título do livro é obrigatório");
+  }
+}
+
+export class LivroJaBaixado extends RuleViolation {
+  constructor(numeroRegistro: NumeroRegistro) {
+    super(`O livro ${numeroRegistro.value} já saiu do acervo`);
   }
 }
 
@@ -21,6 +28,7 @@ export class Livro {
     readonly titulo: string,
     readonly autorId: AutorId,
     readonly dataCatalogacao: string,
+    readonly baixa: Baixa | null = null,
   ) {
     if (Livro.normalizar(titulo) === "") {
       throw new TituloVazio();
@@ -56,7 +64,30 @@ export class Livro {
       this.titulo,
       this.autorId,
       this.dataCatalogacao,
+      this.baixa,
     );
+  }
+
+  /** Um livro sai do acervo uma vez só. A entidade devolve outra, já baixada. */
+  darBaixa(baixa: Baixa): Livro {
+    if (!this.estaNoAcervo()) {
+      throw new LivroJaBaixado(this.numeroRegistro);
+    }
+
+    return new Livro(
+      this.id,
+      this.numeroRegistro,
+      this.isbn,
+      this.titulo,
+      this.autorId,
+      this.dataCatalogacao,
+      baixa,
+    );
+  }
+
+  /** "Estar no acervo" é decisão do negócio, não um `WHERE` perdido numa query. */
+  estaNoAcervo(): boolean {
+    return this.baixa === null;
   }
 
   /** O que conta como "a mesma obra" é decisão do negócio, não do SQL. */

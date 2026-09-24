@@ -4,7 +4,7 @@ import { parseCorrecaoDeTitulo } from "./input";
 
 
 export function register(routes: Hono, useCases: UseCases): void {
-  routes.patch("/livros/:id/titulo", async (contexto) => {
+  routes.patch("/livros/:id/titulo", async (contexto: { req: { param: () => { id?: string; }; json: () => unknown; }; json: (arg0: any, arg1: number) => any; }) => {
     const input = parseCorrecaoDeTitulo(
       contexto.req.param(),
       await contexto.req.json(),

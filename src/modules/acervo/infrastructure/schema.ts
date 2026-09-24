@@ -21,6 +21,19 @@ export function createAcervoTables(): void {
   dropCrossModuleForeignKeys();
 }
 
+export function createAvaliacaoTables(): void {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS avaliacoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero_registro TEXT NOT NULL,
+      matricula TEXT NOT NULL,
+      nota INTEGER NOT NULL,
+      comentario TEXT,
+      UNIQUE (numero_registro, matricula)
+    );
+  `);
+}
+
 function dropCrossModuleForeignKeys(): void {
   const foreignKeys = db.query("PRAGMA foreign_key_list(livros)").all();
 

@@ -21,6 +21,8 @@ function toAutor(row: AutorRow): Autor {
   );
 }
 
+
+
 export class SqliteAutorRepository
   implements AutorRepository, ConsultaDeAutores
 {
@@ -58,4 +60,6 @@ export class SqliteAutorRepository
 
     return rows.map((row) => new AutorId(row.id));
   }
+
+  
 }

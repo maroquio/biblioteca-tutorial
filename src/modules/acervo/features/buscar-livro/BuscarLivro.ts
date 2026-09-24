@@ -32,4 +32,7 @@ export class BuscarLivro {
 
     return livroToJson(livro, autor!);
   }
+
+  findById(id: LivroId): Livro | null;
+  updateTitulo(livro: Livro): void;
 }

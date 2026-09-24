@@ -6,13 +6,17 @@ import {
   SqliteLivroRepository,
 } from "./modules/acervo";
 import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
+import { RegistrarAvaliacao } from "./modules/avaliacao/features/registrar-avaliacao/RegistrarAvaliacao";
+import { SqliteAvaliacaoRepository } from "./modules/avaliacao/infrastructure/SqliteAvaliacaoRepository";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
+import { AcervoComoConsultaDeAvaliacoes } from "./modules/avaliacao/routes";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  registrarAvaliacao: RegistrarAvaliacao;
 };
 
 /**
@@ -26,6 +30,8 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   const autoria = new AutoriaComoConsulta(autores);
   const bus = new EventBus();
   const projecao = new ProjecaoDeLivros(autores);
+  const avaliacoes = new SqliteAvaliacaoRepository();
+  const acervo =  new AcervoComoConsultaDeAvaliacoes(livros);
 
   bus.subscribe<LivroCatalogado>("LivroCatalogado", (event) =>
     projecao.registrarEntrada(new AutorId(event.autorId)),
@@ -34,5 +40,6 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
+    registrarAvaliacao: new RegistrarAvaliacao(avaliacoes, acervo)
   };
 }

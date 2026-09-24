@@ -57,3 +57,4 @@ test("RF05 também vale para a importação em lote", async () => {
 
   expect(noAcervo(AUSTEN)).toBe(5);
 });
+

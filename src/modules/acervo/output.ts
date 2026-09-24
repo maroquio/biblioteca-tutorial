@@ -1,3 +1,4 @@
+import type { Avaliacao } from "./domain/Avaliacao";
 import type { AutorConhecido } from "./domain/ConsultaDeAutoria";
 import type { Livro } from "./domain/Livro";
 
@@ -20,5 +21,23 @@ export function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {
     autor: autor.nome,
     livrosDoAutor: autor.livrosNoAcervo,
     dataCatalogacao: livro.dataCatalogacao,
+  };
+}
+
+export type AvaliacaoJson = {
+  id: number;
+  numeroRegistro: string;
+  matricula: string;
+  nota: number;
+  comentario: string | null;
+};
+
+export function avaliacaoToJson(avaliacao: Avaliacao): AvaliacaoJson {
+  return {
+    id: avaliacao.id!.value,
+    numeroRegistro: avaliacao.numeroRegistro,
+    matricula: avaliacao.matricula,
+    nota: avaliacao.nota,
+    comentario: avaliacao.comentario,
   };
 }

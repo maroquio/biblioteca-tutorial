@@ -1,6 +1,8 @@
 import type { AutorId } from "../../../shared/identifiers";
 import type { Isbn } from "./Isbn";
 import type { Livro } from "./Livro";
+import type { LivroId } from "../../../shared/identifiers";
+
 
 /**
  * Port: quem PRECISA do serviço declara o contrato. Esta interface vive no
@@ -17,4 +19,6 @@ export interface LivroRepository {
   findByAutorId(autorId: AutorId): Livro[];
   searchByTitulo(termo: string): Livro[];
   findByAutorIds(autorIds: AutorId[]): Livro[];
+  findById(id: LivroId): Livro | null;
+  updateTitulo(livro: Livro): void;
 }

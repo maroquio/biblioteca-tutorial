@@ -2,7 +2,8 @@ import { db } from "../../../infrastructure/db";
 import { Autor, type TipoDeAutor } from "../domain/Autor";
 import type { AutorRepository } from "../domain/AutorRepository";
 import type { ConsultaDeAutores, ResumoDoAutor } from "../ConsultaDeAutores";
-import { AutorId } from "../../../shared/identifiers";
+import { AutorId, LivroId } from "../../../shared/identifiers";
+import type { Livro } from "../../acervo/domain/Livro";
 
 type AutorRow = {
   id: number;
@@ -43,6 +44,16 @@ export class SqliteAutorRepository
       livrosNoAcervo: autor.livrosNoAcervo,
     };
   }
+
+  findById(id: LivroId): Livro | null {
+  return this.items.find((livro) => livro.id?.equals(id)) ?? null;
+}
+
+  updateTitulo(livro: Livro): void {
+    this.items = this.items.map((atual) =>
+      atual.id?.equals(livro.id!) ? livro : atual,
+    );
+}
 
   ajustarLivrosNoAcervo(autorId: AutorId, delta: number): void {
     db.run(

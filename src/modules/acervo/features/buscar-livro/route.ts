@@ -3,9 +3,12 @@ import type { UseCases } from "../../../../composition";
 import { parseBusca } from "./input";
 
 export function register(routes: Hono, useCases: UseCases): void {
-  routes.get("/livros/:q", (contexto) =>
-    contexto.json(
-      useCases.buscarLivro.execute(parseBusca(contexto.req.param())),
-    ),
-  );
+  routes.patch("/livros/:id/titulo", async (contexto) => {
+    const input = parseCorrecaoDeTitulo(
+      contexto.req.param(),
+      await contexto.req.json(),
+    );
+    return contexto.json(useCases.corrigirTitulo.execute(input), 200);
+  });
 }
+

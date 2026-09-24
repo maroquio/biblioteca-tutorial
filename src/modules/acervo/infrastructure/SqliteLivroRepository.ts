@@ -69,6 +69,32 @@ export class SqliteLivroRepository implements LivroRepository {
     return row === null ? null : toLivro(row);
   }
 
+
+findById(id: LivroId): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE id = ?")
+    .get(id.value) as LivroRow | null;
+  return row === null ? null : toLivro(row);
+}                                                   // 3 edição...
+
+updateTitulo(livro: Livro): void {
+  db.run("UPDATE livros SET titulo = ? WHERE id = ?", [
+    livro.titulo,
+    livro.id!.value,
+  ]);
+}
+
+
+
+  findById(id: LivroId): Livro | null {
+    return this.items.find((livro) => livro.id?.equals(id)) ?? null;   // 8 edição...
+  }
+
+  updateTitulo(livro: Livro): void {
+    this.items = this.items.map((atual) =>
+      atual.id?.equals(livro.id!) ? livro : atual,
+  );
+}
+
   findByAutorId(autorId: AutorId): Livro[] {
     const rows = db
       .query("SELECT * FROM livros WHERE autor_id = ?")

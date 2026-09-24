@@ -64,6 +64,17 @@ export class Livro {
     return Livro.normalizar(this.titulo) === Livro.normalizar(outro);
   }
 
+  comTitulo(titulo: string): Livro {
+    return new Livro(
+        this.id,
+        this.numeroRegistro,
+        this.isbn,
+        titulo,
+        this.autorId,
+        this.dataCatalogacao,
+    );
+}
+
   private static normalizar(titulo: string): string {
     return titulo.trim().toLowerCase();
   }

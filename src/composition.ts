@@ -1,18 +1,20 @@
 import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
-  BuscarLivro,
-  CadastrarLivro,
-  type LivroCatalogado,
-  SqliteLivroRepository,
+    BuscarLivro,
+    CadastrarLivro,
+    type LivroCatalogado,
+    SqliteLivroRepository,
 } from "./modules/acervo";
+import { CorrigirTitulo } from "./modules/acervo/features/corrigir-titulo/CorrigirTitulo";
 import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
 
 export type UseCases = {
-  cadastrarLivro: CadastrarLivro;
-  buscarLivro: BuscarLivro;
+    cadastrarLivro: CadastrarLivro;
+    buscarLivro: BuscarLivro;
+    corrigirTitulo: CorrigirTitulo;
 };
 
 /**
@@ -21,18 +23,19 @@ export type UseCases = {
  * duas linhas de `new Sqlite...` daqui.
  */
 export function buildUseCases(now: Clock = () => new Date()): UseCases {
-  const livros = new SqliteLivroRepository();
-  const autores = new SqliteAutorRepository();
-  const autoria = new AutoriaComoConsulta(autores);
-  const bus = new EventBus();
-  const projecao = new ProjecaoDeLivros(autores);
+    const livros = new SqliteLivroRepository();
+    const autores = new SqliteAutorRepository();
+    const autoria = new AutoriaComoConsulta(autores);
+    const bus = new EventBus();
+    const projecao = new ProjecaoDeLivros(autores);
 
-  bus.subscribe<LivroCatalogado>("LivroCatalogado", (event) =>
-    projecao.registrarEntrada(new AutorId(event.autorId)),
-  );
+    bus.subscribe<LivroCatalogado>("LivroCatalogado", (event) =>
+        projecao.registrarEntrada(new AutorId(event.autorId)),
+    );
 
-  return {
-    cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
-    buscarLivro: new BuscarLivro(livros, autoria),
-  };
+    return {
+        cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
+        buscarLivro: new BuscarLivro(livros, autoria),
+        corrigirTitulo: new CorrigirTitulo(livros),
+    };
 }

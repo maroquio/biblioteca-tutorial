@@ -47,3 +47,5 @@ data/*.csv
 
 # Saida do ai-distiller
 .aid/
+
+git switch -c

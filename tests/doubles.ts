@@ -11,6 +11,7 @@ import type {
 } from "../src/modules/acervo/domain/events";
 import type { LivroRepository } from "../src/modules/acervo/domain/LivroRepository";
 
+
 export class InMemoryLivroRepository implements LivroRepository {
   private items: Livro[] = [];
   private nextId = 1;
@@ -50,7 +51,18 @@ export class InMemoryLivroRepository implements LivroRepository {
       autorIds.some((autorId) => item.autorId.equals(autorId)),
     );
   }
+
+  findById(id: LivroId): Livro | null {
+  return this.items.find((livro) => livro.id?.equals(id)) ?? null;
 }
+
+updateTitulo(livro: Livro): void {
+  this.items = this.items.map((atual) =>
+    atual.id?.equals(livro.id!) ? livro : atual,
+  );
+}
+}
+
 
 export class InMemoryAutoria implements ConsultaDeAutoria {
   constructor(private readonly items: Record<number, AutorConhecido>) {}

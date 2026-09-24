@@ -1,5 +1,6 @@
 export { CadastrarLivro } from "./features/cadastrar-livro/CadastrarLivro";
 export { BuscarLivro } from "./features/buscar-livro/BuscarLivro";
+export { RegistrarAvaliacao } from "./features/avaliar-livro/RegistrarAvaliacao";
 export { SqliteLivroRepository } from "./infrastructure/SqliteLivroRepository";
 export { createAcervoTables } from "./infrastructure/schema";
 export type {

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Atividade avaliativa 6 — Registrar avaliação de livro</title><link rel="stylesheet" href="avaliacao.css"><script src="copiar.js" defer></script></head>
+<body>
+<header><div class="page"><div class="eyebrow">Biblioteca · avaliação de arquitetura</div><h1>Atividade 6 — Registrar avaliação de livro</h1><p class="subtitle">Um módulo novo com uma fatia vertical. O código da operação está pronto; você decide onde cada artefato pertence e como as fronteiras se conectam.</p><div class="meta"><span class="pill">Ponto de partida: branch main</span><span class="pill">Tempo sugerido: 80 minutos</span><span class="pill">10 pontos</span></div></div></header>
+<main class="page">
+<section><h2>O pedido da biblioteca</h2><p class="lead">Leitores podem registrar avaliações dos livros catalogados. A API recebe <code>POST /avaliacoes</code> com <code>numeroRegistro</code>, <code>matricula</code>, <code>nota</code> inteira de 1 a 5 e <code>comentario</code> opcional. Uma matrícula pode avaliar o mesmo livro uma única vez.</p><p>Livro inexistente resulta em 404; segunda avaliação da mesma matrícula para o mesmo número de registro resulta em 409; entrada inválida resulta em 400. O sucesso retorna 201, <code>Location: /avaliacoes/:id</code> e um JSON com os cinco campos recebidos mais <code>id</code>. Comentário ausente é <code>null</code>.</p><div class="note">Esta atividade também parte da <code>main</code>; não depende da Atividade 5. Todos os blocos de lógica são copiáveis. Você completa os imports locais e as ligações entre artefatos. Nenhum enunciado fornece o caminho dos arquivos novos.</div></section>
+<section><h2>Blocos para distribuir</h2><p>Os blocos marcados <em>arquivo novo</em> formam o corpo principal de um arquivo. Os de <em>edição</em> entram em artefatos existentes. Faça o projeto compilar acrescentando os imports locais apropriados.</p>
+<div class="step"><span class="step-number">01 · edição</span><h3>Identidade da avaliação</h3><p>O projeto já compartilha o mecanismo de identificadores. Acrescente esta identidade nominal ao mesmo mecanismo.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-1">Copiar</button></div><pre><code id="a6-1">export class AvaliacaoId extends Identifier {}</code></pre></div></div>
+<div class="step"><span class="step-number">02 · arquivo novo</span><h3>Entidade do módulo</h3><p>A nota válida é decisão da entidade. A matrícula e o número de registro já chegam como textos não vazios da entrada.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-2">Copiar</button></div><pre><code id="a6-2">export class Avaliacao {
+  constructor(
+    readonly id: AvaliacaoId | null,
+    readonly numeroRegistro: string,
+    readonly matricula: string,
+    readonly nota: number,
+    readonly comentario: string | null,
+  ) {
+    if (!Number.isInteger(nota) || nota &lt; 1 || nota &gt; 5) {
+      throw new InvalidValue("A nota deve ser um inteiro de 1 a 5");
+    }
+  }
+
+  static registrar(
+    numeroRegistro: string,
+    matricula: string,
+    nota: number,
+    comentario: string | null,
+  ): Avaliacao {
+    return new Avaliacao(null, numeroRegistro, matricula, nota, comentario);
+  }
+
+  withId(id: AvaliacaoId): Avaliacao {
+    return new Avaliacao(
+      id, this.numeroRegistro, this.matricula, this.nota, this.comentario,
+    );
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">03 · dois arquivos novos</span><h3>Portas declaradas por quem precisa</h3><p>Separe a porta de persistência da porta de consulta ao Acervo. São dois contratos com donos e responsabilidades diferentes.</p><div class="codebox"><div class="codebar">Contrato de persistência <button class="copy" data-copy="a6-3a">Copiar</button></div><pre><code id="a6-3a">export interface AvaliacaoRepository {
+  findByMatriculaELivro(
+    matricula: string,
+    numeroRegistro: string,
+  ): Avaliacao | null;
+  insert(avaliacao: Avaliacao): Avaliacao;
+}</code></pre></div><div class="codebox"><div class="codebar">Contrato de consulta <button class="copy" data-copy="a6-3b">Copiar</button></div><pre><code id="a6-3b">export interface ConsultaDeAcervo {
+  existeNumeroRegistro(numeroRegistro: string): boolean;
+}</code></pre></div></div>
+<div class="step"><span class="step-number">04 · arquivo novo</span><h3>Validação da entrada</h3><p>Use os helpers existentes. Formato do número de registro pertence ao Acervo; esta borda só exige um texto não vazio.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-4">Copiar</button></div><pre><code id="a6-4">export type NovaAvaliacao = {
+  numeroRegistro: string;
+  matricula: string;
+  nota: number;
+  comentario: string | null;
+};
+
+export function parseNovaAvaliacao(body: unknown): NovaAvaliacao {
+  const data = getBodyAsObject(body);
+  return {
+    numeroRegistro: getFieldAsText(data, "numeroRegistro"),
+    matricula: getFieldAsText(data, "matricula"),
+    nota: getFieldAsPositiveInt(data, "nota"),
+    comentario: data.comentario == null
+      ? null
+      : getFieldAsText(data, "comentario"),
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">05 · arquivo novo</span><h3>Saída JSON</h3><p>O domínio não decide a forma da resposta HTTP. Este mapeador pertence à saída do módulo.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-5">Copiar</button></div><pre><code id="a6-5">export type AvaliacaoJson = {
+  id: number;
+  numeroRegistro: string;
+  matricula: string;
+  nota: number;
+  comentario: string | null;
+};
+
+export function avaliacaoToJson(avaliacao: Avaliacao): AvaliacaoJson {
+  return {
+    id: avaliacao.id!.value,
+    numeroRegistro: avaliacao.numeroRegistro,
+    matricula: avaliacao.matricula,
+    nota: avaliacao.nota,
+    comentario: avaliacao.comentario,
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">06 · arquivo novo</span><h3>Caso de uso</h3><p>O caso de uso recebe as duas portas. A consulta ao Acervo é uma pergunta de negócio; ele não vê SQLite nem importa um módulo vizinho.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-6">Copiar</button></div><pre><code id="a6-6">export class RegistrarAvaliacao {
+  constructor(
+    private readonly avaliacoes: AvaliacaoRepository,
+    private readonly acervo: ConsultaDeAcervo,
+  ) {}
+
+  execute(input: NovaAvaliacao): AvaliacaoJson {
+    if (!this.acervo.existeNumeroRegistro(input.numeroRegistro)) {
+      throw new NotFound("Livro não encontrado");
+    }
+    if (this.avaliacoes.findByMatriculaELivro(
+      input.matricula, input.numeroRegistro,
+    )) {
+      throw new RuleConflict("Leitor já avaliou este livro");
+    }
+
+    const avaliacao = this.avaliacoes.insert(Avaliacao.registrar(
+      input.numeroRegistro,
+      input.matricula,
+      input.nota,
+      input.comentario,
+    ));
+    return avaliacaoToJson(avaliacao);
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">07 · arquivo novo</span><h3>Rota da fatia</h3><p>A rota recebe HTTP e chama o caso de uso. O servidor já transforma exceções em status.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-7">Copiar</button></div><pre><code id="a6-7">export function register(routes: Hono, useCases: UseCases): void {
+  routes.post("/avaliacoes", async (contexto) => {
+    const input = parseNovaAvaliacao(await contexto.req.json());
+    const avaliacao = useCases.registrarAvaliacao.execute(input);
+    contexto.header("Location", `/avaliacoes/${avaliacao.id}`);
+    return contexto.json(avaliacao, 201);
+  });
+}</code></pre></div></div>
+<div class="step"><span class="step-number">08 · arquivo novo</span><h3>Tabela de propriedade do módulo</h3><p>O novo módulo é dono de sua tabela. A referência ao livro não usa chave estrangeira entre módulos.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-8">Copiar</button></div><pre><code id="a6-8">export function createAvaliacaoTables(): void {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS avaliacoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero_registro TEXT NOT NULL,
+      matricula TEXT NOT NULL,
+      nota INTEGER NOT NULL,
+      comentario TEXT,
+      UNIQUE (numero_registro, matricula)
+    );
+  `);
+}</code></pre></div></div>
+<div class="step"><span class="step-number">09 · arquivo novo</span><h3>Adaptador de persistência</h3><p>A implementação da porta traduz entre linhas SQL e entidade.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-9">Copiar</button></div><pre><code id="a6-9">type AvaliacaoRow = {
+  id: number;
+  numero_registro: string;
+  matricula: string;
+  nota: number;
+  comentario: string | null;
+};
+
+function toAvaliacao(row: AvaliacaoRow): Avaliacao {
+  return new Avaliacao(
+    new AvaliacaoId(row.id), row.numero_registro,
+    row.matricula, row.nota, row.comentario,
+  );
+}
+
+export class SqliteAvaliacaoRepository implements AvaliacaoRepository {
+  findByMatriculaELivro(
+    matricula: string,
+    numeroRegistro: string,
+  ): Avaliacao | null {
+    const row = db.query(`
+      SELECT * FROM avaliacoes
+      WHERE matricula = ? AND numero_registro = ?
+    `).get(matricula, numeroRegistro) as AvaliacaoRow | null;
+    return row === null ? null : toAvaliacao(row);
+  }
+
+  insert(avaliacao: Avaliacao): Avaliacao {
+    const result = db.run(`
+      INSERT INTO avaliacoes
+        (numero_registro, matricula, nota, comentario)
+      VALUES (?, ?, ?, ?)
+    `, [
+      avaliacao.numeroRegistro, avaliacao.matricula,
+      avaliacao.nota, avaliacao.comentario,
+    ]);
+    return avaliacao.withId(new AvaliacaoId(Number(result.lastInsertRowid)));
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">10 · arquivo novo e edição</span><h3>Consulta publicada pelo Acervo</h3><p>O Acervo publica uma pergunta no próprio vocabulário. A implementação fica com o adaptador que já conhece a tabela de livros. Acrescente a assinatura correspondente à classe implementadora.</p><div class="codebox"><div class="codebar">Contrato público <button class="copy" data-copy="a6-10a">Copiar</button></div><pre><code id="a6-10a">export interface ConsultaDeLivros {
+  existeNumeroRegistro(numeroRegistro: string): boolean;
+}</code></pre></div><div class="codebox"><div class="codebar">Método no adaptador existente <button class="copy" data-copy="a6-10b">Copiar</button></div><pre><code id="a6-10b">existeNumeroRegistro(numeroRegistro: string): boolean {
+  return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+    .get(numeroRegistro) !== null;
+}</code></pre></div></div>
+<div class="step"><span class="step-number">11 · arquivo novo</span><h3>Ponte entre os vocabulários</h3><p>A ponte fica fora dos dois módulos. Ela implementa a porta de quem pergunta usando apenas a API pública de quem responde.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a6-11">Copiar</button></div><pre><code id="a6-11">export class AcervoComoConsultaDeAvaliacoes implements ConsultaDeAcervo {
+  constructor(private readonly livros: ConsultaDeLivros) {}
+
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return this.livros.existeNumeroRegistro(numeroRegistro);
+  }
+}</code></pre></div></div>
+</section>
+<section><h2>Conexões que você resolve</h2><p>Além dos blocos, o módulo precisa de seu registro de rotas e de uma API pública mínima. Publique o contrato do Acervo por sua própria API pública. Faça a composição instanciar o repositório e a ponte, exponha o caso de uso no tipo usado pelas rotas, registre o módulo no servidor e crie sua tabela na inicialização. Atualize a verificação de propriedade das tabelas.</p><div class="note warn">Não coloque a consulta ao livro em SQL dentro do módulo de Avaliações. O acesso à tabela de livros continua pertencendo ao Acervo. Não altere o comportamento das fatias existentes.</div></section>
+<section><h2>Como conferir</h2><p>Cadastre um livro pela API atual e use seu <code>numeroRegistro</code> para registrar uma avaliação. Teste nota 0 ou 6, livro inexistente e duplicação da mesma matrícula.</p><div class="codebox"><div class="codebar">Exemplo de corpo JSON <button class="copy" data-copy="a6-12">Copiar</button></div><pre><code id="a6-12">{
+  "numeroRegistro": "2026-000001",
+  "matricula": "LEITOR-42",
+  "nota": 5,
+  "comentario": "Excelente leitura"
+}</code></pre></div><div class="codebox"><div class="codebar">Terminal <button class="copy" data-copy="a6-13">Copiar</button></div><pre><code id="a6-13">bun x tsc --noEmit
+bun test
+bun run verificar</code></pre></div><p>Os testes de correção não são distribuídos com esta atividade.</p></section>
+<section><h2>Critérios de avaliação · 10 pontos</h2><table><thead><tr><th>Critério</th><th>Pontos</th></tr></thead><tbody><tr><td>Artefatos nas camadas e no módulo corretos</td><td>3</td></tr><tr><td>Imports, exports, rotas, inicialização e composição</td><td>3</td></tr><tr><td>Portas, ponte e propriedade das tabelas</td><td>1</td></tr><tr><td>Comportamento: sucesso, validações e conflitos</td><td>3</td></tr></tbody></table><p>Entregue como solução separada, partindo da <code>main</code>. Não use a implementação da Atividade 5 como base.</p></section>
+<footer>Biblioteca · TEES2 · Ifes 2026.2</footer>
+</main>
+</body>
+</html>

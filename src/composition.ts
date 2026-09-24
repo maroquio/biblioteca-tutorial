@@ -2,6 +2,7 @@ import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
   BuscarLivro,
   CadastrarLivro,
+  CorrigirTitulo,
   type LivroCatalogado,
   SqliteLivroRepository,
 } from "./modules/acervo";
@@ -13,6 +14,7 @@ import { AutorId } from "./shared/identifiers";
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  corrigirTitulo: CorrigirTitulo;
 };
 
 /**
@@ -34,5 +36,6 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
+    corrigirTitulo: new CorrigirTitulo(livros),
   };
 }

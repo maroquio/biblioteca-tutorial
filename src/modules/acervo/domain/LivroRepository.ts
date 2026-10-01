@@ -1,4 +1,4 @@
-import type { AutorId } from "../../../shared/identifiers";
+import type { AutorId, LivroId } from "../../../shared/identifiers";
 import type { Isbn } from "./Isbn";
 import type { Livro } from "./Livro";
 
@@ -15,6 +15,8 @@ export interface LivroRepository {
   insert(livro: Livro): Livro;
   findByIsbn(isbn: Isbn): Livro | null;
   findByAutorId(autorId: AutorId): Livro[];
+  findById(id: LivroId): Livro | null;
+  updateIsbn(livro: Livro): void;
   searchByTitulo(termo: string): Livro[];
   findByAutorIds(autorIds: AutorId[]): Livro[];
 }

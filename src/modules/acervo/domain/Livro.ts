@@ -47,6 +47,17 @@ export class Livro {
     );
   }
 
+  comIsbn(isbn: Isbn): Livro {
+    return new Livro(
+      this.id,
+      this.numeroRegistro,
+      isbn,
+      this.titulo,
+      this.autorId,
+      this.dataCatalogacao,
+    );
+  }
+
   /** Quem atribui a identidade é a persistência; a entidade aceita sem virar mutável. */
   withId(id: LivroId): Livro {
     return new Livro(

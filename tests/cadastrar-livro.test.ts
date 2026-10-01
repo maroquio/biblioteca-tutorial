@@ -17,7 +17,6 @@ const LIVROS = [
 ];
 const EVANS = 1;
 
-/** ISBN-13 sintético com dígito verificador correto — a fase 34 confere. */
 function isbnSintetico(seq: number): string {
   const doze = `97800000${String(seq).padStart(4, "0")}`;
   let soma = 0;
@@ -129,12 +128,12 @@ test("RF08: o mesmo ISBN não entra duas vezes", () => {
 test("RF09: o mesmo autor não repete título, mesmo com outro ISBN", () => {
   const { useCase } = scenario();
 
-  useCase.execute(deAusten(0)); // Orgulho e Preconceito
+  useCase.execute(deAusten(0));
 
   expect(() =>
     useCase.execute({
       isbn: "9780141439563",
-      titulo: "orgulho e preconceito", // outro ISBN, mesmo título
+      titulo: "orgulho e preconceito",
       autorId: AUSTEN,
     }),
   ).toThrow("Este autor já tem um livro com este título");

@@ -2,11 +2,6 @@ import type { AutorConhecido, ConsultaDeAutoria } from "../modules/acervo";
 import type { ConsultaDeAutores } from "../modules/autoria";
 import type { AutorId } from "../shared/identifiers";
 
-/**
- * Camada anticorrupção: aqui — e só aqui — o vocabulário da Autoria
- * ("literatura" / "didatico") vira o vocabulário do Acervo
- * ("curta" / "ampla").
- */
 export class AutoriaComoConsulta implements ConsultaDeAutoria {
   constructor(private readonly autores: ConsultaDeAutores) {}
 

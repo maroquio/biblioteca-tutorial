@@ -7,11 +7,6 @@ export class LimiteDeLivrosExcedido extends RuleViolation {
   }
 }
 
-/**
- * Esta regra não cabe em nenhuma instância de Livro: ela fala do CONJUNTO
- * de livros de um autor. Também não cabe em Autor, que não conhece — nem
- * deve conhecer — os livros dele. Por isso vive sozinha.
- */
 export class LimiteDeLivros {
   private static readonly POR_TIRAGEM: Record<Tiragem, number> = {
     curta: 5,

@@ -16,8 +16,8 @@ class Identifier {
   }
 }
 
-/** Identidade que o sistema atribui. */
 export class LivroId extends Identifier {}
 
-/** Identidade que o sistema atribui — pelo mesmo motivo. */
 export class AutorId extends Identifier {}
+
+export class AvaliacaoId extends Identifier {}

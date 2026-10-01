@@ -1,3 +1,4 @@
+import { db } from "../../../infrastructure/db";
 import { InvalidValue } from "../../../shared/domain-errors";
 
 export class NumeroRegistro {
@@ -27,4 +28,10 @@ export class NumeroRegistro {
   toString(): string {
     return this.value;
   }
+   
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+  return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+    .get(numeroRegistro) !== null;
+}
+  
 }

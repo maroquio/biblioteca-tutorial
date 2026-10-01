@@ -24,7 +24,7 @@ export class BuscarLivro {
     // pergunta à autoria QUEM bate com o nome, e filtra os próprios livros
     const autorIds = this.autoria.idsPorNome(q);
 
-    return this.livros.findByAutorIds(autorIds).map((l) => this.comAutor(l));
+    return (this.livros.findByAutorIds(autorIds) as Livro[]).map((l) => this.comAutor(l));
   }
 
   private comAutor(livro: Livro): LivroJson {

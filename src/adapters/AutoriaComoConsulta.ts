@@ -1,3 +1,4 @@
+import { db } from "../infrastructure/db";
 import type { AutorConhecido, ConsultaDeAutoria } from "../modules/acervo";
 import type { ConsultaDeAutores } from "../modules/autoria";
 import type { AutorId } from "../shared/identifiers";
@@ -24,5 +25,10 @@ export class AutoriaComoConsulta implements ConsultaDeAutoria {
 
   idsPorNome(termo: string): AutorId[] {
     return this.autores.idsPorNome(termo);
+  }
+
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+      .get(numeroRegistro) !== null;
   }
 }

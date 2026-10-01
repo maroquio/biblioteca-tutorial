@@ -1,10 +1,12 @@
 import { buildUseCases } from "./composition";
 import { createAcervoTables } from "./modules/acervo";
 import { createAutoriaTables } from "./modules/autoria";
+import { createSolicitacaoTables } from "./modules/solicitacoes";
 import { createServer } from "./server";
 
 createAutoriaTables();
 createAcervoTables();
+createSolicitacaoTables();
 
 const server = createServer(buildUseCases());
 

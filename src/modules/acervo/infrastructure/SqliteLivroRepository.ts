@@ -3,6 +3,7 @@ import { LivroId, AutorId } from "../../../shared/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { Livro } from "../domain/Livro";
 import type { LivroRepository } from "../domain/LivroRepository";
+import type { ConsultaDeLivros } from "../ConsultaDeLivros";
 import { NumeroRegistro } from "../domain/NumeroRegistro";
 
 type LivroRow = {
@@ -25,7 +26,14 @@ function toLivro(row: LivroRow): Livro {
   );
 }
 
-export class SqliteLivroRepository implements LivroRepository {
+export class SqliteLivroRepository
+  implements LivroRepository, ConsultaDeLivros
+{
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+      .get(numeroRegistro) !== null;
+  }
+
   contarNoAcervoDoAutor(autorId: AutorId): number {
     const row = db
       .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")

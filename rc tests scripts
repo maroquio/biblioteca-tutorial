@@ -1,0 +1,154 @@
+[1mdiff --git a/src/composition.ts b/src/composition.ts[m
+[1mindex 4549c3d..581cb8e 100644[m
+[1m--- a/src/composition.ts[m
+[1m+++ b/src/composition.ts[m
+[36m@@ -5,12 +5,14 @@[m [mimport {[m
+   type LivroCatalogado,[m
+   SqliteLivroRepository,[m
+ } from "./modules/acervo";[m
+[32m+[m[32mimport { CorrigirIsbn } from "./modules/acervo/features/corrigir-isbn/CorrigirIsbn";[m
+ import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";[m
+ import type { Clock } from "./shared/Clock";[m
+ import { EventBus } from "./shared/EventBus";[m
+ import { AutorId } from "./shared/identifiers";[m
+ [m
+ export type UseCases = {[m
+[32m+[m[32m  corrigirIsbn: CorrigirIsbn;[m
+   cadastrarLivro: CadastrarLivro;[m
+   buscarLivro: BuscarLivro;[m
+ };[m
+[36m@@ -34,5 +36,6 @@[m [mexport function buildUseCases(now: Clock = () => new Date()): UseCases {[m
+   return {[m
+     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),[m
+     buscarLivro: new BuscarLivro(livros, autoria),[m
+[32m+[m[32m    corrigirIsbn: new CorrigirIsbn(livros),[m
+   };[m
+ }[m
+[1mdiff --git a/src/modules/acervo/domain/Livro.ts b/src/modules/acervo/domain/Livro.ts[m
+[1mindex 6282ec0..18a040a 100644[m
+[1m--- a/src/modules/acervo/domain/Livro.ts[m
+[1m+++ b/src/modules/acervo/domain/Livro.ts[m
+[36m@@ -64,6 +64,17 @@[m [mexport class Livro {[m
+     return Livro.normalizar(this.titulo) === Livro.normalizar(outro);[m
+   }[m
+ [m
+[32m+[m[32m  comIsbn(isbn: Isbn): Livro {[m
+[32m+[m[32m    return new Livro([m
+[32m+[m[32m      this.id,[m
+[32m+[m[32m      this.numeroRegistro,[m
+[32m+[m[32m      isbn,[m
+[32m+[m[32m      this.titulo,[m
+[32m+[m[32m      this.autorId,[m
+[32m+[m[32m      this.dataCatalogacao,[m
+[32m+[m[32m    );[m
+[32m+[m[32m  }[m
+[32m+[m
+   private static normalizar(titulo: string): string {[m
+     return titulo.trim().toLowerCase();[m
+   }[m
+[1mdiff --git a/src/modules/acervo/domain/LivroRepository.ts b/src/modules/acervo/domain/LivroRepository.ts[m
+[1mindex 396f16b..525df2d 100644[m
+[1m--- a/src/modules/acervo/domain/LivroRepository.ts[m
+[1m+++ b/src/modules/acervo/domain/LivroRepository.ts[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-import type { AutorId } from "../../../shared/identifiers";[m
+[32m+[m[32mimport type { AutorId, LivroId } from "../../../shared/identifiers";[m
+ import type { Isbn } from "./Isbn";[m
+ import type { Livro } from "./Livro";[m
+ [m
+[36m@@ -17,4 +17,6 @@[m [mexport interface LivroRepository {[m
+   findByAutorId(autorId: AutorId): Livro[];[m
+   searchByTitulo(termo: string): Livro[];[m
+   findByAutorIds(autorIds: AutorId[]): Livro[];[m
+[32m+[m[32m  findById(id: LivroId): Livro | null;[m
+[32m+[m[32m  updateIsbn(livro: Livro): void;[m
+ }[m
+[1mdiff --git a/src/modules/acervo/infrastructure/SqliteLivroRepository.ts b/src/modules/acervo/infrastructure/SqliteLivroRepository.ts[m
+[1mindex 532f4c2..f5f31c7 100644[m
+[1m--- a/src/modules/acervo/infrastructure/SqliteLivroRepository.ts[m
+[1m+++ b/src/modules/acervo/infrastructure/SqliteLivroRepository.ts[m
+[36m@@ -95,4 +95,17 @@[m [mexport class SqliteLivroRepository implements LivroRepository {[m
+ [m
+     return rows.map(toLivro);[m
+   }[m
+[32m+[m
+[32m+[m[32m  findById(id: LivroId): Livro | null {[m
+[32m+[m[32m    const row = db.query("SELECT * FROM livros WHERE id = ?")[m
+[32m+[m[32m      .get(id.value) as LivroRow | null;[m
+[32m+[m[32m    return row === null ? null : toLivro(row);[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  updateIsbn(livro: Livro): void {[m
+[32m+[m[32m    db.run("UPDATE livros SET isbn = ? WHERE id = ?", [[m
+[32m+[m[32m      livro.isbn.value,[m
+[32m+[m[32m      livro.id!.value,[m
+[32m+[m[32m    ]);[m
+[32m+[m[32m  }[m
+ }[m
+[1mdiff --git a/src/modules/acervo/output.ts b/src/modules/acervo/output.ts[m
+[1mindex ee16a55..a10de6b 100644[m
+[1m--- a/src/modules/acervo/output.ts[m
+[1m+++ b/src/modules/acervo/output.ts[m
+[36m@@ -22,3 +22,17 @@[m [mexport function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {[m
+     dataCatalogacao: livro.dataCatalogacao,[m
+   };[m
+ }[m
+[32m+[m
+[32m+[m[32mexport type IsbnCorrigidoJson = {[m
+[32m+[m[32m  id: number;[m
+[32m+[m[32m  numeroRegistro: string;[m
+[32m+[m[32m  isbn: string;[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32mexport function isbnCorrigidoToJson(livro: Livro): IsbnCorrigidoJson {[m
+[32m+[m[32m  return {[m
+[32m+[m[32m    id: livro.id!.value,[m
+[32m+[m[32m    numeroRegistro: livro.numeroRegistro.value,[m
+[32m+[m[32m    isbn: livro.isbn.value,[m
+[32m+[m[32m  };[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/modules/acervo/routes.ts b/src/modules/acervo/routes.ts[m
+[1mindex 3c5ff0c..5de8d80 100644[m
+[1m--- a/src/modules/acervo/routes.ts[m
+[1m+++ b/src/modules/acervo/routes.ts[m
+[36m@@ -2,8 +2,10 @@[m [mimport type { Hono } from "hono";[m
+ import type { UseCases } from "../../composition";[m
+ import { register as registerBuscarLivro } from "./features/buscar-livro/route";[m
+ import { register as registerCadastrarLivro } from "./features/cadastrar-livro/route";[m
+[32m+[m[32mimport { register as registerCorrigirIsbn } from "./features/corrigir-isbn/route";[m
+ [m
+ export function registerRoutes(app: Hono, useCases: UseCases): void {[m
+   registerCadastrarLivro(app, useCases);[m
+   registerBuscarLivro(app, useCases);[m
+[32m+[m[32m  registerCorrigirIsbn(app, useCases);[m
+ }[m
+[1mdiff --git a/tests/doubles.ts b/tests/doubles.ts[m
+[1mindex 46dba50..207cb21 100644[m
+[1m--- a/tests/doubles.ts[m
+[1m+++ b/tests/doubles.ts[m
+[36m@@ -45,6 +45,16 @@[m [mexport class InMemoryLivroRepository implements LivroRepository {[m
+     return this.items.filter((item) => item.titulo.toLowerCase().includes(alvo));[m
+   }[m
+ [m
+[32m+[m[32m  findById(id: LivroId): Livro | null {[m
+[32m+[m[32m    return this.items.find((livro) => livro.id?.equals(id)) ?? null;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  updateIsbn(livro: Livro): void {[m
+[32m+[m[32m    this.items = this.items.map((atual) =>[m
+[32m+[m[32m      atual.id?.equals(livro.id!) ? livro : atual,[m
+[32m+[m[32m    );[m
+[32m+[m[32m  }[m
+[32m+[m[41m  [m
+   findByAutorIds(autorIds: AutorId[]): Livro[] {[m
+     return this.items.filter((item) =>[m
+       autorIds.some((autorId) => item.autorId.equals(autorId)),[m
+[36m@@ -53,7 +63,7 @@[m [mexport class InMemoryLivroRepository implements LivroRepository {[m
+ }[m
+ [m
+ export class InMemoryAutoria implements ConsultaDeAutoria {[m
+[31m-  constructor(private readonly items: Record<number, AutorConhecido>) {}[m
+[32m+[m[32m  constructor(private readonly items: Record<number, AutorConhecido>) { }[m
+ [m
+   autor(autorId: AutorId): AutorConhecido | null {[m
+     return this.items[autorId.value] ?? null;[m

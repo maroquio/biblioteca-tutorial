@@ -1,0 +1,38 @@
+{
+  "id": 1,
+  "numeroRegistro": "2026-000001",
+  "isbn": "9780141439518",
+  "titulo": "Livro de teste 5B A",
+  "autor": "Jane Austen",
+  "livrosDoAutor": 0,
+  "dataCatalogacao": "2026-10-01"
+}
+
+{
+  "id": 2,
+  "numeroRegistro": "2026-000002",
+  "isbn": "9780141439662",
+  "titulo": "Livro de teste 5B B",
+  "autor": "Eric Evans",
+  "livrosDoAutor": 0,
+  "dataCatalogacao": "2026-10-01"
+}
+
+[
+  {
+    "id": 1,
+    "numeroRegistro": "2026-000001",
+    "isbn": "9780141439518",
+    "titulo": "Livro de teste 5B A",
+    "autor": "Jane Austen",
+    "livrosDoAutor": 1,
+    "dataCatalogacao": "2026-10-01"
+  }
+]
+
+ISBN de outro livro - esperado 409 - obtido 409
+Livro inexistente - esperado 404 - obtido 404
+Id inválido - esperado 400 - obtido 400
+ISBN vazio - esperado 400 - obtido 400
+ISBN curto - esperado 400 - obtido 400
+Dígito verificador incorreto - esperado 400 - obtido 400

@@ -21,3 +21,6 @@ export class LivroId extends Identifier {}
 
 /** Identidade que o sistema atribui — pelo mesmo motivo. */
 export class AutorId extends Identifier {}
+
+/** Identidade que o sistema atribui a uma solicitação de empréstimo. */
+export class SolicitacaoId extends Identifier {}

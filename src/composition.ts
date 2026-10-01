@@ -2,6 +2,7 @@ import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
   BuscarLivro,
   CadastrarLivro,
+  CorrigirIsbn,
   type LivroCatalogado,
   SqliteLivroRepository,
 } from "./modules/acervo";
@@ -9,10 +10,13 @@ import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
+import type { RegistrarSolicitacao } from "./modules/solicitacoes";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  corrigirIsbn: CorrigirIsbn;
+  registrarSolicitacao?: RegistrarSolicitacao;
 };
 
 /**
@@ -34,5 +38,6 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
+    corrigirIsbn: new CorrigirIsbn(livros),
   };
 }

@@ -7,6 +7,7 @@ export type {
   ConsultaDeAutoria,
   Tiragem,
 } from "./domain/ConsultaDeAutoria";
+export type { ConsultaDeLivros } from "./ConsultaDeLivros";
 export type {
   AcervoEvent,
   EventPublisher,

@@ -39,8 +39,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .DS_Store
 
 # Banco de dados local
-data/*.sqlite*
-data/*.csv
+backend/data/*.sqlite*
+backend/data/*.csv
 
 # Material de origem, nao versionado
 .docs/chat.md

@@ -13,7 +13,6 @@ const LIVROS = [
 ];
 const EVANS = 1;
 
-/** ISBN-13 sintético com dígito verificador correto — a fase 34 vai conferir. */
 function isbnSintetico(seq: number): string {
   const doze = `97800000${String(seq).padStart(4, "0")}`;
   let soma = 0;
@@ -31,14 +30,11 @@ const LIVROS_DE_EVANS = Array.from({ length: 11 }, (_, i) => ({
 let server: ReturnType<typeof Bun.spawn>;
 
 beforeAll(async () => {
-  // não há como exercitar a regra sem subir a aplicação inteira
   server = Bun.spawn(["bun", "src/main.ts"], {
     stdout: "ignore",
-    // porta própria: a sonda abaixo só passa quando ESTE servidor subir
     env: { ...process.env, PORT: "3999" },
   });
 
-  // ... e sem esperar a porta abrir
   for (let tentativa = 0; tentativa < 50; tentativa++) {
     try {
       await fetch(BASE);
@@ -56,7 +52,6 @@ afterAll(() => {
 });
 
 beforeEach(() => {
-  // ... e sem limpar o banco de verdade entre um teste e outro
   db.run("DELETE FROM livros");
 });
 

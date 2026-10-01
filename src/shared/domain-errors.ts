@@ -5,8 +5,6 @@ export class DomainError extends Error {
   }
 }
 
-/** Valor malformado: o dado não pode existir com essa forma. */
 export class InvalidValue extends DomainError {}
 
-/** Invariante violada: os valores existem, mas a operação não é permitida agora. */
 export class RuleViolation extends DomainError {}

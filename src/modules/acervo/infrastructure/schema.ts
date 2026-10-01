@@ -9,12 +9,6 @@ const COLUMNS = `
   data_catalogacao TEXT NOT NULL
 `;
 
-/**
- * O módulo Acervo é o dono da tabela `livros`.
- * `autor_id` é apenas um inteiro: referência a um agregado de outro módulo,
- * sem chave estrangeira. Quem garante que o autor existe é o caso de uso,
- * através da port ConsultaDeAutoria.
- */
 export function createAcervoTables(): void {
   db.run(`CREATE TABLE IF NOT EXISTS livros (${COLUMNS});`);
 

@@ -2,11 +2,6 @@ export type Event = { readonly nome: string };
 
 export type Listener<E extends Event> = (event: E) => void;
 
-/**
- * Barramento in-process: publicar um evento é uma chamada de função. Não há
- * fila, nem rede, nem broker — mas o ACOPLAMENTO já é o de mensageria: quem
- * publica não sabe quem escuta.
- */
 export class EventBus {
   private readonly listeners = new Map<string, Listener<never>[]>();
 

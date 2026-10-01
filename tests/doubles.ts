@@ -35,6 +35,10 @@ export class InMemoryLivroRepository implements LivroRepository {
     return this.items.find((item) => item.isbn.equals(isbn)) ?? null;
   }
 
+  findById(id: LivroId): Livro | null {
+    return this.items.find((livro) => livro.id?.equals(id)) ?? null;
+  }
+
   findByAutorId(autorId: AutorId): Livro[] {
     return this.items.filter((item) => item.autorId.equals(autorId));
   }
@@ -48,6 +52,12 @@ export class InMemoryLivroRepository implements LivroRepository {
   findByAutorIds(autorIds: AutorId[]): Livro[] {
     return this.items.filter((item) =>
       autorIds.some((autorId) => item.autorId.equals(autorId)),
+    );
+  }
+
+  updateTitulo(livro: Livro): void {
+    this.items = this.items.map((atual) =>
+      atual.id?.equals(livro.id!) ? livro : atual,
     );
   }
 }

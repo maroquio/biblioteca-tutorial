@@ -3,7 +3,6 @@ import { dirname, join, normalize } from "node:path";
 
 const problems: string[] = [];
 
-/** Quem é o dono de cada tabela. Nenhum módulo cita uma tabela que não é dele. */
 const TABELAS: Record<string, string> = {
   livros: "acervo",
   autores: "autoria",

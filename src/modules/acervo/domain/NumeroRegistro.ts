@@ -1,4 +1,7 @@
+import type { Hono } from "hono";
+import type { UseCases } from "../../../composition";
 import { InvalidValue } from "../../../shared/domain-errors";
+import { parseCorrecaoDeTitulo } from "./CorrecaoDeTitulo";
 
 export class NumeroRegistro {
   /** O formato do número de registro é decisão do negócio, não do banco. */
@@ -27,4 +30,13 @@ export class NumeroRegistro {
   toString(): string {
     return this.value;
   }
+}
+export function register(routes: Hono, useCases: UseCases): void {
+  routes.patch("/livros/:id/titulo", async (contexto: { req: { param: () => { id?: string; }; json: () => unknown; }; json: (arg0: any, arg1: number) => any; }) => {
+    const input = parseCorrecaoDeTitulo(
+      contexto.req.param(),
+      await contexto.req.json(),
+    );
+    return contexto.json(useCases.corrigirTitulo.execute(input), 200);
+  });
 }

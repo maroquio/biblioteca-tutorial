@@ -11,3 +11,4 @@ export type AcervoEvent = LivroCatalogado;
 export interface EventPublisher {
   publish(event: AcervoEvent): void;
 }
+

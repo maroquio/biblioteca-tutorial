@@ -2,7 +2,7 @@
   "name": "biblioteca",
   "module": "src/main.ts",
   "type": "module",
-  "private": true,
+  "private": true,  
   "scripts": {
     "dev": "bun --watch src/main.ts",
     "start": "bun src/main.ts",
@@ -17,6 +17,7 @@
     "typescript": "^7"
   },
   "dependencies": {
+    "bun": "^1.4.2",
     "hono": "^4.13.5"
   }
 }

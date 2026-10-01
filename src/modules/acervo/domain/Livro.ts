@@ -14,6 +14,7 @@ export function toIso(dia: Date): string {
 }
 
 export class Livro {
+  items: any;
   constructor(
     readonly id: LivroId | null,
     readonly numeroRegistro: NumeroRegistro,
@@ -26,7 +27,7 @@ export class Livro {
       throw new TituloVazio();
     }
   }
-
+    
   /** Um livro nasce por aqui — e nasce válido. */
   static catalogar(
     isbn: Isbn,
@@ -59,6 +60,17 @@ export class Livro {
     );
   }
 
+  comTitulo(titulo: string): Livro {
+    return new Livro(
+      this.id,
+      this.numeroRegistro,
+      this.isbn,
+      titulo,
+      this.autorId,
+      this.dataCatalogacao,
+  );
+}
+
   /** O que conta como "a mesma obra" é decisão do negócio, não do SQL. */
   mesmoTituloQue(outro: string): boolean {
     return Livro.normalizar(this.titulo) === Livro.normalizar(outro);
@@ -67,4 +79,13 @@ export class Livro {
   private static normalizar(titulo: string): string {
     return titulo.trim().toLowerCase();
   }
+  findById(id: LivroId): Livro | null {
+  return this.items.find((livro: { id: { equals: (arg0: LivroId) => any; }; }) => livro.id?.equals(id)) ?? null;
+}
+
+  updateTitulo(livro: Livro): void {
+    this.items = this.items.map((atual: { id: { equals: (arg0: LivroId) => any; }; }) =>
+      atual.id?.equals(livro.id!) ? livro : atual,
+  );
+}
 }

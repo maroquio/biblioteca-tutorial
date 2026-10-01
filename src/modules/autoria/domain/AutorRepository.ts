@@ -6,4 +6,5 @@ export interface AutorRepository {
 
   /** Escrita da projeção. Só a própria Autoria chama isto. */
   ajustarLivrosNoAcervo(autorId: AutorId, delta: number): void;
+  
 }

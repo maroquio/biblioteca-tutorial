@@ -18,7 +18,7 @@ export class BuscarLivro {
     }
 
     const porTitulo = this.livros.searchByTitulo(q);
-
+    
     if (porTitulo.length > 0) return porTitulo.map((l) => this.comAutor(l));
 
     // pergunta à autoria QUEM bate com o nome, e filtra os próprios livros

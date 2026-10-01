@@ -6,6 +6,7 @@ import {
   SqliteLivroRepository,
 } from "./modules/acervo";
 import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
+import type { RegistrarSolicitacao } from "./modules/solicitacao/features/nova-solicitacao/RegistrarSolicitacao";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
@@ -13,6 +14,7 @@ import { AutorId } from "./shared/identifiers";
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  registrarSolicitacao: RegistrarSolicitacao;
 };
 
 /**

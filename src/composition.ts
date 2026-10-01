@@ -2,9 +2,11 @@ import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
 import {
   BuscarLivro,
   CadastrarLivro,
+  CorrigirIsbn,
   type LivroCatalogado,
   SqliteLivroRepository,
 } from "./modules/acervo";
+
 import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
@@ -13,6 +15,7 @@ import { AutorId } from "./shared/identifiers";
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  corrigirIsbn: CorrigirIsbn;
 };
 
 /**
@@ -26,6 +29,7 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   const autoria = new AutoriaComoConsulta(autores);
   const bus = new EventBus();
   const projecao = new ProjecaoDeLivros(autores);
+  const isbn = new CorrigirIsbn(livros);
 
   bus.subscribe<LivroCatalogado>("LivroCatalogado", (event) =>
     projecao.registrarEntrada(new AutorId(event.autorId)),
@@ -34,5 +38,6 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
+    corrigirIsbn: new CorrigirIsbn(livros),
   };
 }

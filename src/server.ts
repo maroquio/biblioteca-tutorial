@@ -4,6 +4,7 @@ import { DomainError, InvalidValue } from "./shared/domain-errors";
 import { registerRoutes as registerAcervo } from "./modules/acervo";
 import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";
 
+
 function errorResponse(error: unknown): Response {
   if (error instanceof InvalidInput || error instanceof InvalidValue) {
     return Response.json({ error: error.message }, { status: 400 });

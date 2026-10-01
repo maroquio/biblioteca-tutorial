@@ -1,6 +1,6 @@
 export type Event = { readonly nome: string };
 
-export type Listener<E extends Event> = (event: E) => void;
+export type Listener<E extends Event> = (event: E) => void | Promise<void>;
 
 /**
  * Barramento in-process: publicar um evento é uma chamada de função. Não há
@@ -16,9 +16,10 @@ export class EventBus {
     this.listeners.set(nome, [...atuais, listener]);
   }
 
-  publish<E extends Event>(event: E): void {
+  /** Espera cada ouvinte terminar: quem publica só segue quando a projeção já foi gravada. */
+  async publish<E extends Event>(event: E): Promise<void> {
     for (const listener of this.listeners.get(event.nome) ?? []) {
-      (listener as Listener<E>)(event);
+      await (listener as Listener<E>)(event);
     }
   }
 }

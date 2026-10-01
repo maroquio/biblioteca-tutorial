@@ -52,46 +52,46 @@ function scenario(hoje = new Date("2026-03-10")) {
   };
 }
 
-test("RF04: um autor fora da base é recusado", () => {
+test("RF04: um autor fora da base é recusado", async () => {
   const { useCase } = scenario();
 
-  expect(() => useCase.execute({ ...deAusten(0), autorId: 99 })).toThrow(
+  await expect(useCase.execute({ ...deAusten(0), autorId: 99 })).rejects.toThrow(
     "Autor não cadastrado",
   );
 });
 
-test("RF05: um autor de literatura vai até 5 livros no acervo", () => {
+test("RF05: um autor de literatura vai até 5 livros no acervo", async () => {
   const { useCase } = scenario();
 
-  for (let i = 0; i < 5; i++) useCase.execute(deAusten(i));
+  for (let i = 0; i < 5; i++) await useCase.execute(deAusten(i));
 
-  expect(() => useCase.execute(deAusten(5))).toThrow(
+  await expect(useCase.execute(deAusten(5))).rejects.toThrow(
     "O autor já tem 5 livros no acervo",
   );
 });
 
-test("RF05′: um autor didático vai até 10 livros no acervo", () => {
+test("RF05′: um autor didático vai até 10 livros no acervo", async () => {
   const { useCase } = scenario();
 
-  for (let i = 0; i < 10; i++) useCase.execute(deEvans(i));
+  for (let i = 0; i < 10; i++) await useCase.execute(deEvans(i));
 
-  expect(() => useCase.execute(deEvans(10))).toThrow(
+  await expect(useCase.execute(deEvans(10))).rejects.toThrow(
     "O autor já tem 10 livros no acervo",
   );
 });
 
-test("RF06 e RF07: a data e o número de registro vêm do servidor, sequenciais no ano", () => {
+test("RF06 e RF07: a data e o número de registro vêm do servidor, sequenciais no ano", async () => {
   const { useCase } = scenario();
 
-  const primeiro = useCase.execute(deAusten(0));
-  const segundo = useCase.execute(deEvans(0));
+  const primeiro = await useCase.execute(deAusten(0));
+  const segundo = await useCase.execute(deEvans(0));
 
   expect(primeiro.dataCatalogacao).toBe("2026-03-10");
   expect(primeiro.numeroRegistro).toBe("2026-000001");
   expect(segundo.numeroRegistro).toBe("2026-000002");
 });
 
-test("RF07: o sequencial recomeça a cada ano", () => {
+test("RF07: o sequencial recomeça a cada ano", async () => {
   const { livros } = scenario();
 
   const autoria = new InMemoryAutoria({
@@ -114,36 +114,36 @@ test("RF07: o sequencial recomeça a cada ano", () => {
     events,
   );
 
-  expect(em2026.execute(deAusten(0)).numeroRegistro).toBe("2026-000001");
-  expect(em2027.execute(deAusten(1)).numeroRegistro).toBe("2027-000001");
+  expect((await em2026.execute(deAusten(0))).numeroRegistro).toBe("2026-000001");
+  expect((await em2027.execute(deAusten(1))).numeroRegistro).toBe("2027-000001");
 });
 
-test("RF08: o mesmo ISBN não entra duas vezes", () => {
+test("RF08: o mesmo ISBN não entra duas vezes", async () => {
   const { useCase } = scenario();
 
-  useCase.execute(deAusten(0));
+  await useCase.execute(deAusten(0));
 
-  expect(() => useCase.execute(deAusten(0))).toThrow("Livro já cadastrado");
+  await expect(useCase.execute(deAusten(0))).rejects.toThrow("Livro já cadastrado");
 });
 
-test("RF09: o mesmo autor não repete título, mesmo com outro ISBN", () => {
+test("RF09: o mesmo autor não repete título, mesmo com outro ISBN", async () => {
   const { useCase } = scenario();
 
-  useCase.execute(deAusten(0)); // Orgulho e Preconceito
+  await useCase.execute(deAusten(0)); // Orgulho e Preconceito
 
-  expect(() =>
+  await expect(
     useCase.execute({
       isbn: "9780141439563",
       titulo: "orgulho e preconceito", // outro ISBN, mesmo título
       autorId: AUSTEN,
     }),
-  ).toThrow("Este autor já tem um livro com este título");
+  ).rejects.toThrow("Este autor já tem um livro com este título");
 });
 
-test("o cadastro anuncia LivroCatalogado", () => {
+test("o cadastro anuncia LivroCatalogado", async () => {
   const { useCase, events } = scenario();
 
-  useCase.execute(deAusten(0));
+  await useCase.execute(deAusten(0));
 
   expect(events.published).toEqual([
     {

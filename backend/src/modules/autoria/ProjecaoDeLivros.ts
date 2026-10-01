@@ -9,7 +9,7 @@ import type { AutorRepository } from "./domain/AutorRepository";
 export class ProjecaoDeLivros {
   constructor(private readonly autores: AutorRepository) {}
 
-  registrarEntrada(autorId: AutorId): void {
-    this.autores.ajustarLivrosNoAcervo(autorId, +1);
+  async registrarEntrada(autorId: AutorId): Promise<void> {
+    await this.autores.ajustarLivrosNoAcervo(autorId, +1);
   }
 }

@@ -24,7 +24,7 @@ function toAutor(row: AutorRow): Autor {
 export class SqliteAutorRepository
   implements AutorRepository, ConsultaDeAutores
 {
-  findById(autorId: AutorId): Autor | null {
+  async findById(autorId: AutorId): Promise<Autor | null> {
     const row = db
       .query("SELECT * FROM autores WHERE id = ?")
       .get(autorId.value) as AutorRow | null;
@@ -32,8 +32,8 @@ export class SqliteAutorRepository
     return row === null ? null : toAutor(row);
   }
 
-  resumo(autorId: AutorId): ResumoDoAutor | null {
-    const autor = this.findById(autorId);
+  async resumo(autorId: AutorId): Promise<ResumoDoAutor | null> {
+    const autor = await this.findById(autorId);
 
     if (autor === null) return null;
 
@@ -44,14 +44,14 @@ export class SqliteAutorRepository
     };
   }
 
-  ajustarLivrosNoAcervo(autorId: AutorId, delta: number): void {
+  async ajustarLivrosNoAcervo(autorId: AutorId, delta: number): Promise<void> {
     db.run(
       "UPDATE autores SET livros_no_acervo = livros_no_acervo + ? WHERE id = ?",
       [delta, autorId.value],
     );
   }
 
-  idsPorNome(termo: string): AutorId[] {
+  async idsPorNome(termo: string): Promise<AutorId[]> {
     const rows = db
       .query("SELECT id FROM autores WHERE nome LIKE ?")
       .all(`%${termo}%`) as { id: number }[];

@@ -10,25 +10,29 @@ export class BuscarLivro {
     private readonly autoria: ConsultaDeAutoria,
   ) {}
 
-  execute(q: string): LivroJson[] {
+  async execute(q: string): Promise<LivroJson[]> {
     if (Isbn.isValid(q)) {
-      const porIsbn = this.livros.findByIsbn(new Isbn(q));
+      const porIsbn = await this.livros.findByIsbn(new Isbn(q));
 
-      if (porIsbn) return [this.comAutor(porIsbn)];
+      if (porIsbn) return [await this.comAutor(porIsbn)];
     }
 
-    const porTitulo = this.livros.searchByTitulo(q);
+    const porTitulo = await this.livros.searchByTitulo(q);
 
-    if (porTitulo.length > 0) return porTitulo.map((l) => this.comAutor(l));
+    if (porTitulo.length > 0) return this.comAutores(porTitulo);
 
     // pergunta à autoria QUEM bate com o nome, e filtra os próprios livros
-    const autorIds = this.autoria.idsPorNome(q);
+    const autorIds = await this.autoria.idsPorNome(q);
 
-    return this.livros.findByAutorIds(autorIds).map((l) => this.comAutor(l));
+    return this.comAutores(await this.livros.findByAutorIds(autorIds));
   }
 
-  private comAutor(livro: Livro): LivroJson {
-    const autor = this.autoria.autor(livro.autorId);
+  private comAutores(livros: Livro[]): Promise<LivroJson[]> {
+    return Promise.all(livros.map((livro) => this.comAutor(livro)));
+  }
+
+  private async comAutor(livro: Livro): Promise<LivroJson> {
+    const autor = await this.autoria.autor(livro.autorId);
 
     return livroToJson(livro, autor!);
   }

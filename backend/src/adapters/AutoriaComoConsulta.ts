@@ -10,8 +10,8 @@ import type { AutorId } from "../shared/identifiers";
 export class AutoriaComoConsulta implements ConsultaDeAutoria {
   constructor(private readonly autores: ConsultaDeAutores) {}
 
-  autor(autorId: AutorId): AutorConhecido | null {
-    const resumo = this.autores.resumo(autorId);
+  async autor(autorId: AutorId): Promise<AutorConhecido | null> {
+    const resumo = await this.autores.resumo(autorId);
 
     if (!resumo) return null;
 
@@ -22,7 +22,7 @@ export class AutoriaComoConsulta implements ConsultaDeAutoria {
     };
   }
 
-  idsPorNome(termo: string): AutorId[] {
+  idsPorNome(termo: string): Promise<AutorId[]> {
     return this.autores.idsPorNome(termo);
   }
 }

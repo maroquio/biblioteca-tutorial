@@ -15,37 +15,37 @@ export class InMemoryLivroRepository implements LivroRepository {
   private items: Livro[] = [];
   private nextId = 1;
 
-  contarNoAcervoDoAutor(autorId: AutorId): number {
+  async contarNoAcervoDoAutor(autorId: AutorId): Promise<number> {
     return this.items.filter((item) => item.autorId.equals(autorId)).length;
   }
 
-  contarCatalogadosNoAno(ano: string): number {
+  async contarCatalogadosNoAno(ano: string): Promise<number> {
     return this.items.filter((item) => item.dataCatalogacao.startsWith(ano))
       .length;
   }
 
-  insert(livro: Livro): Livro {
+  async insert(livro: Livro): Promise<Livro> {
     const salvo = livro.withId(new LivroId(this.nextId++));
     this.items.push(salvo);
 
     return salvo;
   }
 
-  findByIsbn(isbn: Isbn): Livro | null {
+  async findByIsbn(isbn: Isbn): Promise<Livro | null> {
     return this.items.find((item) => item.isbn.equals(isbn)) ?? null;
   }
 
-  findByAutorId(autorId: AutorId): Livro[] {
+  async findByAutorId(autorId: AutorId): Promise<Livro[]> {
     return this.items.filter((item) => item.autorId.equals(autorId));
   }
 
-  searchByTitulo(termo: string): Livro[] {
+  async searchByTitulo(termo: string): Promise<Livro[]> {
     const alvo = termo.toLowerCase();
 
     return this.items.filter((item) => item.titulo.toLowerCase().includes(alvo));
   }
 
-  findByAutorIds(autorIds: AutorId[]): Livro[] {
+  async findByAutorIds(autorIds: AutorId[]): Promise<Livro[]> {
     return this.items.filter((item) =>
       autorIds.some((autorId) => item.autorId.equals(autorId)),
     );
@@ -55,11 +55,11 @@ export class InMemoryLivroRepository implements LivroRepository {
 export class InMemoryAutoria implements ConsultaDeAutoria {
   constructor(private readonly items: Record<number, AutorConhecido>) {}
 
-  autor(autorId: AutorId): AutorConhecido | null {
+  async autor(autorId: AutorId): Promise<AutorConhecido | null> {
     return this.items[autorId.value] ?? null;
   }
 
-  idsPorNome(termo: string): AutorId[] {
+  async idsPorNome(termo: string): Promise<AutorId[]> {
     const alvo = termo.toLowerCase();
 
     return Object.entries(this.items)
@@ -71,7 +71,7 @@ export class InMemoryAutoria implements ConsultaDeAutoria {
 export class FakeEventPublisher implements EventPublisher {
   readonly published: AcervoEvent[] = [];
 
-  publish(event: AcervoEvent): void {
+  async publish(event: AcervoEvent): Promise<void> {
     this.published.push(event);
   }
 }

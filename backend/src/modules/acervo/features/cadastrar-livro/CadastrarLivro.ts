@@ -18,11 +18,11 @@ export class CadastrarLivro {
     private readonly events: EventPublisher,
   ) {}
 
-  execute(input: NovoLivro): LivroJson {
+  async execute(input: NovoLivro): Promise<LivroJson> {
     const isbn = new Isbn(input.isbn);
     const autorId = new AutorId(input.autorId);
 
-    const autor = this.autoria.autor(autorId);
+    const autor = await this.autoria.autor(autorId);
 
     if (!autor) {
       throw new NotFound("Autor não cadastrado");
@@ -30,16 +30,16 @@ export class CadastrarLivro {
 
     LimiteDeLivros.verificar(
       autor.tiragem,
-      this.livros.contarNoAcervoDoAutor(autorId),
+      await this.livros.contarNoAcervoDoAutor(autorId),
     );
 
-    if (this.livros.findByIsbn(isbn)) {
+    if (await this.livros.findByIsbn(isbn)) {
       throw new RuleConflict("Livro já cadastrado");
     }
 
-    const mesmoTitulo = this.livros
-      .findByAutorId(autorId)
-      .some((livro) => livro.mesmoTituloQue(input.titulo));
+    const mesmoTitulo = (await this.livros.findByAutorId(autorId)).some(
+      (livro) => livro.mesmoTituloQue(input.titulo),
+    );
 
     if (mesmoTitulo) {
       throw new RuleConflict("Este autor já tem um livro com este título");
@@ -48,17 +48,17 @@ export class CadastrarLivro {
     const hoje = this.now();
     const ano = toIso(hoje).slice(0, 4);
 
-    const livro = this.livros.insert(
+    const livro = await this.livros.insert(
       Livro.catalogar(
         isbn,
         input.titulo,
         autorId,
         hoje,
-        this.livros.contarCatalogadosNoAno(ano),
+        await this.livros.contarCatalogadosNoAno(ano),
       ),
     );
 
-    this.events.publish({
+    await this.events.publish({
       nome: "LivroCatalogado",
       autorId: livro.autorId.value,
       numeroRegistro: livro.numeroRegistro.value,

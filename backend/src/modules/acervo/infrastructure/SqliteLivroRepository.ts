@@ -26,7 +26,7 @@ function toLivro(row: LivroRow): Livro {
 }
 
 export class SqliteLivroRepository implements LivroRepository {
-  contarNoAcervoDoAutor(autorId: AutorId): number {
+  async contarNoAcervoDoAutor(autorId: AutorId): Promise<number> {
     const row = db
       .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")
       .get(autorId.value) as { total: number };
@@ -34,7 +34,7 @@ export class SqliteLivroRepository implements LivroRepository {
     return row.total;
   }
 
-  contarCatalogadosNoAno(ano: string): number {
+  async contarCatalogadosNoAno(ano: string): Promise<number> {
     const row = db
       .query(
         `SELECT COUNT(*) AS total FROM livros
@@ -45,7 +45,7 @@ export class SqliteLivroRepository implements LivroRepository {
     return row.total;
   }
 
-  insert(livro: Livro): Livro {
+  async insert(livro: Livro): Promise<Livro> {
     const result = db.run(
       `INSERT INTO livros (numero_registro, isbn, titulo, autor_id, data_catalogacao)
        VALUES (?, ?, ?, ?, ?)`,
@@ -61,7 +61,7 @@ export class SqliteLivroRepository implements LivroRepository {
     return livro.withId(new LivroId(Number(result.lastInsertRowid)));
   }
 
-  findByIsbn(isbn: Isbn): Livro | null {
+  async findByIsbn(isbn: Isbn): Promise<Livro | null> {
     const row = db
       .query("SELECT * FROM livros WHERE isbn = ?")
       .get(isbn.value) as LivroRow | null;
@@ -69,7 +69,7 @@ export class SqliteLivroRepository implements LivroRepository {
     return row === null ? null : toLivro(row);
   }
 
-  findByAutorId(autorId: AutorId): Livro[] {
+  async findByAutorId(autorId: AutorId): Promise<Livro[]> {
     const rows = db
       .query("SELECT * FROM livros WHERE autor_id = ?")
       .all(autorId.value) as LivroRow[];
@@ -77,7 +77,7 @@ export class SqliteLivroRepository implements LivroRepository {
     return rows.map(toLivro);
   }
 
-  searchByTitulo(termo: string): Livro[] {
+  async searchByTitulo(termo: string): Promise<Livro[]> {
     const rows = db
       .query("SELECT * FROM livros WHERE titulo LIKE ?")
       .all(`%${termo}%`) as LivroRow[];
@@ -85,7 +85,7 @@ export class SqliteLivroRepository implements LivroRepository {
     return rows.map(toLivro);
   }
 
-  findByAutorIds(autorIds: AutorId[]): Livro[] {
+  async findByAutorIds(autorIds: AutorId[]): Promise<Livro[]> {
     if (autorIds.length === 0) return [];
 
     const placeholders = autorIds.map(() => "?").join(", ");

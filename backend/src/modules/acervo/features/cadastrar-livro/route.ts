@@ -4,7 +4,7 @@ import { parseNovoLivro } from "./input";
 
 export function register(routes: Hono, useCases: UseCases): void {
   routes.post("/livros", async (contexto) => {
-    const livro = useCases.cadastrarLivro.execute(
+    const livro = await useCases.cadastrarLivro.execute(
       parseNovoLivro(await contexto.req.json()),
     );
 

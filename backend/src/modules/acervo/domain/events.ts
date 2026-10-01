@@ -9,5 +9,5 @@ export type AcervoEvent = LivroCatalogado;
 
 /** Port de saída: o módulo anuncia o que aconteceu e não sabe quem ouve. */
 export interface EventPublisher {
-  publish(event: AcervoEvent): void;
+  publish(event: AcervoEvent): Promise<void>;
 }

@@ -7,14 +7,17 @@ import type { Livro } from "./Livro";
  * domínio e não sabe que existe SQLite, HTTP ou qualquer outra tecnologia.
  * Repare que as duas primeiras assinaturas são perguntas de negócio, não
  * consultas.
+ *
+ * Todas devolvem Promise: falar com um banco é I/O, e I/O leva tempo. O
+ * contrato síncrono só funcionava porque o SQLite embutido responde na hora.
  */
 export interface LivroRepository {
-  contarNoAcervoDoAutor(autorId: AutorId): number;
-  contarCatalogadosNoAno(ano: string): number;
+  contarNoAcervoDoAutor(autorId: AutorId): Promise<number>;
+  contarCatalogadosNoAno(ano: string): Promise<number>;
 
-  insert(livro: Livro): Livro;
-  findByIsbn(isbn: Isbn): Livro | null;
-  findByAutorId(autorId: AutorId): Livro[];
-  searchByTitulo(termo: string): Livro[];
-  findByAutorIds(autorIds: AutorId[]): Livro[];
+  insert(livro: Livro): Promise<Livro>;
+  findByIsbn(isbn: Isbn): Promise<Livro | null>;
+  findByAutorId(autorId: AutorId): Promise<Livro[]>;
+  searchByTitulo(termo: string): Promise<Livro[]>;
+  findByAutorIds(autorIds: AutorId[]): Promise<Livro[]>;
 }

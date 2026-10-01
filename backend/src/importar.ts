@@ -24,7 +24,7 @@ for (const row of rows) {
   const [isbn, titulo, autorId] = row.split(",") as [string, string, string];
 
   try {
-    cadastrarLivro.execute({ isbn, titulo, autorId: Number(autorId) });
+    await cadastrarLivro.execute({ isbn, titulo, autorId: Number(autorId) });
     importados++;
   } catch (error) {
     console.log(`linha rejeitada (${(error as Error).message}): ${row}`);

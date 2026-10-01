@@ -3,6 +3,7 @@ import { LivroId, AutorId } from "../../../shared/identifiers";
 import { Isbn } from "../domain/Isbn";
 import { Livro } from "../domain/Livro";
 import type { LivroRepository } from "../domain/LivroRepository";
+import type { ConsultaDeLivros } from "../domain/ConsultaDeLivros";
 import { NumeroRegistro } from "../domain/NumeroRegistro";
 
 type LivroRow = {
@@ -25,7 +26,7 @@ function toLivro(row: LivroRow): Livro {
   );
 }
 
-export class SqliteLivroRepository implements LivroRepository {
+export class SqliteLivroRepository implements LivroRepository, ConsultaDeLivros {
   contarNoAcervoDoAutor(autorId: AutorId): number {
     const row = db
       .query("SELECT COUNT(*) AS total FROM livros WHERE autor_id = ?")
@@ -94,5 +95,21 @@ export class SqliteLivroRepository implements LivroRepository {
       .all(...autorIds.map((autorId) => autorId.value)) as LivroRow[];
 
     return rows.map(toLivro);
+  }
+  findById(id: LivroId): Livro | null {
+    const row = db.query("SELECT * FROM livros WHERE id = ?")
+      .get(id.value) as LivroRow | null;
+    return row === null ? null : toLivro(row);
+  }
+
+  updateTitulo(livro: Livro): void {
+    db.run("UPDATE livros SET titulo = ? WHERE id = ?", [
+      livro.titulo,
+      livro.id!.value,
+    ]);
+  }
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+      .get(numeroRegistro) !== null;
   }
 }

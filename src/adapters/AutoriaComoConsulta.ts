@@ -1,3 +1,4 @@
+import { db } from "../infrastructure/db";
 import type { AutorConhecido, ConsultaDeAutoria } from "../modules/acervo";
 import type { ConsultaDeAutores } from "../modules/autoria";
 import type { AutorId } from "../shared/identifiers";
@@ -8,7 +9,7 @@ import type { AutorId } from "../shared/identifiers";
  * ("curta" / "ampla").
  */
 export class AutoriaComoConsulta implements ConsultaDeAutoria {
-  constructor(private readonly autores: ConsultaDeAutores) {}
+  constructor(private readonly autores: ConsultaDeAutores) { }
 
   autor(autorId: AutorId): AutorConhecido | null {
     const resumo = this.autores.resumo(autorId);
@@ -25,4 +26,9 @@ export class AutoriaComoConsulta implements ConsultaDeAutoria {
   idsPorNome(termo: string): AutorId[] {
     return this.autores.idsPorNome(termo);
   }
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+      .get(numeroRegistro) !== null;
+  }
+
 }

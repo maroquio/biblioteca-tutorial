@@ -1,4 +1,4 @@
-import type { AutorId } from "../../../shared/identifiers";
+import type { AutorId, LivroId } from "../../../shared/identifiers";
 import type { Isbn } from "./Isbn";
 import type { Livro } from "./Livro";
 
@@ -9,12 +9,15 @@ import type { Livro } from "./Livro";
  * consultas.
  */
 export interface LivroRepository {
+  findByAutorIds(autorIds: AutorId[]): unknown;
   contarNoAcervoDoAutor(autorId: AutorId): number;
   contarCatalogadosNoAno(ano: string): number;
 
   insert(livro: Livro): Livro;
+  findById(id: LivroId): Livro | null;
   findByIsbn(isbn: Isbn): Livro | null;
   findByAutorId(autorId: AutorId): Livro[];
   searchByTitulo(termo: string): Livro[];
-  findByAutorIds(autorIds: AutorId[]): Livro[];
+  findById(id: LivroId): Livro | null;
+  updateIsbn(livro: Livro): void;
 }

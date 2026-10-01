@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Recuperação 6B — Registrar solicitação de empréstimo</title><link rel="stylesheet" href="avaliacao.css"><script src="copiar.js" defer></script></head>
+<body>
+<header><div class="page"><div class="eyebrow">Biblioteca · recuperação de arquitetura</div><h1>Recuperação 6B — Registrar solicitação de empréstimo</h1><p class="subtitle">Um módulo novo com uma fatia vertical. O código da operação está pronto; você decide onde cada artefato pertence e como as fronteiras se conectam.</p><div class="meta"><span class="pill">Ponto de partida: branch main</span><span class="pill">Tempo sugerido: 80 minutos</span><span class="pill">10 pontos</span></div></div></header>
+<main class="page">
+<section id="iniciar"><h2>Antes de implementar: criar a branch 6b</h2><p>Conclua primeiro o <a href="index.html#preparacao">guia de Windows, fork, clonagem e VS Code</a>. Trabalhe no clone do <strong>seu fork</strong>, usando o terminal <strong>PowerShell</strong> do VS Code, na pasta que contém <code>package.json</code>.</p><p>Esta tarefa exige uma branch própria, <code>recuperacao-6b</code>, criada diretamente da <code>main</code> preparada no guia. Confira se não há alterações pendentes:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-6b-status">Copiar</button></div><pre><code id="git-6b-status">git status --short</code></pre></div><p>Prossiga somente se não aparecer nenhum arquivo. Se estiver concluindo a outra tarefa, faça commit e push nela antes de trocar de branch e encerre o servidor com Ctrl+C. Em seguida, crie a branch desta tarefa a partir da main:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-6b-branch">Copiar</button></div><pre><code id="git-6b-branch">git switch main
+git switch -c recuperacao-6b main
+git branch --show-current
+bun install</code></pre></div><p>O nome exibido deve ser <code>recuperacao-6b</code>. A opção <code>-c</code> cria a branch; o argumento <code>main</code> define sua base. Não crie esta branch a partir da Recuperação 5B e não faça merge da outra tarefa na main. Ao retomar uma branch já criada, use apenas <code>git switch recuperacao-6b</code>.</p><div class="note">Entrega desta tarefa: um PR de <code>SEU_USUARIO/biblioteca-tutorial:recuperacao-6b</code> para <code>maroquio/biblioteca-tutorial:main</code>. A recuperação completa exige <strong>dois PRs separados</strong>, um para cada tarefa.</div></section>
+<section><h2>O pedido da biblioteca</h2><p class="lead">Leitores podem registrar uma solicitação de empréstimo de um livro catalogado. A API recebe <code>POST /solicitacoes</code> com <code>numeroRegistro</code>, <code>matricula</code>, <code>diasPretendidos</code> inteiro de 1 a 14 e <code>observacao</code> opcional. Uma matrícula pode solicitar o mesmo livro uma única vez.</p><p>Livro inexistente resulta em 404; segunda solicitação da mesma matrícula para o mesmo número de registro resulta em 409; entrada inválida resulta em 400. O sucesso retorna 201, <code>Location: /solicitacoes/:id</code> e exatamente cinco campos no JSON: <code>id</code>, <code>numeroRegistro</code>, <code>matricula</code>, <code>diasPretendidos</code> e <code>observacao</code>. Observação ausente ou nula é devolvida como <code>null</code>; quando informada como texto, não pode ser vazia.</p><p>O escopo é apenas registrar pedidos. Não há aprovação, disponibilidade de exemplares, cálculo de vencimento, devolução ou cancelamento. Matrículas diferentes podem solicitar o mesmo livro, e uma matrícula pode solicitar livros diferentes. O cabeçalho Location identifica o registro criado; não é necessário implementar GET.</p><div class="note">Parta da branch própria criada a partir da <code>main</code>, fase 53. Esta tarefa é independente da Recuperação 5B e das atividades anteriores. Todos os blocos de lógica são copiáveis. Você completa os imports locais e as ligações entre artefatos. Os caminhos dos arquivos novos não são fornecidos.</div></section>
+<section><h2>Blocos para distribuir</h2><p>Os blocos marcados <em>arquivo novo</em> formam o corpo principal de um arquivo. Os de <em>edição</em> entram em artefatos existentes. Faça o projeto compilar acrescentando os imports locais apropriados.</p>
+<div class="step"><span class="step-number">01 · edição</span><h3>Identidade da solicitação</h3><p>O projeto já compartilha o mecanismo de identificadores. Acrescente esta identidade nominal ao mesmo mecanismo.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-1">Copiar</button></div><pre><code id="b6-1">export class SolicitacaoId extends Identifier {}</code></pre></div></div>
+<div class="step"><span class="step-number">02 · arquivo novo</span><h3>Entidade do módulo</h3><p>O intervalo válido de dias pretendidos é decisão da entidade. A matrícula e o número de registro já chegam como textos não vazios da entrada.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-2">Copiar</button></div><pre><code id="b6-2">export class Solicitacao {
+  constructor(
+    readonly id: SolicitacaoId | null,
+    readonly numeroRegistro: string,
+    readonly matricula: string,
+    readonly diasPretendidos: number,
+    readonly observacao: string | null,
+  ) {
+    if (!Number.isInteger(diasPretendidos) || diasPretendidos &lt; 1 || diasPretendidos &gt; 14) {
+      throw new InvalidValue("O prazo pretendido deve ser um inteiro de 1 a 14 dias");
+    }
+  }
+
+  static registrar(
+    numeroRegistro: string,
+    matricula: string,
+    diasPretendidos: number,
+    observacao: string | null,
+  ): Solicitacao {
+    return new Solicitacao(null, numeroRegistro, matricula, diasPretendidos, observacao);
+  }
+
+  withId(id: SolicitacaoId): Solicitacao {
+    return new Solicitacao(
+      id, this.numeroRegistro, this.matricula, this.diasPretendidos, this.observacao,
+    );
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">03 · dois arquivos novos</span><h3>Portas declaradas por quem precisa</h3><p>Separe a porta de persistência da porta de consulta ao Acervo. São dois contratos com donos e responsabilidades diferentes.</p><div class="codebox"><div class="codebar">Contrato de persistência <button class="copy" data-copy="b6-3a">Copiar</button></div><pre><code id="b6-3a">export interface SolicitacaoRepository {
+  findByMatriculaELivro(
+    matricula: string,
+    numeroRegistro: string,
+  ): Solicitacao | null;
+  insert(solicitacao: Solicitacao): Solicitacao;
+}</code></pre></div><div class="codebox"><div class="codebar">Contrato de consulta <button class="copy" data-copy="b6-3b">Copiar</button></div><pre><code id="b6-3b">export interface ConsultaDeAcervo {
+  existeNumeroRegistro(numeroRegistro: string): boolean;
+}</code></pre></div></div>
+<div class="step"><span class="step-number">04 · arquivo novo</span><h3>Validação da entrada</h3><p>Use os helpers existentes. Formato do número de registro pertence ao Acervo; esta borda só exige um texto não vazio.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-4">Copiar</button></div><pre><code id="b6-4">export type NovaSolicitacao = {
+  numeroRegistro: string;
+  matricula: string;
+  diasPretendidos: number;
+  observacao: string | null;
+};
+
+export function parseNovaSolicitacao(body: unknown): NovaSolicitacao {
+  const data = getBodyAsObject(body);
+  return {
+    numeroRegistro: getFieldAsText(data, "numeroRegistro"),
+    matricula: getFieldAsText(data, "matricula"),
+    diasPretendidos: getFieldAsPositiveInt(data, "diasPretendidos"),
+    observacao: data.observacao == null
+      ? null
+      : getFieldAsText(data, "observacao"),
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">05 · arquivo novo</span><h3>Saída JSON</h3><p>O domínio não decide a forma da resposta HTTP. Este mapeador pertence à saída do módulo.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-5">Copiar</button></div><pre><code id="b6-5">export type SolicitacaoJson = {
+  id: number;
+  numeroRegistro: string;
+  matricula: string;
+  diasPretendidos: number;
+  observacao: string | null;
+};
+
+export function solicitacaoToJson(solicitacao: Solicitacao): SolicitacaoJson {
+  return {
+    id: solicitacao.id!.value,
+    numeroRegistro: solicitacao.numeroRegistro,
+    matricula: solicitacao.matricula,
+    diasPretendidos: solicitacao.diasPretendidos,
+    observacao: solicitacao.observacao,
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">06 · arquivo novo</span><h3>Caso de uso</h3><p>O caso de uso recebe as duas portas. A consulta ao Acervo é uma pergunta de negócio; ele não vê SQLite nem importa um módulo vizinho.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-6">Copiar</button></div><pre><code id="b6-6">export class RegistrarSolicitacao {
+  constructor(
+    private readonly solicitacoes: SolicitacaoRepository,
+    private readonly acervo: ConsultaDeAcervo,
+  ) {}
+
+  execute(input: NovaSolicitacao): SolicitacaoJson {
+    if (!this.acervo.existeNumeroRegistro(input.numeroRegistro)) {
+      throw new NotFound("Livro não encontrado");
+    }
+    if (this.solicitacoes.findByMatriculaELivro(
+      input.matricula, input.numeroRegistro,
+    )) {
+      throw new RuleConflict("Leitor já solicitou este livro");
+    }
+
+    const solicitacao = this.solicitacoes.insert(Solicitacao.registrar(
+      input.numeroRegistro,
+      input.matricula,
+      input.diasPretendidos,
+      input.observacao,
+    ));
+    return solicitacaoToJson(solicitacao);
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">07 · arquivo novo</span><h3>Rota da fatia</h3><p>A rota recebe HTTP e chama o caso de uso. O servidor já transforma exceções em status.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-7">Copiar</button></div><pre><code id="b6-7">export function register(routes: Hono, useCases: UseCases): void {
+  routes.post("/solicitacoes", async (contexto) => {
+    const input = parseNovaSolicitacao(await contexto.req.json());
+    const solicitacao = useCases.registrarSolicitacao.execute(input);
+    contexto.header("Location", `/solicitacoes/${solicitacao.id}`);
+    return contexto.json(solicitacao, 201);
+  });
+}</code></pre></div></div>
+<div class="step"><span class="step-number">08 · arquivo novo</span><h3>Tabela de propriedade do módulo</h3><p>O novo módulo é dono de sua tabela. A referência ao livro não usa chave estrangeira entre módulos.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-8">Copiar</button></div><pre><code id="b6-8">export function createSolicitacaoTables(): void {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS solicitacoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero_registro TEXT NOT NULL,
+      matricula TEXT NOT NULL,
+      dias_pretendidos INTEGER NOT NULL,
+      observacao TEXT,
+      UNIQUE (numero_registro, matricula)
+    );
+  `);
+}</code></pre></div></div>
+<div class="step"><span class="step-number">09 · arquivo novo</span><h3>Adaptador de persistência</h3><p>A implementação da porta traduz entre linhas SQL e entidade.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-9">Copiar</button></div><pre><code id="b6-9">type SolicitacaoRow = {
+  id: number;
+  numero_registro: string;
+  matricula: string;
+  dias_pretendidos: number;
+  observacao: string | null;
+};
+
+function toSolicitacao(row: SolicitacaoRow): Solicitacao {
+  return new Solicitacao(
+    new SolicitacaoId(row.id), row.numero_registro,
+    row.matricula, row.dias_pretendidos, row.observacao,
+  );
+}
+
+export class SqliteSolicitacaoRepository implements SolicitacaoRepository {
+  findByMatriculaELivro(
+    matricula: string,
+    numeroRegistro: string,
+  ): Solicitacao | null {
+    const row = db.query(`
+      SELECT * FROM solicitacoes
+      WHERE matricula = ? AND numero_registro = ?
+    `).get(matricula, numeroRegistro) as SolicitacaoRow | null;
+    return row === null ? null : toSolicitacao(row);
+  }
+
+  insert(solicitacao: Solicitacao): Solicitacao {
+    const result = db.run(`
+      INSERT INTO solicitacoes
+        (numero_registro, matricula, dias_pretendidos, observacao)
+      VALUES (?, ?, ?, ?)
+    `, [
+      solicitacao.numeroRegistro, solicitacao.matricula,
+      solicitacao.diasPretendidos, solicitacao.observacao,
+    ]);
+    return solicitacao.withId(new SolicitacaoId(Number(result.lastInsertRowid)));
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">10 · arquivo novo e edição</span><h3>Consulta publicada pelo Acervo</h3><p>O Acervo publica uma pergunta no próprio vocabulário. A implementação fica com o adaptador que já conhece a tabela de livros. Acrescente a assinatura correspondente à classe implementadora.</p><div class="codebox"><div class="codebar">Contrato público <button class="copy" data-copy="b6-10a">Copiar</button></div><pre><code id="b6-10a">export interface ConsultaDeLivros {
+  existeNumeroRegistro(numeroRegistro: string): boolean;
+}</code></pre></div><div class="codebox"><div class="codebar">Método no adaptador existente <button class="copy" data-copy="b6-10b">Copiar</button></div><pre><code id="b6-10b">existeNumeroRegistro(numeroRegistro: string): boolean {
+  return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+    .get(numeroRegistro) !== null;
+}</code></pre></div></div>
+<div class="step"><span class="step-number">11 · arquivo novo</span><h3>Ponte entre os vocabulários</h3><p>A ponte fica fora dos dois módulos. Ela implementa a porta de quem pergunta usando apenas a API pública de quem responde.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b6-11">Copiar</button></div><pre><code id="b6-11">export class AcervoComoConsultaDeSolicitacoes implements ConsultaDeAcervo {
+  constructor(private readonly livros: ConsultaDeLivros) {}
+
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return this.livros.existeNumeroRegistro(numeroRegistro);
+  }
+}</code></pre></div></div>
+</section>
+<section><h2>Conexões que você resolve</h2><p>Além dos blocos, o módulo precisa de seu registro de rotas e de uma API pública mínima. Publique o contrato do Acervo por sua própria API pública. Faça a composição instanciar o repositório e a ponte, exponha o caso de uso no tipo usado pelas rotas, registre o módulo no servidor e crie sua tabela na inicialização. Atualize a verificação de propriedade das tabelas.</p><div class="note warn">Não coloque a consulta ao livro em SQL dentro do módulo de Solicitações. O acesso à tabela de livros continua pertencendo ao Acervo. Não altere o comportamento das fatias existentes.</div></section>
+<section id="testes-thunder"><h2>Testar a API com o Thunder Client</h2><p><strong>Execute os testes manuais desta tarefa na extensão Thunder Client do VS Code.</strong> Siga a <a href="index.html#thunder-client">orientação de instalação e uso</a>. Para começar uma requisição: ícone de raio → <strong>New Request</strong> → método e URL. Para enviar dados, use <strong>Body → JSON</strong>, confira <code>Content-Type: application/json</code> e clique em <strong>Send</strong>. Leia o status e o corpo na área de resposta.</p><h3>1. Verificar o projeto e preparar os dados</h3><p>Na branch <code>recuperacao-6b</code>, salve os arquivos e pare qualquer servidor anterior com Ctrl+C. Execute no PowerShell, na raiz do projeto:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="tc-6b-checks">Copiar</button></div><pre><code id="tc-6b-checks">bun x tsc --noEmit
+bun test
+bun run verificar</code></pre></div><p>Corrija as falhas antes de continuar. Para iniciar este roteiro sem dados de testes anteriores, preserve o banco atual com outro nome e deixe a aplicação criar um novo banco. Execute o bloco abaixo <strong>uma vez no início do roteiro, com o servidor parado</strong>:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="tc-6b-db">Copiar</button></div><pre><code id="tc-6b-db">New-Item -ItemType Directory -Force -Path .\data | Out-Null
+if (Test-Path ".\data\biblioteca.sqlite") {
+    $backupBanco = "biblioteca-antes-6b-$(Get-Date -Format 'yyyyMMdd-HHmmssfff').sqlite"
+    Move-Item -Path ".\data\biblioteca.sqlite" -Destination (Join-Path ".\data" $backupBanco)
+}
+$env:PORT = "3000"
+bun run dev</code></pre></div><p>Mantenha esse terminal aberto. No Thunder Client, envie <strong>GET</strong> para <code>http://localhost:3000/</code>, sem Body. O esperado é <strong>200</strong> e <code>{"message":"API da Biblioteca"}</code>. Não reinicie o banco entre os cenários abaixo: alguns dependem do que foi criado nos passos anteriores.</p><h3>2. Cadastrar os livros usados nas solicitações</h3><p>No Thunder Client, crie <strong>POST</strong> para <code>http://localhost:3000/livros</code>. Envie em <strong>Body → JSON</strong>:</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-6b-livro1">Copiar</button></div><pre><code id="tc-6b-livro1">{
+  "isbn": "9780141439518",
+  "titulo": "Livro de teste 6B A",
+  "autorId": 4
+}</code></pre></div><p>Espere <strong>201</strong> e copie o <code>numeroRegistro</code> retornado: ele será o <strong>REGISTRO_A</strong>. Cadastre também outro livro, na mesma URL:</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-6b-livro2">Copiar</button></div><pre><code id="tc-6b-livro2">{
+  "isbn": "9780141439662",
+  "titulo": "Livro de teste 6B B",
+  "autorId": 1
+}</code></pre></div><p>Espere <strong>201</strong> e anote o segundo <code>numeroRegistro</code> como <strong>REGISTRO_B</strong>. Nos próximos corpos, substitua os textos REGISTRO_A e REGISTRO_B pelos valores reais, mantendo as aspas. Não suponha o ano ou o sequencial.</p><h3>3. Criar a primeira solicitação</h3><p>Crie <strong>POST</strong> para <code>http://localhost:3000/solicitacoes</code>. Em <strong>Body → JSON</strong>, envie o corpo abaixo após substituir REGISTRO_A:</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-6b-solicitar">Copiar</button></div><pre><code id="tc-6b-solicitar">{
+  "numeroRegistro": "REGISTRO_A",
+  "matricula": "LEITOR-42",
+  "diasPretendidos": 1
+}</code></pre></div><p>Espere <strong>201</strong>. A resposta deve conter exatamente <code>id</code>, <code>numeroRegistro</code>, <code>matricula</code>, <code>diasPretendidos</code> e <code>observacao</code>. Confira <code>diasPretendidos: 1</code> e <code>observacao: null</code>.</p><p>Na área de resposta do Thunder Client, abra <strong>Headers</strong> e localize <code>Location</code> (o nome pode aparecer em minúsculas). Seu valor deve ser <code>/solicitacoes/ID_RETORNADO</code>; por exemplo, <code>/solicitacoes/1</code> se a resposta tiver id 1. Esse cabeçalho identifica o registro criado; esta tarefa não exige um GET de solicitações.</p><p>Clique em <strong>Send</strong> novamente, sem alterar o corpo. Agora espere <strong>409</strong>, porque a matrícula já solicitou esse livro.</p><h3>4. Conferir os outros casos de sucesso</h3><p>Continue usando POST na mesma URL, com os números de registro reais.</p><table><thead><tr><th>Cenário</th><th>Body JSON</th><th>Esperado</th></tr></thead><tbody><tr><td>Outra matrícula, prazo máximo e observação aparada</td><td><code>{"numeroRegistro":"REGISTRO_A","matricula":"LEITOR-43","diasPretendidos":14,"observacao":"  Trabalho  "}</code></td><td>201; diasPretendidos 14 e observacao “Trabalho”</td></tr><tr><td>Mesma matrícula, outro livro e observação null</td><td><code>{"numeroRegistro":"REGISTRO_B","matricula":"LEITOR-42","diasPretendidos":7,"observacao":null}</code></td><td>201; observacao null</td></tr></tbody></table><h3>5. Exercitar os erros sem confundir as regras</h3><p>Para cada cenário abaixo, comece com este corpo e altere apenas o campo indicado na tabela. A matrícula <code>LEITOR-ERRO</code> ainda não possui solicitação. Isso permite testar prazo inválido sem acionar antes a regra de duplicidade. Substitua REGISTRO_A antes de enviar.</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-6b-base-erros">Copiar</button></div><pre><code id="tc-6b-base-erros">{
+  "numeroRegistro": "REGISTRO_A",
+  "matricula": "LEITOR-ERRO",
+  "diasPretendidos": 7
+}</code></pre></div><table><thead><tr><th>Cenário</th><th>Alteração no corpo-base</th><th>Status</th></tr></thead><tbody><tr><td>Livro inexistente</td><td><code>"numeroRegistro": "REGISTRO-INEXISTENTE"</code></td><td>404</td></tr><tr><td>Prazo zero</td><td><code>"diasPretendidos": 0</code></td><td>400</td></tr><tr><td>Prazo acima do limite</td><td><code>"diasPretendidos": 15</code></td><td>400</td></tr><tr><td>Prazo fracionário</td><td><code>"diasPretendidos": 1.5</code></td><td>400</td></tr><tr><td>Matrícula vazia</td><td><code>"matricula": "   "</code></td><td>400</td></tr><tr><td>Número de registro vazio</td><td><code>"numeroRegistro": "   "</code></td><td>400</td></tr><tr><td>Observação vazia</td><td>Acrescente <code>"observacao": "   "</code></td><td>400</td></tr><tr><td>Observação de tipo incorreto</td><td>Acrescente <code>"observacao": 123</code></td><td>400</td></tr></tbody></table><p>Nas falhas, confira o JSON com a propriedade <code>error</code>. Nenhum cenário inválido deve criar uma solicitação. Depois de todos eles, envie o corpo-base válido, sem alterações: espere <strong>201</strong>. Isso confere que a matrícula LEITOR-ERRO continuou disponível para o livro. Se repetir esse corpo válido, o resultado passa a ser 409.</p><p>Se precisar repetir o roteiro inteiro, pare o servidor e recomece a preparação do banco. Ao repetir apenas um sucesso, lembre que o par matrícula/livro já ficou registrado.</p><h3>6. Registrar o resultado</h3><p>Na descrição do PR da 6B, informe os cenários executados no Thunder Client, os status esperados e observados, e a conferência do cabeçalho Location. Exemplo: “Prazo 15 — esperado 400 — obtido 400”. Corrija resultados divergentes e teste novamente. Ao terminar, pare o servidor com Ctrl+C antes de trocar de branch.</p><div class="note">O Thunder Client verifica as respostas HTTP; os testes automatizados existentes e as verificações de tipos e fronteiras complementam a conferência. A inspeção de persistência e arquitetura faz parte da correção do professor.</div></section>
+<section><h2>Critérios de avaliação · 10 pontos</h2><table><thead><tr><th>Critério</th><th>Pontos</th></tr></thead><tbody><tr><td>Artefatos nas camadas e no módulo corretos</td><td>3</td></tr><tr><td>Imports, exports, rotas, inicialização e composição</td><td>3</td></tr><tr><td>Portas, ponte e propriedade das tabelas</td><td>1</td></tr><tr><td>Comportamento: sucesso, validações e conflitos</td><td>3</td></tr></tbody></table><p>Entregue a Recuperação 6B por um PR próprio, seguindo os passos abaixo. Sua branch deve partir da main e não conter a implementação da 5B.</p></section>
+<section id="entrega"><h2>Concluir e entregar a Recuperação 6B</h2><p>Conclua o roteiro do Thunder Client e anote os resultados. Encerre o servidor com Ctrl+C e salve os arquivos. No PowerShell, confira a branch, execute as verificações complementares e revise as alterações. Corrija as falhas antes de enviar. Se repetir os testes manuais depois de bun test, prepare novamente os dados conforme o roteiro.</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-6b-validar">Copiar</button></div><pre><code id="git-6b-validar">git branch --show-current
+bun x tsc --noEmit
+bun test
+bun run verificar
+git status --short
+git diff</code></pre></div><p>A branch deve ser <code>recuperacao-6b</code>. Depois de conferir, prepare os arquivos de código, revise o que entrará no commit e envie ao <code>origin</code>, que é seu fork:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-6b-commit">Copiar</button></div><pre><code id="git-6b-commit">git add src tests scripts
+git diff --cached
+git commit -m "Recuperacao 6B: registrar solicitacao de emprestimo"
+git push -u origin recuperacao-6b</code></pre></div><p>Execute uma linha por vez e confira o diff antes do commit. Ele deve conter somente esta tarefa. Os diretórios adicionados abrangem as alterações solicitadas; arquivos novos aparecerão no diff após o <code>git add</code>.</p><h3>Abrir o PR pelo GitHub</h3><ol><li>Entre no <a href="https://github.com/maroquio/biblioteca-tutorial/pulls">repositório original no GitHub</a> e escolha <strong>Pull requests → New pull request</strong>.</li><li>Clique em <strong>compare across forks</strong>, se necessário, e selecione os valores da tabela abaixo.</li><li>Confira <strong>Commits</strong> e <strong>Files changed</strong>: devem aparecer apenas as alterações desta tarefa.</li><li>Clique em <strong>Create pull request</strong>. Use o título <strong>Recuperação 6B — Seu nome completo</strong> e informe na descrição o que implementou, as verificações executadas e os cenários testados no Thunder Client com os status esperados e observados.</li><li>Confirme em <strong>Create pull request</strong>, como PR pronto para revisão. Copie o link da página criada e mantenha o PR aberto para correção.</li></ol><table><thead><tr><th>Campo no GitHub</th><th>Valor</th></tr></thead><tbody><tr><td>base repository</td><td><code>maroquio/biblioteca-tutorial</code></td></tr><tr><td>base</td><td><code>main</code></td></tr><tr><td>head repository / head fork</td><td><code>SEU_USUARIO/biblioteca-tutorial</code></td></tr><tr><td>compare</td><td><code>recuperacao-6b</code></td></tr></tbody></table><p>O destino é o repositório do professor; não abra o PR para a main do seu próprio fork. Se precisar corrigir algo após abrir o PR, faça outro commit na mesma branch e execute <code>git push</code>; o PR existente será atualizado. Consulte o <a href="https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request-from-a-fork">guia oficial de PRs a partir de forks</a>.</p><div class="note"><strong>A recuperação só é considerada entregue após a criação dos dois PRs: 5B e 6B, um por tarefa.</strong> Commit e push, sozinhos, não são entrega. Não é necessário mesclar os PRs.</div><p><a href="atividade5b.html">Ir para a Recuperação 5B</a> · <a href="index.html">Voltar ao guia inicial</a></p></section>
+<footer>Biblioteca · TEES2 · Ifes 2026.2</footer>
+</main>
+</body>
+</html>

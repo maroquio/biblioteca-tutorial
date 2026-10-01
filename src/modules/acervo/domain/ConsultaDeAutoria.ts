@@ -1,4 +1,5 @@
 import type { AutorId } from "../../../shared/identifiers";
+import type { Livro } from "./Livro";
 
 /**
  * Vocabulário do módulo Acervo. A Autoria fala em "literatura" e "didatico";

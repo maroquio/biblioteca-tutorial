@@ -2,6 +2,7 @@ import type { Hono } from "hono";
 import type { UseCases } from "../../composition";
 import { register as registerBuscarLivro } from "./features/buscar-livro/route";
 import { register as registerCadastrarLivro } from "./features/cadastrar-livro/route";
+import { parseCorrecaoDeIsbn } from "./features/corrigirIsbn/CorrecaoParse";
 
 export function registerRoutes(app: Hono, useCases: UseCases): void {
   registerCadastrarLivro(app, useCases);

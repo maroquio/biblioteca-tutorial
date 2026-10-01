@@ -35,6 +35,7 @@ const deEvans = (n: number) => ({
   autorId: EVANS,
 });
 
+
 function scenario(hoje = new Date("2026-03-10")) {
   const livros = new InMemoryLivroRepository();
 

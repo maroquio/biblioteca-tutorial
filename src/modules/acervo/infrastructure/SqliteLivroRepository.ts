@@ -61,6 +61,14 @@ export class SqliteLivroRepository implements LivroRepository {
     return livro.withId(new LivroId(Number(result.lastInsertRowid)));
   }
 
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return (
+      db
+        .query("SELECT 1 FROM livros WHERE numero_registro = ?")
+        .get(numeroRegistro) !== null
+    );
+  }
+
   findByIsbn(isbn: Isbn): Livro | null {
     const row = db
       .query("SELECT * FROM livros WHERE isbn = ?")

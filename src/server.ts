@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { UseCases } from "./composition";
 import { DomainError, InvalidValue } from "./shared/domain-errors";
 import { registerRoutes as registerAcervo } from "./modules/acervo";
+import { registerRoutes as registerSolicitacao } from "./modules/solicitacao/routes";
 import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";
 
 function errorResponse(error: unknown): Response {
@@ -22,12 +23,16 @@ function errorResponse(error: unknown): Response {
   return Response.json({ error: "Erro interno" }, { status: 500 });
 }
 
-export function createServer(useCases: UseCases, porta = Number(process.env.PORT ?? 3000)) {
+export function createServer(
+  useCases: UseCases,
+  porta = Number(process.env.PORT ?? 3000),
+) {
   const app = new Hono();
 
   app.get("/", (contexto) => contexto.json({ message: "API da Biblioteca" }));
 
   registerAcervo(app, useCases);
+  registerSolicitacao(app, useCases);
 
   app.notFound((contexto) =>
     contexto.json({ error: "Recurso não encontrado" }, 404),

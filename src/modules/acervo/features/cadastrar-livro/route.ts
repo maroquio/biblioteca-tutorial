@@ -13,3 +13,4 @@ export function register(routes: Hono, useCases: UseCases): void {
     return contexto.json(livro, 201);
   });
 }
+

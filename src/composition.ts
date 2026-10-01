@@ -1,4 +1,5 @@
 import { AutoriaComoConsulta } from "./adapters/AutoriaComoConsulta";
+import { AcervoComoConsultaDeSolicitacoes } from "./adapters/AcervoComoConsultaDeSolicitacoes";
 import {
   BuscarLivro,
   CadastrarLivro,
@@ -6,6 +7,10 @@ import {
   SqliteLivroRepository,
 } from "./modules/acervo";
 import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
+import {
+  RegistrarSolicitacao,
+  SqliteSolicitacaoRepository,
+} from "./modules/solicitacoes";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
@@ -13,6 +18,7 @@ import { AutorId } from "./shared/identifiers";
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
+  registrarSolicitacao: RegistrarSolicitacao;
 };
 
 /**
@@ -26,6 +32,8 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   const autoria = new AutoriaComoConsulta(autores);
   const bus = new EventBus();
   const projecao = new ProjecaoDeLivros(autores);
+  const solicitacoes = new SqliteSolicitacaoRepository();
+  const consultaAcervo = new AcervoComoConsultaDeSolicitacoes(livros);
 
   bus.subscribe<LivroCatalogado>("LivroCatalogado", (event) =>
     projecao.registrarEntrada(new AutorId(event.autorId)),
@@ -34,5 +42,6 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   return {
     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
     buscarLivro: new BuscarLivro(livros, autoria),
+    registrarSolicitacao: new RegistrarSolicitacao(solicitacoes, consultaAcervo),
   };
 }

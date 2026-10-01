@@ -1,6 +1,7 @@
 import type { AutorConhecido } from "./domain/ConsultaDeAutoria";
 import type { Livro } from "./domain/Livro";
 
+
 export type LivroJson = {
   id: number;
   numeroRegistro: string;
@@ -22,3 +23,18 @@ export function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {
     dataCatalogacao: livro.dataCatalogacao,
   };
 }
+
+export type TituloCorrigidoJson = {
+  id: number;
+  isbn: string;
+  titulo: string;
+};
+
+export function tituloCorrigidoToJson(livro: Livro): TituloCorrigidoJson {
+  return {
+    id: livro.id!.value,
+    isbn: livro.isbn.value,
+    titulo: livro.titulo,
+  };
+}
+

@@ -12,6 +12,15 @@ import type {
 import type { LivroRepository } from "../src/modules/acervo/domain/LivroRepository";
 
 export class InMemoryLivroRepository implements LivroRepository {
+    findById(id: LivroId): Livro | null {
+    return this.items.find((livro) => livro.id?.equals(id)) ?? null;
+  }
+
+  updateIsbn(livro: Livro): void {
+    this.items = this.items.map((atual) =>
+      atual.id?.equals(livro.id!) ? livro : atual,
+    );
+  }
   private items: Livro[] = [];
   private nextId = 1;
 

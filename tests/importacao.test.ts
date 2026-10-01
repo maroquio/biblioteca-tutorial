@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from "bun:test";
 import { db } from "../src/infrastructure/db";
 import { createAcervoTables } from "../src/modules/acervo";
 import { createAutoriaTables } from "../src/modules/autoria";
+import type { Livro } from "../src/modules/acervo/domain/Livro";
 
 const AUSTEN = 4;
 const LIVROS = [
@@ -15,6 +16,21 @@ const LIVROS = [
 
 createAutoriaTables();
 createAcervoTables();
+
+
+export type IsbnCorrigidoJson = {
+  id: number;
+  numeroRegistro: string;
+  isbn: string;
+};
+
+export function isbnCorrigidoToJson(livro: Livro): IsbnCorrigidoJson {
+  return {
+    id: livro.id!.value,
+    numeroRegistro: livro.numeroRegistro.value,
+    isbn: livro.isbn.value,
+  };
+}
 
 beforeEach(() => {
   db.run("DELETE FROM livros");

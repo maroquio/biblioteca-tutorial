@@ -1,5 +1,5 @@
 import type { AutorId } from "../../shared/identifiers";
-import type { AutorRepository } from "./domain/AutorRepository";
+import type { AutorRepository } from "../autoria/domain/AutorRepository";
 
 /**
  * A coluna de contagem que evitamos de propósito lá na fase 04 volta aqui —

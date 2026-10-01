@@ -21,6 +21,7 @@ export class AutoriaComoConsulta implements ConsultaDeAutoria {
       livrosNoAcervo: resumo.livrosNoAcervo,
     };
   }
+  
 
   idsPorNome(termo: string): AutorId[] {
     return this.autores.idsPorNome(termo);

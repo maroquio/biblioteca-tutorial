@@ -41,4 +41,7 @@ function dropCrossModuleForeignKeys(): void {
   console.log(
     `Migração aplicada: ${foreignKeys.length} chave(s) estrangeira(s) cruzada(s) removida(s) de livros`,
   );
+
+
+  
 }

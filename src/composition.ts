@@ -10,7 +10,7 @@ import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";
 import type { Clock } from "./shared/Clock";
 import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
-import type { RegistrarSolicitacao } from "./modules/solicitacoes";
+import type { RegistrarSolicitacao } from "./modules/solicitacao";
 
 export type UseCases = {
   cadastrarLivro: CadastrarLivro;

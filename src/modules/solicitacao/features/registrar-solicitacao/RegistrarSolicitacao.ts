@@ -7,7 +7,7 @@ import type { NovaSolicitacao } from "./input";
 
 export class RegistrarSolicitacao {
   constructor(
-    private readonly solicitacoes: SolicitacaoRepository,
+    private readonly solicitacao: SolicitacaoRepository,
     private readonly acervo: ConsultaDeAcervo,
   ) {}
 
@@ -15,13 +15,13 @@ export class RegistrarSolicitacao {
     if (!this.acervo.existeNumeroRegistro(input.numeroRegistro)) {
       throw new NotFound("Livro não encontrado");
     }
-    if (this.solicitacoes.findByMatriculaELivro(
+    if (this.solicitacao.findByMatriculaELivro(
       input.matricula, input.numeroRegistro,
     )) {
       throw new RuleConflict("Leitor já solicitou este livro");
     }
 
-    const solicitacao = this.solicitacoes.insert(Solicitacao.registrar(
+    const solicitacao = this.solicitacao.insert(Solicitacao.registrar(
       input.numeroRegistro,
       input.matricula,
       input.diasPretendidos,

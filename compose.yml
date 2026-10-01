@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: biblioteca
+      POSTGRES_PASSWORD: biblioteca
+      POSTGRES_DB: biblioteca
+    # sem "ports": o banco não fica exposto no seu computador, só os outros
+    # serviços deste compose.yaml o enxergam, pela rede interna do Docker
+    volumes:
+      # a partir do Postgres 18 o volume é montado em /var/lib/postgresql
+      # (e não mais em /var/lib/postgresql/data)
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U biblioteca -d biblioteca"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pgdata:

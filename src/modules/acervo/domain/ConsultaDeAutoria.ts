@@ -1,4 +1,5 @@
 import type { AutorId } from "../../../shared/identifiers";
+import type { ConsultaDeAcervo } from "../../solicitacao/domain/ConsultaDeAcervo ";
 
 /**
  * Vocabulário do módulo Acervo. A Autoria fala em "literatura" e "didatico";
@@ -18,4 +19,17 @@ export type AutorConhecido = {
 export interface ConsultaDeAutoria {
   autor(autorId: AutorId): AutorConhecido | null;
   idsPorNome(termo: string): AutorId[];
+}
+
+
+export interface ConsultaDeLivros {
+  existeNumeroRegistro(numeroRegistro: string): boolean;
+}
+
+export class AcervoComoConsultaDeSolicitacoes implements ConsultaDeAcervo {
+  constructor(private readonly livros: ConsultaDeLivros) {}
+
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return this.livros.existeNumeroRegistro(numeroRegistro);
+  }
 }

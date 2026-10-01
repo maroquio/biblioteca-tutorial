@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recuperação 5B — Corrigir ISBN de livro</title>
+  <link rel="stylesheet" href="avaliacao.css">
+  <script src="copiar.js" defer></script>
+</head>
+<body>
+<header><div class="page"><div class="eyebrow">Biblioteca · recuperação de arquitetura</div><h1>Recuperação 5B — Corrigir ISBN de livro</h1><p class="subtitle">Uma nova fatia vertical dentro do Acervo. A lógica está fornecida; sua tarefa é reconhecer os artefatos, colocá-los nas camadas corretas e conectá-los.</p><div class="meta"><span class="pill">Ponto de partida: branch main</span><span class="pill">Tempo sugerido: 40 minutos</span><span class="pill">10 pontos</span></div></div></header>
+<main class="page">
+<section id="iniciar"><h2>Antes de implementar: criar a branch 5b</h2><p>Conclua primeiro o <a href="index.html#preparacao">guia de Windows, fork, clonagem e VS Code</a>. Trabalhe no clone do <strong>seu fork</strong>, usando o terminal <strong>PowerShell</strong> do VS Code, na pasta que contém <code>package.json</code>.</p><p>Esta tarefa exige uma branch própria, <code>recuperacao-5b</code>, criada diretamente da <code>main</code> preparada no guia. Confira se não há alterações pendentes:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-5b-status">Copiar</button></div><pre><code id="git-5b-status">git status --short</code></pre></div><p>Prossiga somente se não aparecer nenhum arquivo. Se estiver concluindo a outra tarefa, faça commit e push nela antes de trocar de branch e encerre o servidor com Ctrl+C. Em seguida, crie a branch desta tarefa a partir da main:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-5b-branch">Copiar</button></div><pre><code id="git-5b-branch">git switch main
+git switch -c recuperacao-5b main
+git branch --show-current
+bun install</code></pre></div><p>O nome exibido deve ser <code>recuperacao-5b</code>. A opção <code>-c</code> cria a branch; o argumento <code>main</code> define sua base. Não crie esta branch a partir da Recuperação 6B e não faça merge da outra tarefa na main. Ao retomar uma branch já criada, use apenas <code>git switch recuperacao-5b</code>.</p><div class="note">Entrega desta tarefa: um PR de <code>SEU_USUARIO/biblioteca-tutorial:recuperacao-5b</code> para <code>maroquio/biblioteca-tutorial:main</code>. A recuperação completa exige <strong>dois PRs separados</strong>, um para cada tarefa.</div></section>
+<section><h2>O pedido da biblioteca</h2><p class="lead">Um livro já catalogado teve seu ISBN digitado incorretamente. A API deve aceitar <code>PATCH /livros/:id/isbn</code> com <code>{"isbn":"9780141439587"}</code>. Livro inexistente resulta em 404; id inválido, ISBN vazio ou inválido resulta em 400; ISBN já usado por outro livro, de qualquer autor, resulta em 409.</p><p>A correção preserva id, número de registro, título, autor e data de catalogação. A resposta 200 contém exatamente <code>id</code>, <code>numeroRegistro</code> e <code>isbn</code>. Enviar o ISBN do próprio livro é permitido e retorna 200. Reutilize o objeto de valor <code>Isbn</code> existente para validar e normalizar: a saída contém somente os 13 dígitos. Corrigir ISBN não cataloga outro livro e não emite <code>LivroCatalogado</code>.</p><div class="note">Você pode consultar o projeto e os quatro treinos. A lógica completa está nos oito blocos abaixo. Os imports locais, os caminhos dos arquivos novos e as ligações entre artefatos são parte da avaliação. Parta da branch própria criada a partir da <code>main</code>, fase 53; não use as soluções das atividades anteriores.</div></section>
+<section><h2>Blocos para distribuir</h2><p>Leia cada responsabilidade antes de copiar. Um bloco marcado <em>arquivo novo</em> é o conteúdo principal de um arquivo que você criará; complete seus imports locais. Um bloco marcado <em>edição</em> entra em um artefato existente. Os nomes das classes e funções são parte do contrato.</p>
+<div class="step"><span class="step-number">01 · edição</span><h3>Comportamento da entidade</h3><p>A própria entidade deve produzir uma nova versão de si com o ISBN corrigido. Insira este método na classe que representa o livro.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-1">Copiar</button></div><pre><code id="b5-1">comIsbn(isbn: Isbn): Livro {
+  return new Livro(
+    this.id,
+    this.numeroRegistro,
+    isbn,
+    this.titulo,
+    this.autorId,
+    this.dataCatalogacao,
+  );
+}</code></pre></div></div>
+<div class="step"><span class="step-number">02 · edição</span><h3>Contrato de persistência</h3><p>O caso de uso precisa localizar o livro pela identidade e gravar a correção. Acrescente as duas operações à porta que ele já usa.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-2">Copiar</button></div><pre><code id="b5-2">findById(id: LivroId): Livro | null;
+updateIsbn(livro: Livro): void;</code></pre></div></div>
+<div class="step"><span class="step-number">03 · edição</span><h3>Implementação da porta no SQLite</h3><p>Estes métodos pertencem ao adaptador de persistência da mesma porta. A validação e a normalização continuam no objeto de valor Isbn; a verificação de duplicidade pertence ao caso de uso.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-3">Copiar</button></div><pre><code id="b5-3">findById(id: LivroId): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE id = ?")
+    .get(id.value) as LivroRow | null;
+  return row === null ? null : toLivro(row);
+}
+
+updateIsbn(livro: Livro): void {
+  db.run("UPDATE livros SET isbn = ? WHERE id = ?", [
+    livro.isbn.value,
+    livro.id!.value,
+  ]);
+}</code></pre></div></div>
+<div class="step"><span class="step-number">04 · arquivo novo</span><h3>Entrada da fatia</h3><p>A entrada reúne o id da URL e o corpo JSON. Use os helpers compartilhados já existentes; descubra o import local deles.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-4">Copiar</button></div><pre><code id="b5-4">export type CorrecaoDeIsbn = {
+  id: number;
+  isbn: string;
+};
+
+export function parseCorrecaoDeIsbn(
+  params: { id?: string },
+  body: unknown,
+): CorrecaoDeIsbn {
+  const data = getBodyAsObject(body);
+  return {
+    id: getFieldAsPositiveInt(params, "id"),
+    isbn: getFieldAsText(data, "isbn"),
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">05 · edição</span><h3>Formato de saída do módulo</h3><p>Acrescente este contrato e o mapeador à borda de saída que já transforma livros em JSON.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-5">Copiar</button></div><pre><code id="b5-5">export type IsbnCorrigidoJson = {
+  id: number;
+  numeroRegistro: string;
+  isbn: string;
+};
+
+export function isbnCorrigidoToJson(livro: Livro): IsbnCorrigidoJson {
+  return {
+    id: livro.id!.value,
+    numeroRegistro: livro.numeroRegistro.value,
+    isbn: livro.isbn.value,
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">06 · arquivo novo</span><h3>Orquestração do caso de uso</h3><p>O caso de uso depende da porta do domínio. Use a busca por ISBN já existente na porta para detectar conflito com outro livro.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-6">Copiar</button></div><pre><code id="b5-6">export class CorrigirIsbn {
+  constructor(private readonly livros: LivroRepository) {}
+
+  execute(input: CorrecaoDeIsbn): IsbnCorrigidoJson {
+    const id = new LivroId(input.id);
+    const livro = this.livros.findById(id);
+    if (!livro) throw new NotFound("Livro não encontrado");
+
+    const isbn = new Isbn(input.isbn);
+    const duplicado = this.livros.findByIsbn(isbn);
+    if (duplicado &amp;&amp; !duplicado.id?.equals(id)) {
+      throw new RuleConflict("Outro livro já utiliza este ISBN");
+    }
+
+    const corrigido = livro.comIsbn(isbn);
+    this.livros.updateIsbn(corrigido);
+    return isbnCorrigidoToJson(corrigido);
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">07 · arquivo novo</span><h3>Borda HTTP da fatia</h3><p>A rota traduz a requisição em entrada do caso de uso e devolve o resultado. O tratamento de exceções já é global no servidor.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-7">Copiar</button></div><pre><code id="b5-7">export function register(routes: Hono, useCases: UseCases): void {
+  routes.patch("/livros/:id/isbn", async (contexto) =&gt; {
+    const input = parseCorrecaoDeIsbn(
+      contexto.req.param(),
+      await contexto.req.json(),
+    );
+    return contexto.json(useCases.corrigirIsbn.execute(input), 200);
+  });
+}</code></pre></div></div>
+<div class="step"><span class="step-number">08 · edição</span><h3>Dublê do repositório para os testes que já existem</h3><p>A porta cresceu; o dublê em memória precisa continuar implementando-a. Insira os métodos na classe de teste correspondente.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="b5-8">Copiar</button></div><pre><code id="b5-8">findById(id: LivroId): Livro | null {
+  return this.items.find((livro) =&gt; livro.id?.equals(id)) ?? null;
+}
+
+updateIsbn(livro: Livro): void {
+  this.items = this.items.map((atual) =&gt;
+    atual.id?.equals(livro.id!) ? livro : atual,
+  );
+}</code></pre></div></div>
+</section>
+<section><h2>Ligações a resolver</h2><p>Depois de distribuir os blocos, complete os imports locais e conecte a nova rota ao conjunto de rotas do Acervo. Publique apenas o caso de uso necessário pela API pública do módulo e monte sua instância no ponto de composição. Não altere a Autoria nem o servidor global.</p><p>Observe também as direções das dependências: o caso de uso conhece a interface do repositório; somente a implementação de infraestrutura conhece SQL.</p></section>
+<section id="testes-thunder"><h2>Testar a API com o Thunder Client</h2><p><strong>Execute os testes manuais desta tarefa na extensão Thunder Client do VS Code.</strong> Siga a <a href="index.html#thunder-client">orientação de instalação e uso</a>. Para começar uma requisição: ícone de raio → <strong>New Request</strong> → método e URL. Para enviar dados, use <strong>Body → JSON</strong>, confira <code>Content-Type: application/json</code> e clique em <strong>Send</strong>. Leia o status e o corpo na área de resposta.</p><h3>1. Verificar o projeto e preparar os dados</h3><p>Na branch <code>recuperacao-5b</code>, salve os arquivos e pare qualquer servidor anterior com Ctrl+C. Execute no PowerShell, na raiz do projeto:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="tc-5b-checks">Copiar</button></div><pre><code id="tc-5b-checks">bun x tsc --noEmit
+bun test
+bun run verificar</code></pre></div><p>Corrija as falhas antes de continuar. Para iniciar este roteiro sem dados de testes anteriores, preserve o banco atual com outro nome e deixe a aplicação criar um novo banco. Execute o bloco abaixo <strong>uma vez no início do roteiro, com o servidor parado</strong>:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="tc-5b-db">Copiar</button></div><pre><code id="tc-5b-db">New-Item -ItemType Directory -Force -Path .\data | Out-Null
+if (Test-Path ".\data\biblioteca.sqlite") {
+    $backupBanco = "biblioteca-antes-5b-$(Get-Date -Format 'yyyyMMdd-HHmmssfff').sqlite"
+    Move-Item -Path ".\data\biblioteca.sqlite" -Destination (Join-Path ".\data" $backupBanco)
+}
+$env:PORT = "3000"
+bun run dev</code></pre></div><p>Mantenha esse terminal aberto. No Thunder Client, envie <strong>GET</strong> para <code>http://localhost:3000/</code>, sem Body. O esperado é <strong>200</strong> e <code>{"message":"API da Biblioteca"}</code>. Não reinicie o banco entre os cenários abaixo: alguns dependem do que foi criado nos passos anteriores.</p><h3>2. Cadastrar dois livros para o teste</h3><p>Crie uma requisição <strong>POST</strong> para <code>http://localhost:3000/livros</code>. Em <strong>Body → JSON</strong>, envie primeiro:</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-5b-livro1">Copiar</button></div><pre><code id="tc-5b-livro1">{
+  "isbn": "9780141439518",
+  "titulo": "Livro de teste 5B A",
+  "autorId": 4
+}</code></pre></div><p>Espere <strong>201</strong>. Anote o <code>id</code>, o <code>numeroRegistro</code> e a <code>dataCatalogacao</code> retornados. Chamaremos esse id de <strong>ID_A</strong>. Na mesma URL, envie o segundo corpo:</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-5b-livro2">Copiar</button></div><pre><code id="tc-5b-livro2">{
+  "isbn": "9780141439662",
+  "titulo": "Livro de teste 5B B",
+  "autorId": 1
+}</code></pre></div><p>Espere <strong>201</strong> novamente. Os autores são diferentes para verificar que um ISBN não pode ser reutilizado nem por outro autor.</p><p>Antes da correção, envie <strong>GET</strong> para <code>http://localhost:3000/livros/9780141439518</code>. A resposta 200 é uma lista com o primeiro livro. Guarde os valores para comparar depois, incluindo <code>livrosDoAutor</code>.</p><h3>3. Corrigir o ISBN e conferir os dados</h3><p>Crie uma requisição <strong>PATCH</strong> para <code>http://localhost:3000/livros/ID_A/isbn</code>. <strong>Substitua ID_A pelo número retornado no cadastro</strong>; por exemplo, se o id for 1, use <code>http://localhost:3000/livros/1/isbn</code>. Não digite ID_A literalmente. Envie:</p><div class="codebox"><div class="codebar">JSON · Body → JSON <button class="copy" data-copy="tc-5b-corrigir">Copiar</button></div><pre><code id="tc-5b-corrigir">{
+  "isbn": "978-0-14-143958-7"
+}</code></pre></div><p>Espere <strong>200</strong> com exatamente <code>id</code>, <code>numeroRegistro</code> e <code>isbn</code>. Os dois primeiros mantêm os valores originais e o ISBN deve ser <code>9780141439587</code>, sem hífens. Clique em <strong>Send</strong> novamente: repetir o próprio ISBN deve continuar retornando <strong>200</strong>.</p><p>Envie <strong>GET</strong> para <code>http://localhost:3000/livros/9780141439587</code> e compare com o GET anterior: id, título, autor, número de registro, data de catalogação e <code>livrosDoAutor</code> devem permanecer iguais. A consulta ao ISBN antigo, <code>http://localhost:3000/livros/9780141439518</code>, deve retornar 200 com lista vazia neste banco de teste.</p><h3>4. Exercitar os erros</h3><p>Use PATCH e Body → JSON em todos os casos. Altere apenas os dados indicados; use o ID_A real nas URLs.</p><table><thead><tr><th>Cenário</th><th>URL após http://localhost:3000</th><th>Body JSON</th><th>Status</th></tr></thead><tbody><tr><td>ISBN de outro livro</td><td><code>/livros/ID_A/isbn</code></td><td><code>{"isbn":"978-0-14-143966-2"}</code></td><td>409</td></tr><tr><td>Livro inexistente</td><td><code>/livros/999999/isbn</code></td><td><code>{"isbn":"9780141439587"}</code></td><td>404</td></tr><tr><td>Id inválido</td><td><code>/livros/0/isbn</code></td><td><code>{"isbn":"9780141439587"}</code></td><td>400</td></tr><tr><td>ISBN vazio</td><td><code>/livros/ID_A/isbn</code></td><td><code>{"isbn":"   "}</code></td><td>400</td></tr><tr><td>ISBN curto</td><td><code>/livros/ID_A/isbn</code></td><td><code>{"isbn":"123"}</code></td><td>400</td></tr><tr><td>Dígito verificador incorreto</td><td><code>/livros/ID_A/isbn</code></td><td><code>{"isbn":"9780141439588"}</code></td><td>400</td></tr></tbody></table><p>Nas falhas, confira o JSON com a propriedade <code>error</code>. Ao final, repita os GETs do primeiro livro pelo ISBN corrigido e do segundo por <code>9780141439662</code>. Ambos devem manter os dados anteriores aos erros. Se precisar repetir o roteiro completo, pare o servidor e recomece a preparação do banco.</p><h3>5. Registrar o resultado</h3><p>Na descrição do PR da 5B, informe os cenários executados no Thunder Client, o status esperado e o observado. Exemplo de registro: “ISBN repetido do próprio livro — esperado 200 — obtido 200”. Se um resultado divergir, corrija e teste novamente. Ao concluir, pare o servidor com Ctrl+C antes de trocar de branch.</p><div class="note">As requisições do Thunder Client verificam a API. As verificações de tipos, testes automatizados existentes e fronteiras continuam fazendo parte da conferência. A organização arquitetural também será avaliada.</div></section>
+<section><h2>Critérios de avaliação · 10 pontos</h2><table><thead><tr><th>Critério</th><th>Pontos</th></tr></thead><tbody><tr><td>Artefatos na fatia e camadas corretas</td><td>3</td></tr><tr><td>Imports, exports, registro de rota e composição</td><td>3</td></tr><tr><td>Porta, adaptador e fronteiras preservados</td><td>1</td></tr><tr><td>Comportamento: sucesso, validações e conflitos</td><td>3</td></tr></tbody></table><p>Entregue a Recuperação 5B por um PR próprio, seguindo os passos abaixo. A outra tarefa exige outro PR.</p></section>
+<section id="entrega"><h2>Concluir e entregar a Recuperação 5B</h2><p>Conclua o roteiro do Thunder Client e anote os resultados. Encerre o servidor com Ctrl+C e salve os arquivos. No PowerShell, confira a branch, execute as verificações complementares e revise as alterações. Corrija as falhas antes de enviar. Se repetir os testes manuais depois de bun test, prepare novamente os dados conforme o roteiro.</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-5b-validar">Copiar</button></div><pre><code id="git-5b-validar">git branch --show-current
+bun x tsc --noEmit
+bun test
+bun run verificar
+git status --short
+git diff</code></pre></div><p>A branch deve ser <code>recuperacao-5b</code>. Depois de conferir, prepare os arquivos de código, revise o que entrará no commit e envie ao <code>origin</code>, que é seu fork:</p><div class="codebox"><div class="codebar">PowerShell · Windows <button class="copy" data-copy="git-5b-commit">Copiar</button></div><pre><code id="git-5b-commit">git add src tests scripts
+git diff --cached
+git commit -m "Recuperacao 5B: corrigir ISBN de livro"
+git push -u origin recuperacao-5b</code></pre></div><p>Execute uma linha por vez e confira o diff antes do commit. Ele deve conter somente esta tarefa. Os diretórios adicionados abrangem as alterações solicitadas; arquivos novos aparecerão no diff após o <code>git add</code>.</p><h3>Abrir o PR pelo GitHub</h3><ol><li>Entre no <a href="https://github.com/maroquio/biblioteca-tutorial/pulls">repositório original no GitHub</a> e escolha <strong>Pull requests → New pull request</strong>.</li><li>Clique em <strong>compare across forks</strong>, se necessário, e selecione os valores da tabela abaixo.</li><li>Confira <strong>Commits</strong> e <strong>Files changed</strong>: devem aparecer apenas as alterações desta tarefa.</li><li>Clique em <strong>Create pull request</strong>. Use o título <strong>Recuperação 5B — Seu nome completo</strong> e informe na descrição o que implementou, as verificações executadas e os cenários testados no Thunder Client com os status esperados e observados.</li><li>Confirme em <strong>Create pull request</strong>, como PR pronto para revisão. Copie o link da página criada e mantenha o PR aberto para correção.</li></ol><table><thead><tr><th>Campo no GitHub</th><th>Valor</th></tr></thead><tbody><tr><td>base repository</td><td><code>maroquio/biblioteca-tutorial</code></td></tr><tr><td>base</td><td><code>main</code></td></tr><tr><td>head repository / head fork</td><td><code>SEU_USUARIO/biblioteca-tutorial</code></td></tr><tr><td>compare</td><td><code>recuperacao-5b</code></td></tr></tbody></table><p>O destino é o repositório do professor; não abra o PR para a main do seu próprio fork. Se precisar corrigir algo após abrir o PR, faça outro commit na mesma branch e execute <code>git push</code>; o PR existente será atualizado. Consulte o <a href="https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request-from-a-fork">guia oficial de PRs a partir de forks</a>.</p><div class="note"><strong>A recuperação só é considerada entregue após a criação dos dois PRs: 5B e 6B, um por tarefa.</strong> Commit e push, sozinhos, não são entrega. Não é necessário mesclar os PRs.</div><p><a href="atividade6b.html">Ir para a Recuperação 6B</a> · <a href="index.html">Voltar ao guia inicial</a></p></section>
+<footer>Biblioteca · TEES2 · Ifes 2026.2</footer>
+</main>
+</body>
+</html>

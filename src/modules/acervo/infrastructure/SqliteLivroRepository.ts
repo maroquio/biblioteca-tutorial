@@ -84,6 +84,11 @@ export class SqliteLivroRepository implements LivroRepository {
 
     return rows.map(toLivro);
   }
+  
+  existeNumeroRegistro(numeroRegistro: string): boolean {
+    return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")
+      .get(numeroRegistro) !== null;
+  }
 
   findByAutorIds(autorIds: AutorId[]): Livro[] {
     if (autorIds.length === 0) return [];

@@ -1,0 +1,23 @@
+2026-000001
+
+{
+  "id": 1,
+  "numeroRegistro": "2026-000001",
+  "isbn": "9780141439518",
+  "titulo": "Livro de teste 6B A",
+  "autor": "Jane Austen",
+  "livrosDoAutor": 0,
+  "dataCatalogacao": "2026-10-01"
+}
+
+{
+  "id": 2,
+  "numeroRegistro": "2026-000002",
+  "isbn": "9780141439662",
+  "titulo": "Livro de teste 6B B",
+  "autor": "Eric Evans",
+  "livrosDoAutor": 0,
+  "dataCatalogacao": "2026-10-01"
+}
+
+2026-000002

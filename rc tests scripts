@@ -1,0 +1,63 @@
+[1mdiff --git a/src/composition.ts b/src/composition.ts[m
+[1mindex 4549c3d..5ff1026 100644[m
+[1m--- a/src/composition.ts[m
+[1m+++ b/src/composition.ts[m
+[36m@@ -6,11 +6,15 @@[m [mimport {[m
+   SqliteLivroRepository,[m
+ } from "./modules/acervo";[m
+ import { ProjecaoDeLivros, SqliteAutorRepository } from "./modules/autoria";[m
+[32m+[m[32mimport { RegistrarSolicitacao } from "./modules/solicitacoes/features/registrar-solicitacao/RegistrarSolicitacao";[m
+[32m+[m[32mimport { SqliteSolicitacaoRepository } from "./modules/solicitacoes/infrastructure/SqliteSolicitacaoRepository";[m
+ import type { Clock } from "./shared/Clock";[m
+ import { EventBus } from "./shared/EventBus";[m
+ import { AutorId } from "./shared/identifiers";[m
+[32m+[m[32mimport { AcervoComoConsultaDeSolicitacoes } from "./adapters/AcervoComoConsultaDeSolicitacoes";[m
+ [m
+ export type UseCases = {[m
+[32m+[m[32m  registrarSolicitacao: RegistrarSolicitacao;[m
+   cadastrarLivro: CadastrarLivro;[m
+   buscarLivro: BuscarLivro;[m
+ };[m
+[36m@@ -22,6 +26,8 @@[m [mexport type UseCases = {[m
+  */[m
+ export function buildUseCases(now: Clock = () => new Date()): UseCases {[m
+   const livros = new SqliteLivroRepository();[m
+[32m+[m[32m  const acervo = new AcervoComoConsultaDeSolicitacoes(livros);[m
+[32m+[m[32m  const solicitacao = new SqliteSolicitacaoRepository();[m
+   const autores = new SqliteAutorRepository();[m
+   const autoria = new AutoriaComoConsulta(autores);[m
+   const bus = new EventBus();[m
+[36m@@ -34,5 +40,6 @@[m [mexport function buildUseCases(now: Clock = () => new Date()): UseCases {[m
+   return {[m
+     cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),[m
+     buscarLivro: new BuscarLivro(livros, autoria),[m
+[32m+[m[32m    registrarSolicitacao: new RegistrarSolicitacao(solicitacao, acervo),[m
+   };[m
+ }[m
+[1mdiff --git a/src/modules/acervo/infrastructure/SqliteLivroRepository.ts b/src/modules/acervo/infrastructure/SqliteLivroRepository.ts[m
+[1mindex 532f4c2..b509a16 100644[m
+[1m--- a/src/modules/acervo/infrastructure/SqliteLivroRepository.ts[m
+[1m+++ b/src/modules/acervo/infrastructure/SqliteLivroRepository.ts[m
+[36m@@ -84,6 +84,11 @@[m [mexport class SqliteLivroRepository implements LivroRepository {[m
+ [m
+     return rows.map(toLivro);[m
+   }[m
+[32m+[m[41m  [m
+[32m+[m[32m  existeNumeroRegistro(numeroRegistro: string): boolean {[m
+[32m+[m[32m    return db.query("SELECT 1 FROM livros WHERE numero_registro = ?")[m
+[32m+[m[32m      .get(numeroRegistro) !== null;[m
+[32m+[m[32m  }[m
+ [m
+   findByAutorIds(autorIds: AutorId[]): Livro[] {[m
+     if (autorIds.length === 0) return [];[m
+[1mdiff --git a/src/shared/identifiers.ts b/src/shared/identifiers.ts[m
+[1mindex 9f8c308..eb55e80 100644[m
+[1m--- a/src/shared/identifiers.ts[m
+[1m+++ b/src/shared/identifiers.ts[m
+[36m@@ -21,3 +21,5 @@[m [mexport class LivroId extends Identifier {}[m
+ [m
+ /** Identidade que o sistema atribui — pelo mesmo motivo. */[m
+ export class AutorId extends Identifier {}[m
+[32m+[m
+[32m+[m[32mexport class SolicitacaoId extends Identifier {}[m
+\ No newline at end of file[m

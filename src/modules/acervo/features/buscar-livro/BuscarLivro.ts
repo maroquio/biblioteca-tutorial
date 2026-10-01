@@ -1,3 +1,4 @@
+import type { LivroId } from "../../../../shared/identifiers";
 import type { ConsultaDeAutoria } from "../../domain/ConsultaDeAutoria";
 import { Isbn } from "../../domain/Isbn";
 import type { Livro } from "../../domain/Livro";
@@ -32,4 +33,5 @@ export class BuscarLivro {
 
     return livroToJson(livro, autor!);
   }
+  
 }

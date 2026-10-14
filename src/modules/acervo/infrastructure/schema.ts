@@ -42,3 +42,16 @@ function dropCrossModuleForeignKeys(): void {
     `Migração aplicada: ${foreignKeys.length} chave(s) estrangeira(s) cruzada(s) removida(s) de livros`,
   );
 }
+
+export function createAvaliacaoTables(): void {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS avaliacoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero_registro TEXT NOT NULL,
+      matricula TEXT NOT NULL,
+      nota INTEGER NOT NULL,
+      comentario TEXT,
+      UNIQUE (numero_registro, matricula)
+    );
+  `);
+}

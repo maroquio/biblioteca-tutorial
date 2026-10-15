@@ -1,7 +1,5 @@
 import { db } from "../../../infrastructure/db";
 
-// O id vai explícito de propósito: é ele que faz o INSERT OR IGNORE ser
-// idempotente, e é ele que os exemplos deste documento referenciam.
 const AUTORES = [
   [1, "Eric Evans", "didatico"],
   [2, "Robert C. Martin", "didatico"],
@@ -9,7 +7,6 @@ const AUTORES = [
   [4, "Jane Austen", "literatura"],
 ] as const;
 
-/** O módulo Autoria é o dono da tabela `autores` — e da carga inicial dela. */
 export function createAutoriaTables(): void {
   db.run(`
     CREATE TABLE IF NOT EXISTS autores (
@@ -32,7 +29,6 @@ export function createAutoriaTables(): void {
   }
 }
 
-/** Banco criado antes desta fase não tem a coluna — e a projeção nasce zerada. */
 function addLivrosNoAcervoIfMissing(): void {
   const colunas = db.query("PRAGMA table_info(autores)").all() as {
     name: string;

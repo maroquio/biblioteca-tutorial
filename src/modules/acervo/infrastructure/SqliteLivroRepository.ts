@@ -69,6 +69,12 @@ export class SqliteLivroRepository implements LivroRepository {
     return row === null ? null : toLivro(row);
   }
 
+  findById(id: LivroId): Livro | null {
+    const row = db.query("SELECT * FROM livros WHERE id = ?")
+      .get(id.value) as LivroRow | null;
+    return row === null ? null : toLivro(row);
+  }
+
   findByAutorId(autorId: AutorId): Livro[] {
     const rows = db
       .query("SELECT * FROM livros WHERE autor_id = ?")
@@ -94,5 +100,12 @@ export class SqliteLivroRepository implements LivroRepository {
       .all(...autorIds.map((autorId) => autorId.value)) as LivroRow[];
 
     return rows.map(toLivro);
+  }
+
+  updateTitulo(livro: Livro): void {
+    db.run("UPDATE livros SET titulo = ? WHERE id = ?", [
+      livro.titulo,
+      livro.id!.value,
+    ]);
   }
 }

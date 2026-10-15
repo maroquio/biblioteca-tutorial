@@ -13,6 +13,7 @@ export function toIso(dia: Date): string {
   return dia.toISOString().slice(0, 10);
 }
 
+
 export class Livro {
   constructor(
     readonly id: LivroId | null,
@@ -67,4 +68,5 @@ export class Livro {
   private static normalizar(titulo: string): string {
     return titulo.trim().toLowerCase();
   }
+  
 }

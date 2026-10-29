@@ -1,5 +1,6 @@
 export { CadastrarLivro } from "./features/cadastrar-livro/CadastrarLivro";
 export { BuscarLivro } from "./features/buscar-livro/BuscarLivro";
+export { CorrigirTitulo } from "./features/corrigir-titulo/CorrigirTitulo";
 export { SqliteLivroRepository } from "./infrastructure/SqliteLivroRepository";
 export { createAcervoTables } from "./infrastructure/schema";
 export type {
@@ -13,4 +14,5 @@ export type {
   LivroCatalogado,
 } from "./domain/events";
 export type { LivroJson } from "./output";
+export type { ConsultaDeLivros } from "./domain/ConsultaDeLivros";
 export { registerRoutes } from "./routes";

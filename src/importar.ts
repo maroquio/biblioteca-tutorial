@@ -1,9 +1,11 @@
 import { buildUseCases } from "./composition";
 import { createAcervoTables } from "./modules/acervo";
 import { createAutoriaTables } from "./modules/autoria";
+import { createAvaliacaoTables } from "./modules/avaliacoes";
 
 createAutoriaTables();
 createAcervoTables();
+createAvaliacaoTables();
 
 const { cadastrarLivro } = buildUseCases();
 

@@ -11,7 +11,7 @@ do código sem mudar o que ele faz, e a fase seguinte cobra o preço da anterior
 ```bash
 git clone https://github.com/maroquio/biblioteca-tutorial
 cd biblioteca-tutorial
-open .docs/tutorial-aluno.html
+open .docs/modular-monolith.html
 ```
 
 O tutorial traz as 53 fases em sequência, com o código pronto para copiar.

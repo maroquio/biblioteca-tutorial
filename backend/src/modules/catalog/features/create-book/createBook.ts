@@ -6,7 +6,7 @@ import { checkBookRules, toBookView, type BookRow } from "../../infrastructure/b
 
 export async function createBook(input: BookInput, integration: CatalogIntegration, now = new Date()): Promise<BookView> {
   const today = civilDate(now);
-  return inTransaction(async (tx) => {
+  const book = await inTransaction(async (tx) => {
     await checkBookRules(tx, input, integration);
     const [row] = await tx`
       INSERT INTO livros (isbn, titulo, autor_id, data_catalogacao)
@@ -16,4 +16,7 @@ export async function createBook(input: BookInput, integration: CatalogIntegrati
     await integration.syncAuthorBookCounts(tx, [input.authorId]);
     return toBookView(tx, row!, integration, today);
   });
+  // efeitos derivados só depois do COMMIT: antes dele, ninguém mais vê o livro novo
+  await integration.bookCountsChanged([input.authorId]);
+  return book;
 }

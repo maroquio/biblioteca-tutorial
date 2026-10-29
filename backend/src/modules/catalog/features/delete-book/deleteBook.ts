@@ -4,7 +4,7 @@ import type { CatalogIntegration } from "../../domain/CatalogIntegration";
 import { findBook } from "../../infrastructure/books";
 
 export async function deleteBook(id: number, integration: CatalogIntegration): Promise<void> {
-  await inTransaction(async (tx) => {
+  const book = await inTransaction(async (tx) => {
     const book = await findBook(tx, id);
     const [table] = await tx`SELECT to_regclass('public.exemplares') IS NOT NULL AS "exists"` as { exists: boolean }[];
     if (table!.exists) {
@@ -17,5 +17,7 @@ export async function deleteBook(id: number, integration: CatalogIntegration): P
     }
     await tx`DELETE FROM livros WHERE id = ${id}`;
     await integration.syncAuthorBookCounts(tx, [book.authorId]);
+    return book;
   });
+  await integration.bookCountsChanged([book.authorId]);
 }

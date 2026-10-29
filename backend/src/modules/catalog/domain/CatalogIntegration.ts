@@ -9,6 +9,8 @@ export type CatalogIntegration = {
   author: (db: CatalogDb, id: number) => Promise<CatalogAuthor | null>;
   authorIdsByName: (db: CatalogDb, term: string) => Promise<number[]>;
   syncAuthorBookCounts: (db: CatalogDb, ids: number[]) => Promise<void>;
+  /** Depois do COMMIT: a contagem de livros desses autores mudou (o cache de buscas de autores fica velho). */
+  bookCountsChanged: (authorIds: number[]) => Promise<void>;
   copyAvailability: (db: CatalogDb, copyId: number, today: string) => Promise<CopyAvailability>;
   copyHasHistory: (db: CatalogDb, id: number) => Promise<boolean>;
 };

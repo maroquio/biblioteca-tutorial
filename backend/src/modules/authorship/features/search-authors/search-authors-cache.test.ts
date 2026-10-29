@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { api, testAuthor, testName } from "#tests/api";
+import { api, testAuthor, testIsbn, testName } from "#tests/api";
 import { createRedis } from "../../../../infrastructure/redis";
 import { authorshipIntegration } from "../../../../integration/authorshipIntegration";
 import { invalidateAuthorSearch, readCachedSearch, writeCachedSearch } from "../../infrastructure/searchCache";
@@ -58,4 +58,22 @@ test("UC06: sem Redis a busca responde do Postgres", async () => {
   expect(result.cache).toBe("BYPASS");
   expect(result.authors.map((a) => a.id)).toEqual([author.id]);
   await invalidateAuthorSearch(dead);
+});
+
+test("UC06: cadastrar e excluir livro atualiza livrosNoAcervo no cache", async () => {
+  const author = await testAuthor();
+  await search(author.nome);
+  const warm = await search(author.nome);
+  expect(warm.cache).toBe("HIT");
+  expect(warm.authors).toEqual([expect.objectContaining({ id: author.id, livrosNoAcervo: 0 })]);
+
+  const book = await (await api("POST", "/livros", { isbn: testIsbn(), titulo: testName("Livro"), autorId: author.id })).json();
+  const afterCreate = await search(author.nome);
+  expect(afterCreate.cache).toBe("MISS");
+  expect(afterCreate.authors).toEqual([expect.objectContaining({ livrosNoAcervo: 1 })]);
+
+  expect((await api("DELETE", `/livros/${book.id}`)).status).toBe(204);
+  const afterDelete = await search(author.nome);
+  expect(afterDelete.cache).toBe("MISS");
+  expect(afterDelete.authors).toEqual([expect.objectContaining({ livrosNoAcervo: 0 })]);
 });

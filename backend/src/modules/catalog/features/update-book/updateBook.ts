@@ -5,11 +5,15 @@ import type { CatalogIntegration } from "../../domain/CatalogIntegration";
 import { checkBookRules, findBook, toBookView, type BookRow } from "../../infrastructure/books";
 
 export async function updateBook(id: number, input: BookInput, integration: CatalogIntegration, now = new Date()): Promise<BookView> {
-  return inTransaction(async (tx) => {
+  let authorIds: number[] = [];
+  const book = await inTransaction(async (tx) => {
     const previous = await findBook(tx, id);
+    authorIds = [previous.authorId, input.authorId];
     await checkBookRules(tx, input, integration, id);
     const [row] = await tx`UPDATE livros SET isbn = ${input.isbn}, titulo = ${input.title}, autor_id = ${input.authorId} WHERE id = ${id} RETURNING id, isbn, titulo AS title, autor_id AS "authorId", data_catalogacao AS "catalogedOn"` as BookRow[];
-    await integration.syncAuthorBookCounts(tx, [previous.authorId, input.authorId]);
+    await integration.syncAuthorBookCounts(tx, authorIds);
     return toBookView(tx, row!, integration, civilDate(now));
   });
+  await integration.bookCountsChanged(authorIds);
+  return book;
 }

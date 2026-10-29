@@ -1,3 +1,4 @@
+import { invalidateAuthorSearch } from "../modules/authorship";
 import type { CatalogAuthor, CatalogDb, CatalogIntegration } from "../modules/catalog";
 
 async function tableExists(db: CatalogDb, name: string): Promise<boolean> {
@@ -19,6 +20,10 @@ export const catalogIntegration: CatalogIntegration = {
     for (const id of new Set(ids)) {
       await db`UPDATE autores SET livros_no_acervo = (SELECT COUNT(*)::int FROM livros WHERE autor_id = ${id}) WHERE id = ${id}`;
     }
+  },
+  async bookCountsChanged() {
+    // a busca de autores mostra livrosNoAcervo: qualquer mudança invalida a geração inteira
+    await invalidateAuthorSearch();
   },
   async copyAvailability(db, copyId, today) {
     if (await tableExists(db, "emprestimos")) {

@@ -10,6 +10,8 @@ import { NotFound, RuleConflict } from "../../../../shared/errors";
 import type { NovoLivro } from "./input";
 import { livroToJson, type LivroJson } from "../../output";
 
+
+
 export class CadastrarLivro {
   constructor(
     private readonly livros: LivroRepository,
@@ -18,6 +20,7 @@ export class CadastrarLivro {
     private readonly events: EventPublisher,
   ) {}
 
+  
   execute(input: NovoLivro): LivroJson {
     const isbn = new Isbn(input.isbn);
     const autorId = new AutorId(input.autorId);
@@ -67,4 +70,6 @@ export class CadastrarLivro {
 
     return livroToJson(livro, autor);
   }
+
+  
 }

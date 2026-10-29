@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atividade avaliativa 5 — Corrigir título de livro</title>
+  <link rel="stylesheet" href="avaliacao.css">
+  <script src="copiar.js" defer></script>
+</head>
+<body>
+<header><div class="page"><div class="eyebrow">Biblioteca · avaliação de arquitetura</div><h1>Atividade 5 — Corrigir título de livro</h1><p class="subtitle">Uma nova fatia vertical dentro do Acervo. A lógica está fornecida; sua tarefa é reconhecer os artefatos, colocá-los nas camadas corretas e conectá-los.</p><div class="meta"><span class="pill">Ponto de partida: branch main</span><span class="pill">Tempo sugerido: 40 minutos</span><span class="pill">10 pontos</span></div></div></header>
+<main class="page">
+<section><h2>O pedido da biblioteca</h2><p class="lead">Um livro já catalogado pode ter seu título corrigido. A API deve aceitar <code>PATCH /livros/:id/titulo</code> com <code>{"titulo":"Novo título"}</code>. Se o livro não existir, responda 404. Se o título for vazio, responda 400. Se outro livro do mesmo autor já tiver título equivalente, ignorando caixa e espaços nas pontas, responda 409.</p><p>A correção preserva id, ISBN, número de registro, autor e data de catalogação. A resposta 200 contém <code>id</code>, <code>isbn</code> e <code>titulo</code>. Corrigir título não cataloga um livro novo e não emite <code>LivroCatalogado</code>.</p><div class="note">Você pode consultar o projeto e os quatro treinos. Os blocos abaixo trazem a lógica completa. Os imports locais, os caminhos dos arquivos novos e as ligações entre artefatos são parte da avaliação.</div></section>
+<section><h2>Blocos para distribuir</h2><p>Leia cada responsabilidade antes de copiar. Um bloco marcado <em>arquivo novo</em> é o conteúdo principal de um arquivo que você criará; complete seus imports locais. Um bloco marcado <em>edição</em> entra em um artefato existente. Os nomes das classes e funções são parte do contrato.</p>
+<div class="step"><span class="step-number">01 · edição</span><h3>Comportamento da entidade</h3><p>A própria entidade deve produzir uma nova versão de si com o título corrigido. Insira este método na classe que representa o livro.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-1">Copiar</button></div><pre><code id="a5-1">comTitulo(titulo: string): Livro {
+  return new Livro(
+    this.id,
+    this.numeroRegistro,
+    this.isbn,
+    titulo,
+    this.autorId,
+    this.dataCatalogacao,
+  );
+}</code></pre></div></div>
+<div class="step"><span class="step-number">02 · edição</span><h3>Contrato de persistência</h3><p>O caso de uso precisa localizar o livro pela identidade e gravar a correção. Acrescente as duas operações à porta que ele já usa.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-2">Copiar</button></div><pre><code id="a5-2">findById(id: LivroId): Livro | null;
+updateTitulo(livro: Livro): void;</code></pre></div></div>
+<div class="step"><span class="step-number">03 · edição</span><h3>Implementação da porta no SQLite</h3><p>Estes métodos pertencem ao adaptador de persistência da mesma porta. A regra de igualdade entre títulos continua na entidade e no caso de uso.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-3">Copiar</button></div><pre><code id="a5-3">findById(id: LivroId): Livro | null {
+  const row = db.query("SELECT * FROM livros WHERE id = ?")
+    .get(id.value) as LivroRow | null;
+  return row === null ? null : toLivro(row);
+}
+
+updateTitulo(livro: Livro): void {
+  db.run("UPDATE livros SET titulo = ? WHERE id = ?", [
+    livro.titulo,
+    livro.id!.value,
+  ]);
+}</code></pre></div></div>
+<div class="step"><span class="step-number">04 · arquivo novo</span><h3>Entrada da fatia</h3><p>A entrada reúne o id da URL e o corpo JSON. Use os helpers compartilhados já existentes; descubra o import local deles.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-4">Copiar</button></div><pre><code id="a5-4">export type CorrecaoDeTitulo = {
+  id: number;
+  titulo: string;
+};
+
+export function parseCorrecaoDeTitulo(
+  params: { id?: string },
+  body: unknown,
+): CorrecaoDeTitulo {
+  const data = getBodyAsObject(body);
+  return {
+    id: getFieldAsPositiveInt(params, "id"),
+    titulo: getFieldAsText(data, "titulo"),
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">05 · edição</span><h3>Formato de saída do módulo</h3><p>Acrescente este contrato e o mapeador à borda de saída que já transforma livros em JSON.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-5">Copiar</button></div><pre><code id="a5-5">export type TituloCorrigidoJson = {
+  id: number;
+  isbn: string;
+  titulo: string;
+};
+
+export function tituloCorrigidoToJson(livro: Livro): TituloCorrigidoJson {
+  return {
+    id: livro.id!.value,
+    isbn: livro.isbn.value,
+    titulo: livro.titulo,
+  };
+}</code></pre></div></div>
+<div class="step"><span class="step-number">06 · arquivo novo</span><h3>Orquestração do caso de uso</h3><p>O caso de uso depende da porta do domínio. Preserve a regra de duplicidade por autor que o cadastro de livros já pratica.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-6">Copiar</button></div><pre><code id="a5-6">export class CorrigirTitulo {
+  constructor(private readonly livros: LivroRepository) {}
+
+  execute(input: CorrecaoDeTitulo): TituloCorrigidoJson {
+    const id = new LivroId(input.id);
+    const livro = this.livros.findById(id);
+    if (!livro) throw new NotFound("Livro não encontrado");
+
+    const corrigido = livro.comTitulo(input.titulo);
+    const duplicado = this.livros.findByAutorId(livro.autorId).some(
+      (outro) => !outro.id?.equals(id) && outro.mesmoTituloQue(corrigido.titulo),
+    );
+    if (duplicado) {
+      throw new RuleConflict("Este autor já tem um livro com este título");
+    }
+
+    this.livros.updateTitulo(corrigido);
+    return tituloCorrigidoToJson(corrigido);
+  }
+}</code></pre></div></div>
+<div class="step"><span class="step-number">07 · arquivo novo</span><h3>Borda HTTP da fatia</h3><p>A rota traduz a requisição em entrada do caso de uso e devolve o resultado. O tratamento de exceções já é global no servidor.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-7">Copiar</button></div><pre><code id="a5-7">export function register(routes: Hono, useCases: UseCases): void {
+  routes.patch("/livros/:id/titulo", async (contexto) => {
+    const input = parseCorrecaoDeTitulo(
+      contexto.req.param(),
+      await contexto.req.json(),
+    );
+    return contexto.json(useCases.corrigirTitulo.execute(input), 200);
+  });
+}</code></pre></div></div>
+<div class="step"><span class="step-number">08 · edição</span><h3>Dublê do repositório para os testes que já existem</h3><p>A porta cresceu; o dublê em memória precisa continuar implementando-a. Insira os métodos na classe de teste correspondente.</p><div class="codebox"><div class="codebar">TypeScript <button class="copy" data-copy="a5-8">Copiar</button></div><pre><code id="a5-8">findById(id: LivroId): Livro | null {
+  return this.items.find((livro) => livro.id?.equals(id)) ?? null;
+}
+
+updateTitulo(livro: Livro): void {
+  this.items = this.items.map((atual) =>
+    atual.id?.equals(livro.id!) ? livro : atual,
+  );
+}</code></pre></div></div>
+</section>
+<section><h2>Ligações a resolver</h2><p>Depois de distribuir os blocos, complete os imports locais e conecte a nova rota ao conjunto de rotas do Acervo. Publique apenas o caso de uso necessário pela API pública do módulo e monte sua instância no ponto de composição. Não altere a Autoria nem o servidor global.</p><p>Observe também as direções das dependências: o caso de uso conhece a interface do repositório; somente a implementação de infraestrutura conhece SQL.</p></section>
+<section><h2>Como conferir</h2><p>Use um banco de desenvolvimento e cadastre um livro pela API existente. Em seguida, envie <code>PATCH /livros/1/titulo</code> com <code>{"titulo":"Título corrigido"}</code> e confira a resposta 200. Experimente id inexistente, título vazio e título duplicado para o mesmo autor.</p><div class="codebox"><div class="codebar">Terminal <button class="copy" data-copy="a5-9">Copiar</button></div><pre><code id="a5-9">bun x tsc --noEmit
+bun test
+bun run verificar</code></pre></div><div class="note warn">Os testes de correção não fazem parte deste material. Uma solução que responde corretamente pela API ainda pode perder pontos se colocar regras ou arquivos na camada errada.</div></section>
+<section><h2>Critérios de avaliação · 10 pontos</h2><table><thead><tr><th>Critério</th><th>Pontos</th></tr></thead><tbody><tr><td>Artefatos na fatia e camadas corretas</td><td>3</td></tr><tr><td>Imports, exports, registro de rota e composição</td><td>3</td></tr><tr><td>Porta, adaptador e fronteiras preservados</td><td>1</td></tr><tr><td>Comportamento: sucesso, validações e conflitos</td><td>3</td></tr></tbody></table><p>Entregue sua solução como alteração do projeto iniciado na <code>main</code>, identificando-a como Atividade 5. Esta atividade é independente da Atividade 6.</p></section>
+<footer>Biblioteca · TEES2 · Ifes 2026.2</footer>
+</main>
+</body>
+</html>

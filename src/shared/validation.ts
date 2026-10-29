@@ -1,4 +1,5 @@
 import { InvalidInput } from "./errors";
+import type {Livro} from "../modules/acervo/domain/Livro";
 
 export function getBodyAsObject(body: unknown): Record<string, unknown> {
   if (typeof body !== "object" || body === null) {
@@ -29,4 +30,18 @@ export function getFieldAsPositiveInt(
   }
 
   return value;
+}
+
+export type TituloCorrigidoJson = {
+  id: number;
+  isbn: string;
+  titulo: string;
+};
+
+export function tituloCorrigidoToJson(livro: Livro): TituloCorrigidoJson {
+  return {
+    id: livro.id!.value,
+    isbn: livro.isbn.value,
+    titulo: livro.titulo,
+  };
 }

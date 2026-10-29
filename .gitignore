@@ -5,6 +5,8 @@ node_modules
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+bun.lock
+
 
 # output
 out
@@ -44,6 +46,3 @@ data/*.csv
 
 # Material de origem, nao versionado
 .docs/chat.md
-
-# Saida do ai-distiller
-.aid/

@@ -12,4 +12,8 @@ export class ProjecaoDeLivros {
   registrarEntrada(autorId: AutorId): void {
     this.autores.ajustarLivrosNoAcervo(autorId, +1);
   }
+
+  registrarSaida(autorId: AutorId): void {
+    this.autores.ajustarLivrosNoAcervo(autorId, -1);
+  }
 }

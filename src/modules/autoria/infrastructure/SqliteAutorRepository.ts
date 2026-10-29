@@ -1,5 +1,6 @@
 import { db } from "../../../infrastructure/db";
 import { Autor, type TipoDeAutor } from "../domain/Autor";
+import { Orcid } from "../domain/Orcid";
 import type { AutorRepository } from "../domain/AutorRepository";
 import type { ConsultaDeAutores, ResumoDoAutor } from "../ConsultaDeAutores";
 import { AutorId } from "../../../shared/identifiers";
@@ -18,6 +19,7 @@ function toAutor(row: AutorRow): Autor {
     row.nome,
     row.tipo as TipoDeAutor,
     row.livros_no_acervo,
+    row.orcid === null ? null : new Orcid(row.orcid),
   );
 }
 
@@ -30,6 +32,31 @@ export class SqliteAutorRepository
       .get(autorId.value) as AutorRow | null;
 
     return row === null ? null : toAutor(row);
+  }
+
+  insert(autor: Autor): Autor {
+    const result = db.run(
+      "INSERT INTO autores (nome, orcid, tipo) VALUES (?, ?, ?)",
+      [autor.nome, autor.orcid?.value ?? null, autor.tipo],
+    );
+
+    return autor.withId(new AutorId(result.lastInsertRowid as number));
+  }
+
+  findByOrcid(orcid: Orcid): Autor | null {
+    const row = db
+      .query("SELECT * FROM autores WHERE orcid = ?")
+      .get(orcid.value) as AutorRow | null;
+
+    return row === null ? null : toAutor(row);
+  }
+
+  findByNomeSemelhante(nome: string): Autor[] {
+    const rows = db
+      .query("SELECT * FROM autores WHERE nome LIKE ?")
+      .all(`%${nome.trim()}%`) as AutorRow[];
+
+    return rows.map(toAutor);
   }
 
   resumo(autorId: AutorId): ResumoDoAutor | null {

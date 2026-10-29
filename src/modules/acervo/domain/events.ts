@@ -5,7 +5,15 @@ export type LivroCatalogado = {
   readonly em: string;
 };
 
-export type AcervoEvent = LivroCatalogado;
+export type LivroBaixado = {
+  readonly nome: "LivroBaixado";
+  readonly autorId: number;
+  readonly numeroRegistro: string;
+  readonly motivo: string;
+  readonly em: string;
+};
+
+export type AcervoEvent = LivroCatalogado | LivroBaixado;
 
 /** Port de saída: o módulo anuncia o que aconteceu e não sabe quem ouve. */
 export interface EventPublisher {

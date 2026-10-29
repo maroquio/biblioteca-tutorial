@@ -7,6 +7,7 @@ const problems: string[] = [];
 const TABELAS: Record<string, string> = {
   livros: "acervo",
   autores: "autoria",
+  emprestimos: "circulacao",
 };
 
 for await (const rawFile of new Glob("src/modules/**/*.ts").scan(".")) {

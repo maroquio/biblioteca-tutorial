@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { DomainError, InvalidValue } from "./shared/domain-errors";
-import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";
+import { InvalidInput, NotFound, RuleConflict, ServiceUnavailable } from "./shared/errors";
 import type { RegisterRoutes } from "./shared/http";
 
 /** O build do React (`bun run build` em frontend/), relativo à pasta backend/. */
@@ -18,6 +18,10 @@ function errorResponse(error: unknown): Response {
 
   if (error instanceof RuleConflict || error instanceof DomainError) {
     return Response.json({ error: error.message }, { status: 409 });
+  }
+
+  if (error instanceof ServiceUnavailable) {
+    return Response.json({ error: error.message }, { status: 503 });
   }
 
   console.error(error);

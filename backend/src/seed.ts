@@ -1,5 +1,6 @@
 import { prepareDatabase } from "./composition";
 import { sql } from "./infrastructure/postgres";
+import { redis } from "./infrastructure/redis";
 import { runSeed } from "./integration/seed/run";
 
 try {
@@ -8,4 +9,4 @@ try {
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
-} finally { await sql.close(); }
+} finally { await sql.close(); redis?.close(); }

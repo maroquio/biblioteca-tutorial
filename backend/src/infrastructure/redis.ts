@@ -26,7 +26,7 @@ export async function ready(client: RedisClient): Promise<RedisClient> {
   return client;
 }
 
-const PREFIX = process.env.REDIS_PREFIX ?? "biblioteca";
+const PREFIX = process.env.REDIS_PREFIX ?? "biblioteca" ;
 
 /**
  * Toda chave passa por aqui. O prefixo separa os ambientes que dividem o mesmo

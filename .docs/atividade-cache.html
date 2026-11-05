@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Biblioteca — Atividade: cache na busca de leitores</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#111827; --muted:#5b6472; --line:#e3e7ed;
+  --accent:#1d4ed8; --accent-soft:#eef3ff; --ok:#047857; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --prof:#6d28d9; --prof-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e6edf7;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",SFMono-Regular,ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.87em;background:#eef1f5;border:1px solid #e0e5ec;border-radius:4px;padding:.08em .34em;white-space:nowrap}
+.ref{color:var(--muted);font-style:italic}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:264px minmax(0,1fr);gap:0;max-width:1400px;margin:0 auto}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--card);padding:20px 12px 60px}
+.side h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+.side a{display:block;padding:5px 9px;border-radius:7px;text-decoration:none;color:#374151;font-size:13.5px;line-height:1.35}
+.side a:hover{background:var(--accent-soft);color:var(--accent)}
+.side a.mk{font-weight:700}
+.side .num{display:inline-block;min-width:26px;color:#94a3b8;font-family:var(--mono);font-size:11.5px}
+main{padding:0 44px 120px;min-width:0}
+
+/* hero */
+.hero{margin:0 -44px 44px;padding:56px 44px 44px;background:linear-gradient(160deg,#0f172a 0%,#1e3a8a 100%);color:#fff}
+.hero .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;margin:0 0 12px}
+.hero h1{font-family:var(--serif);font-size:40px;line-height:1.15;margin:0 0 14px;font-weight:700}
+.hero p{margin:0;max-width:70ch;opacity:.9;font-size:17px}
+.hero .chips{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 13px;font-size:12.5px}
+
+/* seções */
+section.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px 34px;margin:0 0 26px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+h2.sec{font-family:var(--serif);font-size:27px;margin:0 0 6px;line-height:1.25}
+h3{font-family:var(--serif);font-size:20px;margin:26px 0 8px}
+h4{font-size:15px;margin:20px 0 6px}
+h5,h6{font-size:14px;margin:16px 0 6px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:0 0 5px}
+blockquote{margin:0 0 16px;padding:2px 0 2px 16px;border-left:3px solid #cbd5e1;color:var(--muted)}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+
+/* fase */
+article.fase{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 0 30px;margin:0 0 30px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.fase-head{padding:22px 34px 18px;border-bottom:1px solid var(--line);background:#fbfcfe;display:flex;gap:18px;align-items:flex-start}
+.fase-n{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:19px;font-weight:700}
+.fase.mk .fase-n{background:#b91c1c}
+.fase-t{min-width:0}
+.fase-t h2{font-family:var(--serif);font-size:24px;margin:0 0 4px;line-height:1.25}
+.fase-t .req{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.fase-body{padding:0 34px}
+.lead{margin:22px 0 4px;padding:16px 18px;background:var(--accent-soft);border:1px solid #d7e3ff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;font-size:16.5px}
+.lead p{margin:0}
+
+.step{margin-top:26px}
+.step > h3{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.step.test > h3{color:var(--ok)}
+.step.commit > h3{color:var(--warn)}
+
+/* código */
+.cb{margin:0 0 16px;border:1px solid #1e293b;border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 14px;background:#111c31;border-bottom:1px solid #1e293b}
+.cb-lang{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8ba0c4}
+.cb-actions{display:flex;gap:6px}
+.cb button{font:inherit;font-size:11.5px;font-family:var(--sans);background:#1e293b;color:#cbd5e1;border:1px solid #33415a;border-radius:6px;padding:3px 10px;cursor:pointer}
+.cb button:hover{background:#2a3a52;color:#fff}
+.cb button.done{background:#065f46;border-color:#047857;color:#d1fae5}
+.cb-body{margin:0;padding:14px 16px;overflow-x:auto;background:var(--code-bg)}
+.cb-body code{background:none;border:0;padding:0;white-space:pre;color:var(--code-ink);font-size:13px;line-height:1.6;font-family:var(--mono)}
+.cb-out{border-color:#cbd5e1;background:#f8fafc}
+.cb-out .cb-bar{background:#eef2f7;border-bottom-color:#dde3ec}
+.cb-out .cb-lang{color:#64748b}
+.cb-fig{border-style:dashed}
+.cb-fig .cb-bar{background:#0d1626}
+.cb-note{align-self:center;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:#8ba0c4;opacity:.8}
+.ln-new{font-weight:700;color:#fde047}
+.cb-out .cb-body{background:#f8fafc}
+.cb-out .cb-body code{color:#0f172a}
+.cb-diff code{white-space:pre}
+.dl{display:block}
+.dl.add{background:rgba(16,185,129,.14);color:#a7f3d0}
+.dl.del{background:rgba(239,68,68,.14);color:#fecaca}
+
+/* tabelas */
+.tw{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f4f6f9;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:0}
+
+/* diagramas */
+figure.diagram{margin:0 0 20px;padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.diagram-scroll{overflow-x:auto}
+svg.dg{display:block;width:100%;height:auto;max-width:100%;min-width:520px}
+figure.diagram figcaption{margin-top:10px;font-size:13px;color:var(--muted);text-align:center}
+.diagram.missing{color:#b91c1c;font-size:13px}
+
+/* professor */
+aside.prof{margin:18px 0;padding:16px 20px;background:var(--prof-soft);border:1px solid #ddd6fe;border-left:4px solid var(--prof);border-radius:0 10px 10px 0}
+aside.prof h4{margin:0 0 8px;color:var(--prof);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+aside.prof p:last-child{margin-bottom:0}
+.conc{margin:0 0 18px;padding:0;list-style:none}
+.conc li{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin:0 0 7px;font-size:15px}
+.conc li::before{content:"◆";color:var(--accent);flex:0 0 auto;font-size:11px;line-height:1.7}
+.refl{padding:18px 20px;background:#fffdf5;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:0 10px 10px 0}
+.refl p:last-child{margin-bottom:0}
+
+.callout{padding:16px 20px;border-radius:10px;border:1px solid var(--line);background:#f8fafc;margin:0 0 18px}
+.callout.good{background:var(--ok-soft);border-color:#a7f3d0}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}
+.entrevista{font-family:var(--serif);font-size:17.5px;line-height:1.75;background:#fffdf7;border:1px solid #e8e0cc;border-radius:12px;padding:26px 30px;position:relative}
+.entrevista::before{content:"\201C";position:absolute;top:-6px;left:14px;font-size:72px;color:#e0d5b8;font-family:var(--serif);line-height:1}
+.entrevista p{margin:0 0 12px;padding-left:26px}
+.entrevista .quem{padding-left:26px;font-family:var(--sans);font-size:13px;color:var(--muted);font-style:normal}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 18px}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-family:var(--serif);font-size:30px;line-height:1.1;color:var(--accent)}
+.stat span{font-size:13px;color:var(--muted)}
+
+footer{padding:40px 44px 60px;color:var(--muted);font-size:13.5px;text-align:center}
+.top{position:fixed;right:22px;bottom:22px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-size:13px;cursor:pointer;opacity:.85;font-family:var(--sans)}
+.top:hover{opacity:1}
+
+@media (max-width:1020px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);max-height:280px}
+  main{padding:0 18px 80px}
+  .hero{margin:0 -18px 28px;padding:36px 18px 30px}
+  .hero h1{font-size:29px}
+  section.doc,.fase-head,.fase-body{padding-left:18px;padding-right:18px}
+}
+@media print{
+  .side,.top,.cb button{display:none}
+  .wrap{display:block}
+  body{background:#fff;font-size:11pt}
+  .hero{background:#fff;color:#000;margin:0;padding:0 0 20px;border-bottom:2px solid #000}
+  .hero .chip{border-color:#999;background:#f2f2f2;color:#000}
+  article.fase,section.doc{break-inside:avoid-page;box-shadow:none;border-color:#ccc}
+  .cb{border-color:#ccc}
+  .cb-bar{background:#eee}.cb-lang{color:#333}
+  .cb-note{color:#555}
+  .ln-new{font-weight:700;color:#000}
+  .cb-body,.cb-body code{background:#f7f7f7;color:#000}
+  .dl.add{background:#e6f7ee;color:#065f46}.dl.del{background:#fdeaea;color:#991b1b}
+}
+/* gerar-fases:inicio */
+/* tokens de código, pré-renderizados pelo gerador */
+.cb-body i{font-style:normal}
+.cb-body{--t-com:#64748b;--t-str:#86efac;--t-num:#fca5a5;--t-kw:#c4b5fd;
+  --t-typ:#7dd3fc;--t-fn:#fdba74;--t-pun:#94a3b8;--t-key:#93c5fd;
+  --t-cmd:#fdba74;--t-flag:#c4b5fd}
+.cb-out .cb-body{--t-com:#64748b;--t-str:#15803d;--t-num:#b91c1c;--t-kw:#6d28d9;
+  --t-typ:#0369a1;--t-fn:#b45309;--t-pun:#64748b;--t-key:#1d4ed8;
+  --t-cmd:#b45309;--t-flag:#6d28d9}
+.t-com{color:var(--t-com);font-style:italic}
+.t-str{color:var(--t-str)}
+.t-num{color:var(--t-num)}
+.t-kw{color:var(--t-kw)}
+.t-typ{color:var(--t-typ)}
+.t-fn{color:var(--t-fn)}
+.t-pun{color:var(--t-pun)}
+.t-key{color:var(--t-key)}
+.t-cmd{color:var(--t-cmd);font-weight:600}
+.t-flag{color:var(--t-flag)}
+
+/* linha que a fase acrescenta: negrito e fundo, por cima dos tokens.
+   inline-block com min-width leva o fundo até a margem direita do bloco, para a
+   marcação virar uma faixa e não um borrão do tamanho do texto */
+.ln-new{display:inline-block;min-width:100%;font-weight:700;color:inherit;
+  background:rgba(253,224,71,.13);box-shadow:inset 3px 0 0 #fde047}
+.cb-out .ln-new{background:rgba(180,83,9,.11);box-shadow:inset 3px 0 0 #b45309}
+
+/* objetivo, no lugar do lead curto da versão de sala */
+.step.objetivo > h3{color:var(--accent)}
+.step.objetivo p{margin:0 0 12px}
+.step.objetivo p:last-child{margin-bottom:0}
+/* gerar-fases:fim */.dl.ctx{color:#cbd5e1}
+kbd{font-family:var(--mono);font-size:.82em;background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:4px;padding:.05em .4em}
+.cb-bar .cb-note{margin-left:12px;margin-right:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side">
+<h2>Atividade</h2>
+<a href="#topo"><span class="num">•</span>Visão geral</a>
+<h2>Preparação</h2>
+<a href="#passo-00"><span class="num">00</span>Uma branch sua, no seu fork</a>
+<h2>O trabalho</h2>
+<a href="#passo-01"><span class="num">01</span>O que fazer</a>
+<a href="#passo-02"><span class="num">02</span>Código de referência</a>
+<a href="#passo-03"><span class="num">03</span>Onde Leitores é diferente de Autoria</a>
+<a href="#passo-04"><span class="num">04</span>Critérios de aceite</a>
+<a href="#passo-05"><span class="num">05</span>Veja o cache funcionando</a>
+<h2>Fechamento</h2>
+<a href="#passo-06"><span class="num">06</span>Para discutir</a>
+<a href="#passo-07"><span class="num">07</span>Entrega</a>
+</nav>
+<main>
+<div class="hero">
+  <p class="kicker">Tópicos Especiais em Engenharia de Software II · IFES</p>
+  <h1>Atividade — cache na busca de leitores</h1>
+  <p>Nos passos 01 a 03 da aula, a busca de autores (UC06) ganhou um cache no Redis com invalidação por geração. Agora é a sua vez: leve o mesmo padrão para a <strong>busca de leitores (UC10)</strong>, sozinho, partindo do código de referência que já está no projeto.</p>
+  <div class="chips"><span class="chip">UC10</span><span class="chip">Cache-aside</span><span class="chip">Geração</span><span class="chip">HSETEX</span><span class="chip">X-Cache</span><span class="chip">Depois do COMMIT</span></div>
+</div>
+
+<div class="fase-body" id="topo">
+<div class="callout warn"><strong>Este enunciado não traz código.</strong> Ele diz <em>o que</em> fazer e <em>onde</em> olhar. O <em>como</em> está no próprio projeto: o cache de autores é a sua referência, e as diferenças entre os dois módulos são exatamente o que a atividade quer que você perceba.</div>
+<div class="tw"><table>
+<tr><th>Passo</th><th>O que acontece</th><th>Como saber que deu certo</th></tr>
+<tr><td>00</td><td>fork, branch nova e linha de base</td><td>75 testes passando</td></tr>
+<tr><td>01–03</td><td>ler o enunciado, a referência e as armadilhas</td><td>você sabe dizer onde fica o COMMIT em Leitores</td></tr>
+<tr><td>04</td><td>implementar e testar</td><td>todos os critérios marcados; suíte e fronteiras verdes</td></tr>
+<tr><td>05</td><td>ver o cache no navegador e no Redis</td><td><code>X-Cache: HIT</code> no DevTools</td></tr>
+<tr><td>07</td><td>entregar</td><td>a branch no seu fork, no GitHub</td></tr>
+</table></div>
+</div>
+
+<div class="fase-head" id="passo-00"><div class="fase-n">00</div><div class="fase-t"><h2>Uma branch sua, no seu fork</h2></div></div>
+<div class="fase-body">
+<p>A atividade é sua, então o código vai para o <strong>seu</strong> fork, numa branch nova, criada a partir da branch da aula no repositório do professor. Quem fala com o GitHub em seu nome é o GitHub CLI (<code>gh</code>), autenticado na <strong>sua</strong> conta.</p>
+
+<div class="step "><h3>Confira quem está autenticado</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c1">copiar</button></div></div><pre class="cb-body" id="c1"><code>gh auth status</code></pre></div>
+<p>A saída mostra <em>Logged in to github.com account <strong>seu-usuario</strong></em>. Se não estiver autenticado, ou se o usuário mostrado não for o seu (computador do laboratório, conta de um colega), entre com a sua:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c2">copiar</button></div></div><pre class="cb-body" id="c2"><code>gh auth login</code></pre></div>
+<p>Escolha <em>GitHub.com</em>, <em>HTTPS</em> e <em>Login with a web browser</em>. Depois, faça o <code>git</code> usar essa mesma conta no <code>push</code>:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c3">copiar</button></div></div><pre class="cb-body" id="c3"><code>gh auth setup-git</code></pre></div>
+<div class="callout"><strong>Por que o <code>setup-git</code>?</strong> Sem ele, o <code>git push</code> pode usar outra credencial guardada no Windows (no Gerenciador de Credenciais) e enviar o código com a conta errada, ou ser recusado.</div>
+</div>
+
+<div class="step "><h3>O seu fork e os remotos</h3>
+<p>Se você <strong>ainda não tem o projeto</strong> no computador, o <code>gh</code> cria o fork na sua conta e clona numa tacada só. Ele já deixa <code>origin</code> apontando para o seu fork e <code>upstream</code> para o do professor:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c4">copiar</button></div></div><pre class="cb-body" id="c4"><code>gh repo fork maroquio/biblioteca-tutorial --clone
+cd biblioteca-tutorial</code></pre></div>
+<p>Se <strong>já tem</strong>, abra a pasta do projeto e confira os remotos:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c5">copiar</button></div></div><pre class="cb-body" id="c5"><code>git remote -v</code></pre></div>
+<div class="tw"><table>
+<tr><th>O que aparece</th><th>O que fazer</th></tr>
+<tr><td><code>origin</code> no <strong>seu</strong> usuário e <code>upstream</code> em <code>maroquio</code></td><td>Nada. Está certo.</td></tr>
+<tr><td><code>origin</code> em <code>maroquio</code> (você clonou o repositório do professor)</td><td>Rode <code>gh repo fork --remote</code>. Ele cria o seu fork, passa a chamá-lo de <code>origin</code> e guarda o do professor como <code>upstream</code>.</td></tr>
+<tr><td><code>origin</code> no seu usuário, mas <strong>sem</strong> <code>upstream</code></td><td>Rode <code>git remote add upstream https://github.com/maroquio/biblioteca-tutorial.git</code>.</td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>A branch da atividade</h3>
+<p>Antes de trocar de branch, o <code>git status</code> precisa estar limpo. Se você tem alterações da aula sem commit, faça o commit delas na branch em que estão (a sua <code>aula-redis</code>, por exemplo): elas continuam lá, intactas.</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c6">copiar</button></div></div><pre class="cb-body" id="c6"><code>git status
+git fetch upstream
+git switch -c atividade-cache-leitores upstream/saas-evolution/fase02</code></pre></div>
+<p>A branch nasce de <code>upstream/saas-evolution/fase02</code>, e não da sua <code>aula-redis</code>, por um motivo: assim todo mundo parte do mesmo ponto, com o cache de autores (passos 01 a 03) já pronto e igual ao do roteiro, que é justamente a referência desta atividade. A branch <code>saas-evolution/fase02</code> não existe no seu fork (ele foi criado antes dela), por isso o ponto de partida vem do <code>upstream</code>.</p>
+</div>
+
+<div class="step test"><h3>Confira a linha de base</h3>
+<p>Com o Docker Desktop aberto:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c7">copiar</button></div></div><pre class="cb-body" id="c7"><code>docker compose -f infra/compose.yaml up -d db redis
+docker compose -f infra/compose.yaml run --rm --build test</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c8"><code> 75 pass
+ 0 fail</code></pre></div>
+<p>Se o banco de testes não existir (primeira vez neste computador), crie com <code>docker compose -f infra/compose.yaml exec db createdb -U biblioteca biblioteca_test</code> e rode a suíte de novo.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-01"><div class="fase-n">01</div><div class="fase-t"><h2>O que fazer</h2></div></div>
+<div class="fase-body">
+<div class="lead"><p>Coloque um cache <strong>cache-aside</strong> no Redis na busca de leitores, <code>GET /api/leitores?q=</code>, com o mesmo desenho do cache de autores: <strong>geração</strong>, um campo por termo com <strong>TTL próprio</strong> (<code>HSETEX</code>), degradação sem Redis e o cabeçalho <code>X-Cache</code>.</p></div>
+
+<div class="step "><h3>Dentro do escopo</h3>
+<ul class="conc">
+<li><span>A busca <code>GET /api/leitores?q=</code> procura primeiro no Redis; se não achar, consulta o Postgres e guarda o resultado.</span></li>
+<li><span>A resposta traz o cabeçalho <code>X-Cache</code> com <code>HIT</code>, <code>MISS</code> ou <code>BYPASS</code> (sem Redis), como em <code>/api/autores</code>.</span></li>
+<li><span>Cadastrar (UC09), editar (UC11) e excluir (UC12) um leitor invalidam o cache, <strong>depois do COMMIT</strong>.</span></li>
+<li><span>Quem escreve direto na tabela <code>leitores</code>, sem passar pelos casos de uso, também invalida.</span></li>
+<li><span>Sem Redis, a busca continua respondendo do Postgres e as escritas continuam funcionando.</span></li>
+<li><span>As chaves pertencem ao módulo Leitores, e o verificador de fronteiras sabe disso.</span></li>
+<li><span>Testes automatizados para tudo isso.</span></li>
+</ul>
+</div>
+
+<div class="step "><h3>Fora do escopo</h3>
+<ul>
+<li><strong>A consulta individual</strong> <code>GET /api/leitores/:id</code> fica sem cache. É um extra opcional para quem terminar antes. Pense antes: com que chave, e quem a invalida?</li>
+<li><strong>O frontend</strong> não muda. O cabeçalho <code>X-Cache</code> aparece no DevTools do navegador.</li>
+<li><strong>A busca semântica</strong> (passos 04 em diante do roteiro) não faz parte da atividade.</li>
+</ul>
+</div>
+</div>
+
+<div class="fase-head" id="passo-02"><div class="fase-n">02</div><div class="fase-t"><h2>Código de referência</h2></div></div>
+<div class="fase-body">
+<p>Leia estes arquivos <strong>antes</strong> de escrever qualquer linha. Para cada um, a pergunta não é "o que eu copio?", e sim "que decisão este arquivo toma, e ela vale igual para Leitores?".</p>
+
+<div class="step "><h3>O cache de autores, a referência</h3>
+<div class="tw"><table>
+<tr><th>Arquivo</th><th>O que observar</th></tr>
+<tr><td><code>backend/src/infrastructure/redis.ts</code></td><td>O cliente compartilhado, o <code>ready()</code> antes de qualquer comando e o <code>redisKey()</code>, que monta toda chave com o prefixo do ambiente e o módulo dono. Você <strong>usa</strong> este arquivo; não precisa mudá-lo.</td></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/searchCache.ts</code></td><td>O coração do padrão: a chave da geração, um hash por geração, a normalização do termo, o <code>HSETEX</code> com TTL, a invalidação por incremento e o que acontece quando o Redis falha.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/search-authors/searchAuthorsCached.ts</code></td><td>O cache-aside em si: a busca original fica intacta e é envolvida pelo cache. Repare em quando o resultado é <code>HIT</code>, <code>MISS</code> ou <code>BYPASS</code>.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/search-authors/route.ts</code></td><td>Onde o status vira o cabeçalho <code>X-Cache</code>.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/create-author/createAuthor.ts</code><br><code>…/update-author/updateAuthor.ts</code><br><code>…/delete-author/deleteAuthor.ts</code></td><td>Em que linha a invalidação acontece, em relação ao <code>inTransaction</code>.</td></tr>
+<tr><td><code>backend/src/modules/authorship/index.ts</code></td><td>A invalidação faz parte da API pública do módulo. Por quê?</td></tr>
+<tr><td><code>backend/src/integration/derivedData.ts</code></td><td>Quem recalcula os dados derivados quando o servidor sobe e depois do seed. Veja também quem chama essa função: <code>backend/src/integration/seed/route.ts</code>, <code>backend/src/seed.ts</code> e <code>backend/src/main.ts</code>.</td></tr>
+<tr><td><code>backend/scripts/check-boundaries.ts</code></td><td>A tabela <code>KEY_OWNERS</code>: o primeiro trecho de cada <code>redisKey(...)</code> tem um módulo dono.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/search-authors/search-authors-cache.test.ts</code></td><td>O modelo dos seus testes: <code>MISS</code> seguido de <code>HIT</code>, invalidação por escrita, a corrida da geração e o <code>BYPASS</code> com um cliente que aponta para um Redis inexistente.</td></tr>
+</table></div>
+<p>A explicação de cada decisão está no roteiro da aula: <a href="saas-evolution/saas-fase02.html#passo-02">passo 02, cache-aside na busca de autores</a> (a corrida e a geração) e <a href="saas-evolution/saas-fase02.html#passo-03">passo 03, livros também invalidam</a> (depois do COMMIT e quem escreve direto nas tabelas).</p>
+</div>
+
+<div class="step "><h3>O módulo Leitores, onde você vai trabalhar</h3>
+<div class="tw"><table>
+<tr><th>Arquivo</th><th>O que observar</th></tr>
+<tr><td><code>backend/src/modules/readers/features/search-readers/route.ts</code></td><td>A rota da busca e a da consulta individual.</td></tr>
+<tr><td><code>backend/src/modules/readers/features/search-readers/SearchReaders.ts</code></td><td>O caso de uso. Aqui ele é uma <strong>classe</strong> que recebe um repositório; em Autoria, é uma função.</td></tr>
+<tr><td><code>backend/src/modules/readers/infrastructure/PostgresReaderRepository.ts</code></td><td>O <code>search()</code>: o que ele compara (nome, e-mail, CPF com e sem máscara) e o que devolve.</td></tr>
+<tr><td><code>backend/src/modules/readers/domain/ReaderRepository.ts</code></td><td>O contrato do repositório.</td></tr>
+<tr><td><code>backend/src/modules/readers/features/create-reader/route.ts</code><br><code>…/update-reader/route.ts</code><br><code>…/delete-reader/route.ts</code></td><td>Onde está o <code>inTransaction</code> em cada escrita. Compare com Autoria.</td></tr>
+<tr><td><code>backend/src/modules/readers/index.ts</code></td><td>A API pública do módulo.</td></tr>
+<tr><td><code>backend/src/integration/seed/run.ts</code></td><td>Procure <code>INSERT INTO leitores</code>.</td></tr>
+<tr><td><code>backend/src/modules/readers/features/search-readers/search-readers.test.ts</code><br><code>backend/tests/reader-fixtures.ts</code></td><td>Como os testes atuais criam leitores pela API. Os seus testes podem reaproveitar isso.</td></tr>
+</table></div>
+</div>
+</div>
+
+<div class="fase-head" id="passo-03"><div class="fase-n">03</div><div class="fase-t"><h2>Onde Leitores é diferente de Autoria</h2></div></div>
+<div class="fase-body">
+<p>Copiar o cache de autores trocando "autor" por "leitor" <strong>não</strong> resolve. Os dois módulos foram escritos por equipes diferentes, com estilos diferentes, e cada diferença abaixo muda alguma decisão. Descubra qual.</p>
+
+<div class="step "><h3>1. Onde fica o COMMIT</h3>
+<p>Em Autoria, a transação abre e fecha <strong>dentro</strong> da função do caso de uso, e a invalidação vem logo depois dela. Em Leitores, quem abre a transação é a <strong>rota</strong>: o caso de uso inteiro roda dentro do <code>inTransaction</code>. Então, onde o COMMIT acontece em Leitores, e onde a invalidação precisa ficar?</p>
+<div class="callout warn"><strong>Os testes não pegam este erro.</strong> Se você invalidar dentro do caso de uso, antes do COMMIT, os testes de API continuam passando, porque a busca do teste só acontece depois que a resposta da escrita chegou. Mas, em produção, uma leitura concorrente pode ler o dado antigo no Postgres, que ainda não viu o COMMIT, e gravá-lo na geração nova: o cache fica velho até o TTL vencer. Releia a tabela da corrida no passo 02 do roteiro e confira a posição da sua invalidação <strong>lendo o código</strong>.</div>
+</div>
+
+<div class="step "><h3>2. A chave tem dono</h3>
+<p>Toda chave nasce de <code>redisKey(...)</code>, e o primeiro trecho diz o módulo dono, como cada tabela tem um módulo dono. As chaves desta atividade pertencem a Leitores. O verificador de fronteiras ainda não conhece esse dono: rode <code>bun run check-boundaries</code> (na pasta <code>backend</code>) depois de criar a primeira chave, leia a mensagem e corrija no lugar certo.</p>
+</div>
+
+<div class="step "><h3>3. Alguém escreve direto na tabela</h3>
+<p>O seed grava leitores com SQL direto, sem passar por <code>CreateReader</code>. Depois de um seed, o cache de leitores precisa estar vazio. Quem já é chamado depois de todo seed? E como esse alguém, que mora fora do módulo Leitores, chega à sua invalidação sem importar um arquivo interno do módulo?</p>
+</div>
+
+<div class="step "><h3>4. O termo buscado</h3>
+<ul>
+<li><code>GET /api/leitores</code>, sem <code>q</code>, e <code>GET /api/leitores?q=</code> devolvem a mesma lista. No cache, os dois precisam cair no mesmo lugar.</li>
+<li>A busca usa <code>ILIKE</code>: <code>" Ana "</code> e <code>"ana"</code> são o mesmo resultado.</li>
+<li><code>529.982.247-25</code> e <code>52998224725</code> também encontram o mesmo leitor. Vale normalizar isso na chave? Não é obrigatório; decida e justifique no commit.</li>
+</ul>
+</div>
+
+<div class="step "><h3>5. Classe com repositório, não função</h3>
+<p>Em Autoria, o cache envolve uma função de busca. Em Leitores, a busca é um caso de uso que recebe um <code>ReaderRepository</code>. Onde o cache fica melhor: numa função da fatia que envolve o caso de uso, como em Autoria, ou numa implementação de <code>ReaderRepository</code> que envolve a do Postgres? As duas funcionam. Antes de escolher, pense em duas coisas: como o status <code>HIT</code>/<code>MISS</code>/<code>BYPASS</code> chega até a rota, e o que acontece com o <code>get(id)</code>.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-04"><div class="fase-n">04</div><div class="fase-t"><h2>Critérios de aceite</h2></div></div>
+<div class="fase-body">
+<p>A atividade está pronta quando todos os itens abaixo valem e estão cobertos por <strong>testes seus</strong>, num arquivo novo dentro da fatia <code>search-readers</code>.</p>
+
+<div class="step "><h3>Comportamento</h3>
+<ul class="conc">
+<li><span>A primeira busca por um termo responde <code>X-Cache: MISS</code>; a segunda, pelo mesmo termo, responde <code>HIT</code> com o <strong>mesmo</strong> corpo.</span></li>
+<li><span>Termos que diferem só em espaços nas pontas ou em maiúsculas compartilham o resultado: a segunda busca é <code>HIT</code>.</span></li>
+<li><span>Sem <code>q</code> e com <code>q</code> vazio compartilham o resultado.</span></li>
+<li><span>Depois de cadastrar um leitor, a próxima busca é <code>MISS</code> e o leitor novo aparece.</span></li>
+<li><span>Depois de editar um leitor, a próxima busca é <code>MISS</code> e mostra os dados novos.</span></li>
+<li><span>Depois de excluir um leitor, a próxima busca é <code>MISS</code> e ele não aparece mais.</span></li>
+<li><span>Depois de um seed (<code>POST /api/seed</code>), a próxima busca é <code>MISS</code>.</span></li>
+<li><span>Um resultado gravado numa geração antiga, depois de uma invalidação, <strong>não</strong> é lido (o teste da corrida, como o de autores).</span></li>
+<li><span>Com um cliente Redis apontando para um servidor inexistente, a busca responde <code>BYPASS</code> com os leitores certos, e a invalidação não lança erro.</span></li>
+<li><span>Cada termo guardado expira sozinho (TTL), mesmo que ninguém invalide.</span></li>
+</ul>
+</div>
+
+<div class="step "><h3>Arquitetura</h3>
+<ul class="conc">
+<li><span>A invalidação acontece <strong>depois</strong> do COMMIT em cadastrar, editar e excluir (confira lendo o código: os testes não pegam isso).</span></li>
+<li><span>Toda chave nova começa pelo trecho do módulo Leitores, e o verificador de fronteiras aceita.</span></li>
+<li><span>Nada fora do módulo Leitores importa arquivos internos dele: quem está fora usa o <code>index.ts</code>.</span></li>
+<li><span>A busca original, sem cache, continua existindo e intacta; o cache a envolve.</span></li>
+</ul>
+</div>
+
+<div class="step test"><h3>Verifique</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c9">copiar</button></div></div><pre class="cb-body" id="c9"><code>cd backend
+bun run check-boundaries
+bun run typecheck
+cd ..
+docker compose -f infra/compose.yaml run --rm --build test</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c10"><code>Fronteiras de módulo respeitadas.
+...
+ 75 + os seus testes pass
+ 0 fail</code></pre></div>
+<p>Os 75 testes da linha de base precisam continuar passando. Não avance com teste vermelho.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-05"><div class="fase-n">05</div><div class="fase-t"><h2>Veja o cache funcionando</h2></div></div>
+<div class="fase-body">
+<div class="step "><h3>No navegador</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c11">copiar</button></div></div><pre class="cb-body" id="c11"><code>docker compose -f infra/compose.yaml up -d --build app</code></pre></div>
+<p>Abra <a href="http://localhost:3000/leitores">localhost:3000/leitores</a>, abra o DevTools (<kbd>F12</kbd>), aba <em>Network</em>, e busque o mesmo termo duas vezes. Na requisição <code>leitores?q=…</code>, o cabeçalho de resposta <code>X-Cache</code> passa de <code>MISS</code> para <code>HIT</code>. Cadastre um leitor em <a href="http://localhost:3000/leitores/cadastrar">/leitores/cadastrar</a> e busque de novo: <code>MISS</code>.</p>
+</div>
+
+<div class="step "><h3>Dentro do Redis</h3>
+<p>O Redis não tem porta publicada, então o <code>redis-cli</code> roda dentro do contêiner. Liste as chaves do módulo:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c12">copiar</button></div></div><pre class="cb-body" id="c12"><code>docker compose -f infra/compose.yaml exec redis redis-cli --scan --pattern "biblioteca:leitores:*"</code></pre></div>
+<p>Escolha uma das chaves listadas e investigue: <code>HGETALL</code> mostra os termos guardados, e <code>HTTL &lt;chave&gt; FIELDS 1 &lt;campo&gt;</code> mostra quantos segundos faltam para cada termo expirar. Pare o Redis (<code>docker compose -f infra/compose.yaml stop redis</code>), busque de novo (<code>BYPASS</code>, e a lista continua aparecendo) e depois suba ele outra vez com <code>start redis</code>.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-06"><div class="fase-n">06</div><div class="fase-t"><h2>Para discutir</h2></div></div>
+<div class="fase-body">
+<div class="step "><h3>Responda no fim do arquivo de testes, em comentário, ou leve para a discussão em sala</h3>
+<div class="refl">
+<p><strong>1. Valeu a pena?</strong> A busca de autores faz 1 + N consultas; a de leitores, uma só. O que o cache economiza aqui? Em que situação (quantidade de leitores, de buscas por minuto) ele passaria a compensar?</p>
+<p><strong>2. Dados pessoais no Redis.</strong> O cache guarda CPF, e-mail e telefone numa segunda cópia, fora do Postgres. Pense na LGPD: o que o TTL e a falta de volume no Redis mudam nessa conversa? Quem consegue ler essas chaves? Você guardaria esses dados assim num sistema de verdade?</p>
+<p><strong>3. Por que geração, e não <code>DEL</code>?</strong> Explique, com as palavras da tabela de corrida do passo 02, o que daria errado se cada escrita apenas apagasse as chaves da busca.</p>
+<p><strong>4. Invalidar tudo.</strong> Editar <em>um</em> leitor joga fora o cache de <em>todos</em> os termos. Seria possível invalidar só os termos afetados? Quanto isso custaria em complexidade, e o que poderia dar errado?</p>
+</div>
+</div>
+</div>
+
+<div class="fase-head" id="passo-07"><div class="fase-n">07</div><div class="fase-t"><h2>Entrega</h2></div></div>
+<div class="fase-body">
+<div class="step commit"><h3>Commit e push</h3>
+<p>Na raiz do projeto. Confira no <code>git status</code> que só entram os arquivos da atividade:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c13">copiar</button></div></div><pre class="cb-body" id="c13"><code>git status
+git add -A
+git commit -m "feat: cachear a busca de leitores no Redis com invalidação por geração"
+git push -u origin atividade-cache-leitores</code></pre></div>
+<p>Se o <code>push</code> for negado, volte ao passo 00: provavelmente o <code>gh auth status</code> mostra outra conta, ou o <code>origin</code> ainda aponta para o repositório do professor.</p>
+</div>
+
+<div class="step "><h3>O link da entrega</h3>
+<p>Gere o endereço da branch no seu fork (troque <code>seu-usuario</code> pelo usuário que o <code>gh auth status</code> mostrou):</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c14">copiar</button></div></div><pre class="cb-body" id="c14"><code>gh browse --no-browser --repo seu-usuario/biblioteca-tutorial --branch atividade-cache-leitores</code></pre></div>
+<p>Abra o link para conferir que o código está lá e envie-o ao professor.</p>
+</div>
+
+<div class="step "><h3>Problemas comuns</h3>
+<div class="tw"><table>
+<tr><th>Sintoma</th><th>Causa e solução</th></tr>
+<tr><td><code>fatal: 'upstream' does not appear to be a git repository</code></td><td>Falta o remoto <code>upstream</code>. Veja a tabela do passo 00.</td></tr>
+<tr><td><code>fatal: invalid reference: upstream/saas-evolution/fase02</code></td><td>Faltou o <code>git fetch upstream</code> antes do <code>git switch</code>.</td></tr>
+<tr><td><code>error: Your local changes … would be overwritten</code> no <code>git switch</code></td><td>Há alterações sem commit. Faça o commit delas na branch atual e tente de novo.</td></tr>
+<tr><td><code>toca a chave Redis "…", que pertence a nenhum módulo</code></td><td>O verificador de fronteiras ainda não conhece o dono da chave. Releia o item 2 do passo 03.</td></tr>
+<tr><td>A busca sempre responde <code>BYPASS</code> na aplicação</td><td>O Redis está fora do ar ou a aplicação subiu sem ele. Confira com <code>docker compose -f infra/compose.yaml ps</code>.</td></tr>
+<tr><td><code>error during connect</code> / <code>Cannot connect to the Docker daemon</code></td><td>O Docker Desktop não está aberto.</td></tr>
+</table></div>
+</div>
+</div>
+</main>
+</div>
+<script>
+document.addEventListener("click", (e) => {
+  const cp = e.target.closest(".cp");
+  if (cp) {
+    const el = document.getElementById(cp.dataset.code);
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      const t = cp.textContent; cp.textContent = "copiado!"; cp.classList.add("done");
+      setTimeout(() => { cp.textContent = t; cp.classList.remove("done"); }, 1400);
+    });
+  }
+});
+</script>
+</body>
+</html>

@@ -11,6 +11,12 @@ export type LivroJson = {
   dataCatalogacao: string;
 };
 
+export type TituloCorrigidoJson = {
+  id: number;
+  isbn: string;
+  titulo: string;
+};
+
 export function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {
   return {
     id: livro.id!.value,
@@ -20,5 +26,13 @@ export function livroToJson(livro: Livro, autor: AutorConhecido): LivroJson {
     autor: autor.nome,
     livrosDoAutor: autor.livrosNoAcervo,
     dataCatalogacao: livro.dataCatalogacao,
+  };
+}
+
+export function tituloCorrigidoToJson(livro: Livro): TituloCorrigidoJson {
+  return {
+    id: livro.id!.value,
+    isbn: livro.isbn.value,
+    titulo: livro.titulo,
   };
 }

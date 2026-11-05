@@ -226,7 +226,7 @@ kbd{font-family:var(--mono);font-size:.82em;background:#fff;border:1px solid #cb
 <defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker></defs>
 <rect width="1000" height="400" fill="#f8fafc"/>
 <text x="24" y="32" font-size="15" font-weight="700" fill="#0f172a">Ao fim da aula: dois contêineres, um endereço</text>
-<text x="24" y="52" font-size="11.5" fill="#64748b">docker compose up -d --build · só a porta 3000 é publicada</text>
+<text x="24" y="52" font-size="11.5" fill="#64748b">docker compose -f infra/compose.yaml up -d --build · só a porta 3000 é publicada</text>
 <rect x="24" y="86" width="190" height="250" rx="12" fill="#ffffff" stroke="#cbd5e1"/>
 <text x="119" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Navegador</text>
 <rect x="44" y="130" width="150" height="56" rx="8" fill="#eef3ff" stroke="#1d4ed8"/>
@@ -272,12 +272,12 @@ kbd{font-family:var(--mono);font-size:.82em;background:#fff;border:1px solid #cb
 <div class="tw"><table>
 <tr><th>Passo</th><th>O que muda</th><th>Como saber que deu certo</th></tr>
 <tr><td>01</td><td>código atual vai para <code>backend/</code></td><td>11 testes passando</td></tr>
-<tr><td>02</td><td>Postgres 18 no Docker, sem porta publicada</td><td><code>docker compose ps</code> mostra <em>healthy</em> e só <code>5432/tcp</code></td></tr>
+<tr><td>02</td><td>Postgres 18 no Docker, sem porta publicada</td><td><code>docker compose -f infra/compose.yaml ps</code> mostra <em>healthy</em> e só <code>5432/tcp</code></td></tr>
 <tr><td>03</td><td>ports assíncronas, ainda no SQLite</td><td>typecheck limpo, 11 testes passando</td></tr>
 <tr><td>04</td><td>aplicação num contêiner, ainda com SQLite</td><td>API em <code>localhost:3000</code> vinda do Docker</td></tr>
 <tr><td>05</td><td>adapters Postgres e contêiner de testes</td><td>11 testes passando no contêiner, contra o Postgres</td></tr>
 <tr><td>06–08</td><td>frontend com Vite, React 19 e React Router</td><td>cadastro e busca em <code>localhost:5173</code></td></tr>
-<tr><td>09</td><td>backend serve o React, build dentro da imagem</td><td><code>docker compose up -d --build</code> e tudo em <code>localhost:3000</code></td></tr>
+<tr><td>09</td><td>backend serve o React, build dentro da imagem</td><td><code>docker compose -f infra/compose.yaml up -d --build</code> e tudo em <code>localhost:3000</code></td></tr>
 </table></div>
 <p>Cada passo termina com um <strong>Verifique</strong>. Não avance com teste vermelho. Nos blocos de código, as linhas <span style="background:rgba(253,224,71,.35);padding:0 4px">em destaque</span> são as que o passo acrescenta ou altera, e o botão <em>ver o que mudou</em> mostra o diff. O botão <em>copiar</em> copia sempre o arquivo inteiro, pronto para substituir o que você tem.</p>
 </div>
@@ -306,11 +306,12 @@ kbd{font-family:var(--mono);font-size:.82em;background:#fff;border:1px solid #cb
 </div>
 <div class="fase-head" id="passo-01"><div class="fase-n">01</div><div class="fase-t"><h2>Uma pasta para o backend, outra para o frontend</h2></div></div>
 <div class="fase-body">
-<p>Até aqui o repositório <em>era</em> o backend. Daqui a pouco ele vai ter também um frontend, e cada um tem as próprias dependências, o próprio <code>package.json</code> e os próprios comandos. Por isso cada um ganha uma pasta: todo o código atual vai para <code>backend/</code>, e na raiz ficam só os arquivos que valem para os dois, como o <code>compose.yaml</code> e o <code>Dockerfile</code>.</p>
+<p>Até aqui o repositório <em>era</em> o backend. Daqui a pouco ele vai ter também um frontend, e cada um tem as próprias dependências, o próprio <code>package.json</code> e os próprios comandos. Por isso cada um ganha uma pasta: todo o código atual vai para <code>backend/</code>, os arquivos de contêiner ficam em <code>infra/</code>, incluindo <code>infra/compose.yaml</code> e <code>infra/Dockerfile</code>.</p>
 <div class="step "><h3>Mova os arquivos</h3>
 <p>Antes de tudo, pare qualquer <code>bun run dev</code> de aulas anteriores (<kbd>Ctrl</kbd>+<kbd>C</kbd>). No Windows, um arquivo aberto, como o banco SQLite, impede a pasta de ser movida.</p>
 <p>Na raiz do projeto, use <code>git mv</code> para o Git registrar a mudança como <em>renomeação</em> e o histórico de cada arquivo continuar inteiro. Depois apague o <code>node_modules</code> antigo da raiz, se houver um (num clone novo ele não existe, e o comando simplesmente não faz nada):</p>
 <div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c4">copiar</button></div></div><pre class="cb-body" id="c4"><code><i class="t-cmd">mkdir</i> backend
+<i class="t-cmd">mkdir</i> infra
 <i class="t-cmd">git</i> mv src tests scripts data package.json bun.lock tsconfig.json backend/
 <i class="t-cmd">Remove-Item</i> <i class="t-flag">-Recurse</i> <i class="t-flag">-Force</i> node_modules <i class="t-flag">-ErrorAction</i> SilentlyContinue</code></pre></div>
 <p><strong>Edite</strong> <code>.gitignore</code>: os caminhos do banco local agora começam em <code>backend/</code></p>
@@ -385,12 +386,15 @@ Fronteiras de módulo respeitadas.</code></pre></div>
 </div>
 <div class="fase-head" id="passo-02"><div class="fase-n">02</div><div class="fase-t"><h2>Postgres 18, só na rede interna do Docker</h2></div></div>
 <div class="fase-body">
-<p>O Postgres vai rodar num <strong>contêiner</strong>, sem instalar nada no Windows. O arquivo <code>compose.yaml</code> descreve os serviços do projeto. Por enquanto é um só: o banco.</p>
+<p>O Postgres vai rodar num <strong>contêiner</strong>, sem instalar nada no Windows. O arquivo <code>infra/compose.yaml</code> descreve os serviços do projeto. Por enquanto é um só: o banco.</p>
 <div class="step "><h3>O serviço db</h3>
-<p><strong>Crie</strong> <code>compose.yaml</code>: na <strong>raiz</strong> do projeto, ao lado da pasta <code>backend/</code></p>
+<p><strong>Crie</strong> <code>infra/compose.yaml</code>: dentro da pasta <code>infra/</code>, criada no passo anterior.</p>
+<p>Os comandos continuam sendo executados na raiz do repositório. A opção <code>-f infra/compose.yaml</code> indica o arquivo de configuração. O <code>name: biblioteca-tutorial</code> mantém o nome do projeto e do volume mesmo com o Compose em outra pasta.</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">yaml</span><span class="cb-note">compose.yaml</span><div class="cb-actions"><button class="cp" data-code="c8">copiar</button></div></div>
-<pre class="cb-body" id="c8" data-file="compose.yaml" data-step="02"><code><i class="t-key">services</i><i class="t-pun">:</i>
+<div class="cb-bar"><span class="cb-lang">yaml</span><span class="cb-note">infra/compose.yaml</span><div class="cb-actions"><button class="cp" data-code="c8">copiar</button></div></div>
+<pre class="cb-body" id="c8" data-file="infra/compose.yaml" data-step="02"><code><i class="t-key">name</i><i class="t-pun">:</i> biblioteca-tutorial
+
+<i class="t-key">services</i><i class="t-pun">:</i>
   <i class="t-key">db</i><i class="t-pun">:</i>
     <i class="t-key">image</i><i class="t-pun">:</i> postgres:18
     <i class="t-key">environment</i><i class="t-pun">:</i>
@@ -398,7 +402,7 @@ Fronteiras de módulo respeitadas.</code></pre></div>
       <i class="t-key">POSTGRES_PASSWORD</i><i class="t-pun">:</i> biblioteca
       <i class="t-key">POSTGRES_DB</i><i class="t-pun">:</i> biblioteca
     <i class="t-com"># sem "ports": o banco não fica exposto no seu computador, só os outros</i>
-    <i class="t-com"># serviços deste compose.yaml o enxergam, pela rede interna do Docker</i>
+    <i class="t-com"># serviços deste infra/compose.yaml o enxergam, pela rede interna do Docker</i>
     <i class="t-key">volumes</i><i class="t-pun">:</i>
       <i class="t-com"># a partir do Postgres 18 o volume é montado em /var/lib/postgresql</i>
       <i class="t-com"># (e não mais em /var/lib/postgresql/data)</i>
@@ -413,19 +417,19 @@ Fronteiras de módulo respeitadas.</code></pre></div>
   <i class="t-key">pgdata</i><i class="t-pun">:</i>
 </code></pre>
 </div>
-<ul class="conc"><li><span><code>image: postgres:18</code>: a imagem oficial, baixada do Docker Hub na primeira vez.</span></li><li><span><code>environment</code>: usuário, senha e banco que a imagem cria na primeira subida.</span></li><li><span><strong>Não há <code>ports</code>, de propósito.</strong> Sem essa seção, nenhuma porta do seu computador leva ao banco. Ele só é alcançável por outros contêineres do mesmo <code>compose.yaml</code>, pela rede interna que o Docker cria para o projeto. Assim o banco não fica exposto e não briga com um PostgreSQL que já esteja instalado no Windows na porta 5432.</span></li><li><span><code>volumes</code>: os dados ficam num volume com nome (<code>pgdata</code>), que sobrevive quando o contêiner é apagado e recriado.</span></li><li><span><code>healthcheck</code>: o Docker pergunta periodicamente ao <code>pg_isready</code> se o banco já aceita conexões. O <code>-h localhost</code> faz a pergunta pela rede, como a aplicação fará; sem ele, a resposta pode vir positiva cedo demais na primeira subida, quando o Postgres ainda está se preparando. Vai ser útil no passo 05.</span></li></ul>
+<ul class="conc"><li><span><code>image: postgres:18</code>: a imagem oficial, baixada do Docker Hub na primeira vez.</span></li><li><span><code>environment</code>: usuário, senha e banco que a imagem cria na primeira subida.</span></li><li><span><strong>Não há <code>ports</code>, de propósito.</strong> Sem essa seção, nenhuma porta do seu computador leva ao banco. Ele só é alcançável por outros contêineres do mesmo <code>infra/compose.yaml</code>, pela rede interna que o Docker cria para o projeto. Assim o banco não fica exposto e não briga com um PostgreSQL que já esteja instalado no Windows na porta 5432.</span></li><li><span><code>volumes</code>: os dados ficam num volume com nome (<code>pgdata</code>), que sobrevive quando o contêiner é apagado e recriado.</span></li><li><span><code>healthcheck</code>: o Docker pergunta periodicamente ao <code>pg_isready</code> se o banco já aceita conexões. O <code>-h localhost</code> faz a pergunta pela rede, como a aplicação fará; sem ele, a resposta pode vir positiva cedo demais na primeira subida, quando o Postgres ainda está se preparando. Vai ser útil no passo 05.</span></li></ul>
 <div class="callout warn"><strong>Novidade do Postgres 18.</strong> Até a versão 17, o volume era montado em <code>/var/lib/postgresql/data</code>. A imagem 18 guarda os dados em <code>/var/lib/postgresql/18/docker</code> e espera o volume em <code>/var/lib/postgresql</code>. Muito tutorial na internet ainda mostra o caminho antigo.</div>
 </div>
 <div class="step test"><h3>Suba o banco</h3>
 <p>Ainda na raiz do projeto (se estiver em <code>backend/</code>, volte com <code>cd ..</code>):</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c9">copiar</button></div></div><pre class="cb-body" id="c9"><code><i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i> db
-<i class="t-cmd">docker</i> compose ps</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c9">copiar</button></div></div><pre class="cb-body" id="c9"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i> db
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml ps</code></pre></div>
 <p>Espere a coluna <code>STATUS</code> mostrar <code>(healthy)</code>. Repare na coluna <code>PORTS</code>: aparece só <code>5432/tcp</code>, sem um <code>0.0.0.0:5432-&gt;</code> na frente. A porta existe dentro da rede do Docker, mas não foi publicada no seu computador.</p>
-<p>Mesmo sem porta, dá para conversar com o banco <em>entrando</em> no contêiner com <code>docker compose exec</code>, que roda o comando lá dentro:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c10">copiar</button></div></div><pre class="cb-body" id="c10"><code><i class="t-cmd">docker</i> compose exec db psql <i class="t-flag">-U</i> biblioteca <i class="t-flag">-d</i> biblioteca <i class="t-flag">-c</i> <i class="t-str">"select version();"</i></code></pre></div>
+<p>Mesmo sem porta, dá para conversar com o banco <em>entrando</em> no contêiner com <code>docker compose -f infra/compose.yaml exec</code>, que roda o comando lá dentro:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c10">copiar</button></div></div><pre class="cb-body" id="c10"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml exec db psql <i class="t-flag">-U</i> biblioteca <i class="t-flag">-d</i> biblioteca <i class="t-flag">-c</i> <i class="t-str">"select version();"</i></code></pre></div>
 <div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada (em máquinas ARM, aarch64 no lugar de x86_64)</span></div><pre class="cb-body" id="c11"><code>PostgreSQL 18.x (Debian 18.x-1.pgdg13+2) on x86_64-pc-linux-gnu, ...</code></pre></div>
 <p>Crie também um segundo banco, só para os testes. Assim os testes nunca apagam o que você cadastrou à mão:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c12">copiar</button></div></div><pre class="cb-body" id="c12"><code><i class="t-cmd">docker</i> compose exec db createdb <i class="t-flag">-U</i> biblioteca biblioteca_test</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c12">copiar</button></div></div><pre class="cb-body" id="c12"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml exec db createdb <i class="t-flag">-U</i> biblioteca biblioteca_test</code></pre></div>
 <div class="callout "><strong>O preço do isolamento.</strong> Como o banco não tem porta no seu computador, nenhum programa rodando no Windows chega até ele, nem o backend. Tudo o que fala com o banco vai rodar dentro de contêineres da mesma rede: a aplicação (passo 04) e os testes de integração (passo 05). O que não fala com banco continua rodando direto no Windows: o compilador, os testes de unidade e o frontend.</div>
 </div>
 </div>
@@ -1320,12 +1324,12 @@ Fronteiras de módulo respeitadas.</code></pre></div>
 <div class="fase-head" id="passo-04"><div class="fase-n">04</div><div class="fase-t"><h2>A aplicação no contêiner (ainda com SQLite)</h2></div></div>
 <div class="fase-body">
 <p>O banco está numa rede que só contêineres enxergam. Para o backend falar com ele, o backend também precisa virar contêiner. Uma mudança de cada vez: primeiro a aplicação vai para o Docker <em>ainda com SQLite</em>, e só no passo seguinte troca de banco.</p>
-<p>O <code>Dockerfile</code> descreve como montar a <strong>imagem</strong> da aplicação, e um novo serviço no <code>compose.yaml</code> diz como rodá-la.</p>
+<p>O <code>infra/Dockerfile</code> descreve como montar a <strong>imagem</strong> da aplicação, e um novo serviço no <code>infra/compose.yaml</code> diz como rodá-la.</p>
 <div class="step "><h3>1 · A receita da imagem</h3>
-<p><strong>Crie</strong> <code>Dockerfile</code>: na raiz</p>
+<p><strong>Crie</strong> <code>infra/Dockerfile</code>: na pasta <code>infra/</code>.</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">dockerfile</span><span class="cb-note">Dockerfile</span><div class="cb-actions"><button class="cp" data-code="c35">copiar</button></div></div>
-<pre class="cb-body" id="c35" data-file="Dockerfile" data-step="04"><code><i class="t-kw">FROM</i> oven/bun:1-slim
+<div class="cb-bar"><span class="cb-lang">dockerfile</span><span class="cb-note">infra/Dockerfile</span><div class="cb-actions"><button class="cp" data-code="c35">copiar</button></div></div>
+<pre class="cb-body" id="c35" data-file="infra/Dockerfile" data-step="04"><code><i class="t-kw">FROM</i> oven/bun:1-slim
 
 <i class="t-kw">WORKDIR</i> /app/backend
 
@@ -1342,10 +1346,11 @@ Fronteiras de módulo respeitadas.</code></pre></div>
 </code></pre>
 </div>
 <p>A ordem dos <code>COPY</code> é de propósito. Cada instrução vira uma <em>camada</em>, e o Docker reaproveita do cache toda camada cuja entrada não mudou. Como o <code>package.json</code> e o <code>bun.lock</code> mudam pouco, o <code>bun install</code> só roda de novo quando as dependências mudam. Mexer no código só refaz o último <code>COPY</code>, e o build leva segundos.</p>
-<p><strong>Crie</strong> <code>.dockerignore</code>: o que <em>não</em> entra no contexto de build: as dependências instaladas no Windows (a imagem instala as suas, para Linux) e o banco SQLite local</p>
+<p><strong>Crie</strong> <code>infra/Dockerfile.dockerignore</code>: o que <em>não</em> entra no contexto de build: as dependências instaladas no Windows (a imagem instala as suas, para Linux) e o banco SQLite local.</p>
+<p>Esse é o ignore específico de <code>infra/Dockerfile</code>, reconhecido pelo Docker ao lado dele. As regras continuam relativas à raiz do repositório, definida como contexto de build por <code>context: ..</code>. O caminho <code>dockerfile: infra/Dockerfile</code> é relativo a esse contexto, permitindo copiar <code>backend/</code> e <code>frontend/</code>.</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">gitignore</span><span class="cb-note">.dockerignore</span><div class="cb-actions"><button class="cp" data-code="c36">copiar</button></div></div>
-<pre class="cb-body" id="c36" data-file=".dockerignore" data-step="04"><code>**/node_modules
+<div class="cb-bar"><span class="cb-lang">gitignore</span><span class="cb-note">infra/Dockerfile.dockerignore</span><div class="cb-actions"><button class="cp" data-code="c36">copiar</button></div></div>
+<pre class="cb-body" id="c36" data-file="infra/Dockerfile.dockerignore" data-step="04"><code>**/node_modules
 backend/data/*.sqlite*
 backend/data/*.csv
 .git
@@ -1354,12 +1359,16 @@ backend/data/*.csv
 </div>
 </div>
 <div class="step "><h3>2 · O serviço app</h3>
-<p><strong>Edite</strong> <code>compose.yaml</code>:</p>
+<p><strong>Edite</strong> <code>infra/compose.yaml</code>:</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">yaml</span><span class="cb-note">compose.yaml</span><div class="cb-actions"><button class="tgl" data-target="c37-diff" data-alt="c37">ver o que mudou</button><button class="cp" data-code="c37">copiar</button></div></div>
-<pre class="cb-body" id="c37" data-file="compose.yaml" data-step="04"><code><i class="t-key">services</i><i class="t-pun">:</i>
+<div class="cb-bar"><span class="cb-lang">yaml</span><span class="cb-note">infra/compose.yaml</span><div class="cb-actions"><button class="tgl" data-target="c37-diff" data-alt="c37">ver o que mudou</button><button class="cp" data-code="c37">copiar</button></div></div>
+<pre class="cb-body" id="c37" data-file="infra/compose.yaml" data-step="04"><code><i class="t-key">name</i><i class="t-pun">:</i> biblioteca-tutorial
+
+<i class="t-key">services</i><i class="t-pun">:</i>
 <strong class="ln-new">  <i class="t-key">app</i><i class="t-pun">:</i></strong>
-<strong class="ln-new">    <i class="t-key">build</i><i class="t-pun">:</i> .</strong>
+<strong class="ln-new">    <i class="t-key">build</i><i class="t-pun">:</i></strong>
+<strong class="ln-new">      <i class="t-key">context</i><i class="t-pun">:</i> ..</strong>
+<strong class="ln-new">      <i class="t-key">dockerfile</i><i class="t-pun">:</i> infra/Dockerfile</strong>
 <strong class="ln-new">    <i class="t-key">ports</i><i class="t-pun">:</i></strong>
 <strong class="ln-new">      - <i class="t-str">"3000:3000"</i></strong>
 <strong class="ln-new"></strong>
@@ -1370,7 +1379,7 @@ backend/data/*.csv
       <i class="t-key">POSTGRES_PASSWORD</i><i class="t-pun">:</i> biblioteca
       <i class="t-key">POSTGRES_DB</i><i class="t-pun">:</i> biblioteca
     <i class="t-com"># sem "ports": o banco não fica exposto no seu computador, só os outros</i>
-    <i class="t-com"># serviços deste compose.yaml o enxergam, pela rede interna do Docker</i>
+    <i class="t-com"># serviços deste infra/compose.yaml o enxergam, pela rede interna do Docker</i>
     <i class="t-key">volumes</i><i class="t-pun">:</i>
       <i class="t-com"># a partir do Postgres 18 o volume é montado em /var/lib/postgresql</i>
       <i class="t-com"># (e não mais em /var/lib/postgresql/data)</i>
@@ -1384,15 +1393,15 @@ backend/data/*.csv
 <i class="t-key">volumes</i><i class="t-pun">:</i>
   <i class="t-key">pgdata</i><i class="t-pun">:</i>
 </code></pre>
-<pre class="cb-body cb-diff" id="c37-diff" hidden><code><span class="dl ctx"> services:</span><span class="dl add">+  app:</span><span class="dl add">+    build: .</span><span class="dl add">+    ports:</span><span class="dl add">+      - "3000:3000"</span><span class="dl add">+</span><span class="dl ctx">   db:</span><span class="dl ctx">     image: postgres:18</span><span class="dl ctx">     environment:</span><span class="dl ctx">       POSTGRES_USER: biblioteca</span><span class="dl ctx">       POSTGRES_PASSWORD: biblioteca</span><span class="dl ctx">       POSTGRES_DB: biblioteca</span><span class="dl ctx">     # sem "ports": o banco não fica exposto no seu computador, só os outros</span><span class="dl ctx">     # serviços deste compose.yaml o enxergam, pela rede interna do Docker</span><span class="dl ctx">     volumes:</span><span class="dl ctx">       # a partir do Postgres 18 o volume é montado em /var/lib/postgresql</span><span class="dl ctx">       # (e não mais em /var/lib/postgresql/data)</span><span class="dl ctx">       - pgdata:/var/lib/postgresql</span><span class="dl ctx">     healthcheck:</span><span class="dl ctx">       test: ["CMD-SHELL", "pg_isready -h localhost -U biblioteca -d biblioteca"]</span><span class="dl ctx">       interval: 2s</span><span class="dl ctx">       timeout: 3s</span><span class="dl ctx">       retries: 15</span><span class="dl ctx"> </span><span class="dl ctx"> volumes:</span><span class="dl ctx">   pgdata:</span></code></pre>
+<pre class="cb-body cb-diff" id="c37-diff" hidden><code><span class="dl ctx"> name: biblioteca-tutorial</span><span class="dl ctx"> </span><span class="dl ctx"> services:</span><span class="dl add">+  app:</span><span class="dl add">+    build:</span><span class="dl add">+      context: ..</span><span class="dl add">+      dockerfile: infra/Dockerfile</span><span class="dl add">+    ports:</span><span class="dl add">+      - "3000:3000"</span><span class="dl add">+</span><span class="dl ctx">   db:</span><span class="dl ctx">     image: postgres:18</span><span class="dl ctx">     environment:</span><span class="dl ctx">       POSTGRES_USER: biblioteca</span><span class="dl ctx">       POSTGRES_PASSWORD: biblioteca</span><span class="dl ctx">       POSTGRES_DB: biblioteca</span><span class="dl ctx">     # sem "ports": o banco não fica exposto no seu computador, só os outros</span><span class="dl ctx">     # serviços deste infra/compose.yaml o enxergam, pela rede interna do Docker</span><span class="dl ctx">     volumes:</span><span class="dl ctx">       # a partir do Postgres 18 o volume é montado em /var/lib/postgresql</span><span class="dl ctx">       # (e não mais em /var/lib/postgresql/data)</span><span class="dl ctx">       - pgdata:/var/lib/postgresql</span><span class="dl ctx">     healthcheck:</span><span class="dl ctx">       test: ["CMD-SHELL", "pg_isready -h localhost -U biblioteca -d biblioteca"]</span><span class="dl ctx">       interval: 2s</span><span class="dl ctx">       timeout: 3s</span><span class="dl ctx">       retries: 15</span><span class="dl ctx"> </span><span class="dl ctx"> volumes:</span><span class="dl ctx">   pgdata:</span></code></pre>
 </div>
 <p>Agora sim há um <code>ports</code>: a porta 3000 do seu computador leva à 3000 do contêiner da aplicação. É a única porta publicada do projeto. O banco continua fechado.</p>
 </div>
 <div class="step test"><h3>Verifique</h3>
 <p>Na raiz:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c38">copiar</button></div></div><pre class="cb-body" id="c38"><code><i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i> <i class="t-flag">--build</i>
-<i class="t-cmd">docker</i> compose ps
-<i class="t-cmd">docker</i> compose logs app</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c38">copiar</button></div></div><pre class="cb-body" id="c38"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i> <i class="t-flag">--build</i>
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml ps
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml logs app</code></pre></div>
 <div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c39"><code>app-1  | Servidor executando em http://localhost:3000</code></pre></div>
 <p>Cadastre um livro:</p>
 <div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c40">copiar</button></div></div><pre class="cb-body" id="c40"><code><i class="t-cmd">Invoke-RestMethod</i> <i class="t-flag">-Method</i> Post <i class="t-flag">-Uri</i> http://localhost:3000/livros <i class="t-flag">-ContentType</i> "application/json<i class="t-pun">; </i><i class="t-cmd">charset=utf-8"</i> <i class="t-flag">-Body</i> <i class="t-str">'{"isbn":"9780321125217","titulo":"Domain-Driven Design","autorId":1}'</i></code></pre></div>
@@ -1420,19 +1429,19 @@ dataCatalogacao : 2026-10-01</code></pre></div>
 
 <i class="t-kw">if</i> <i class="t-pun">(!</i>url<i class="t-pun">)</i> <i class="t-pun">{</i>
   <i class="t-kw">throw</i> <i class="t-kw">new</i> <i class="t-fn">Error</i><i class="t-pun">(</i>
-    <i class="t-str">"DATABASE_URL não definida: o banco só existe na rede do Docker, rode pelo docker compose"</i><i class="t-pun">,</i>
+    <i class="t-str">"DATABASE_URL não definida: o banco só existe na rede do Docker, rode pelo docker compose -f infra/compose.yaml"</i><i class="t-pun">,</i>
   <i class="t-pun">);</i>
 <i class="t-pun">}</i>
 
 <i class="t-com">/**</i>
 <i class="t-com"> * Pool de conexões com o Postgres. A URL vem do ambiente, definida no</i>
-<i class="t-com"> * compose.yaml: o banco não tem porta aberta no seu computador, então só um</i>
+<i class="t-com"> * infra/compose.yaml: o banco não tem porta aberta no seu computador, então só um</i>
 <i class="t-com"> * contêiner da mesma rede consegue chegar até ele.</i>
 <i class="t-com"> */</i>
 <i class="t-kw">export</i> <i class="t-kw">const</i> sql <i class="t-pun">=</i> <i class="t-kw">new</i> <i class="t-fn">SQL</i><i class="t-pun">(</i>url<i class="t-pun">);</i>
 </code></pre>
 </div>
-<p>A URL de conexão vem da variável de ambiente <code>DATABASE_URL</code>, que só vai existir dentro dos contêineres, definida no <code>compose.yaml</code>. Fora do Docker ela não existe, e o erro avisa logo, com uma mensagem clara.</p>
+<p>A URL de conexão vem da variável de ambiente <code>DATABASE_URL</code>, que só vai existir dentro dos contêineres, definida no <code>infra/compose.yaml</code>. Fora do Docker ela não existe, e o erro avisa logo, com uma mensagem clara.</p>
 </div>
 <div class="step "><h3>2 · Acervo: tabela e repositório</h3>
 <p><strong>Crie</strong> <code>backend/src/modules/acervo/infrastructure/postgresSchema.ts</code>:</p>
@@ -2030,12 +2039,16 @@ console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i cla
 </div>
 </div>
 <div class="step "><h3>7 · O compose: a aplicação encontra o banco, e os testes ganham um contêiner</h3>
-<p><strong>Edite</strong> <code>compose.yaml</code>:</p>
+<p><strong>Edite</strong> <code>infra/compose.yaml</code>:</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">yaml</span><span class="cb-note">compose.yaml</span><div class="cb-actions"><button class="tgl" data-target="c55-diff" data-alt="c55">ver o que mudou</button><button class="cp" data-code="c55">copiar</button></div></div>
-<pre class="cb-body" id="c55" data-file="compose.yaml" data-step="05"><code><i class="t-key">services</i><i class="t-pun">:</i>
+<div class="cb-bar"><span class="cb-lang">yaml</span><span class="cb-note">infra/compose.yaml</span><div class="cb-actions"><button class="tgl" data-target="c55-diff" data-alt="c55">ver o que mudou</button><button class="cp" data-code="c55">copiar</button></div></div>
+<pre class="cb-body" id="c55" data-file="infra/compose.yaml" data-step="05"><code><i class="t-key">name</i><i class="t-pun">:</i> biblioteca-tutorial
+
+<i class="t-key">services</i><i class="t-pun">:</i>
   <i class="t-key">app</i><i class="t-pun">:</i>
-    <i class="t-key">build</i><i class="t-pun">:</i> .
+    <i class="t-key">build</i><i class="t-pun">:</i>
+      <i class="t-key">context</i><i class="t-pun">:</i> ..
+      <i class="t-key">dockerfile</i><i class="t-pun">:</i> infra/Dockerfile
 <strong class="ln-new">    <i class="t-key">environment</i><i class="t-pun">:</i></strong>
 <strong class="ln-new">      <i class="t-com"># dentro da rede do compose, o banco atende pelo nome do serviço: db</i></strong>
 <strong class="ln-new">      <i class="t-key">DATABASE_URL</i><i class="t-pun">:</i> postgres://biblioteca:biblioteca@db:5432/biblioteca</strong>
@@ -2046,16 +2059,18 @@ console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i cla
 <strong class="ln-new">        <i class="t-key">condition</i><i class="t-pun">:</i> service_healthy</strong>
 <strong class="ln-new"></strong>
 <strong class="ln-new">  <i class="t-com"># a suíte de testes, rodando dentro da rede e contra o banco de testes:</i></strong>
-<strong class="ln-new">  <i class="t-com"># docker compose run --rm --build test</i></strong>
+<strong class="ln-new">  <i class="t-com"># docker compose -f infra/compose.yaml run --rm --build test</i></strong>
 <strong class="ln-new">  <i class="t-key">test</i><i class="t-pun">:</i></strong>
-<strong class="ln-new">    <i class="t-key">build</i><i class="t-pun">:</i> .</strong>
+<strong class="ln-new">    <i class="t-key">build</i><i class="t-pun">:</i></strong>
+<strong class="ln-new">      <i class="t-key">context</i><i class="t-pun">:</i> ..</strong>
+<strong class="ln-new">      <i class="t-key">dockerfile</i><i class="t-pun">:</i> infra/Dockerfile</strong>
 <strong class="ln-new">    <i class="t-key">command</i><i class="t-pun">:</i> [<i class="t-str">"bun"</i>, <i class="t-str">"test"</i>]</strong>
 <strong class="ln-new">    <i class="t-key">environment</i><i class="t-pun">:</i></strong>
 <strong class="ln-new">      <i class="t-key">DATABASE_URL</i><i class="t-pun">:</i> postgres://biblioteca:biblioteca@db:5432/biblioteca_test</strong>
 <strong class="ln-new">    <i class="t-key">depends_on</i><i class="t-pun">:</i></strong>
 <strong class="ln-new">      <i class="t-key">db</i><i class="t-pun">:</i></strong>
 <strong class="ln-new">        <i class="t-key">condition</i><i class="t-pun">:</i> service_healthy</strong>
-<strong class="ln-new">    <i class="t-com"># com um profile, o "docker compose up" não sobe este serviço</i></strong>
+<strong class="ln-new">    <i class="t-com"># com um profile, o "docker compose -f infra/compose.yaml up" não sobe este serviço</i></strong>
 <strong class="ln-new">    <i class="t-key">profiles</i><i class="t-pun">:</i> [<i class="t-str">"test"</i>]</strong>
 
   <i class="t-key">db</i><i class="t-pun">:</i>
@@ -2065,7 +2080,7 @@ console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i cla
       <i class="t-key">POSTGRES_PASSWORD</i><i class="t-pun">:</i> biblioteca
       <i class="t-key">POSTGRES_DB</i><i class="t-pun">:</i> biblioteca
     <i class="t-com"># sem "ports": o banco não fica exposto no seu computador, só os outros</i>
-    <i class="t-com"># serviços deste compose.yaml o enxergam, pela rede interna do Docker</i>
+    <i class="t-com"># serviços deste infra/compose.yaml o enxergam, pela rede interna do Docker</i>
     <i class="t-key">volumes</i><i class="t-pun">:</i>
       <i class="t-com"># a partir do Postgres 18 o volume é montado em /var/lib/postgresql</i>
       <i class="t-com"># (e não mais em /var/lib/postgresql/data)</i>
@@ -2079,9 +2094,9 @@ console<i class="t-pun">.</i><i class="t-fn">log</i><i class="t-pun">(</i><i cla
 <i class="t-key">volumes</i><i class="t-pun">:</i>
   <i class="t-key">pgdata</i><i class="t-pun">:</i>
 </code></pre>
-<pre class="cb-body cb-diff" id="c55-diff" hidden><code><span class="dl ctx"> services:</span><span class="dl ctx">   app:</span><span class="dl ctx">     build: .</span><span class="dl add">+    environment:</span><span class="dl add">+      # dentro da rede do compose, o banco atende pelo nome do serviço: db</span><span class="dl add">+      DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca</span><span class="dl ctx">     ports:</span><span class="dl ctx">       - "3000:3000"</span><span class="dl add">+    depends_on:</span><span class="dl add">+      db:</span><span class="dl add">+        condition: service_healthy</span><span class="dl add">+</span><span class="dl add">+  # a suíte de testes, rodando dentro da rede e contra o banco de testes:</span><span class="dl add">+  # docker compose run --rm --build test</span><span class="dl add">+  test:</span><span class="dl add">+    build: .</span><span class="dl add">+    command: ["bun", "test"]</span><span class="dl add">+    environment:</span><span class="dl add">+      DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca_test</span><span class="dl add">+    depends_on:</span><span class="dl add">+      db:</span><span class="dl add">+        condition: service_healthy</span><span class="dl add">+    # com um profile, o "docker compose up" não sobe este serviço</span><span class="dl add">+    profiles: ["test"]</span><span class="dl ctx"> </span><span class="dl ctx">   db:</span><span class="dl ctx">     image: postgres:18</span><span class="dl ctx">     environment:</span><span class="dl ctx">       POSTGRES_USER: biblioteca</span><span class="dl ctx">       POSTGRES_PASSWORD: biblioteca</span><span class="dl ctx">       POSTGRES_DB: biblioteca</span><span class="dl ctx">     # sem "ports": o banco não fica exposto no seu computador, só os outros</span><span class="dl ctx">     # serviços deste compose.yaml o enxergam, pela rede interna do Docker</span><span class="dl ctx">     volumes:</span><span class="dl ctx">       # a partir do Postgres 18 o volume é montado em /var/lib/postgresql</span><span class="dl ctx">       # (e não mais em /var/lib/postgresql/data)</span><span class="dl ctx">       - pgdata:/var/lib/postgresql</span><span class="dl ctx">     healthcheck:</span><span class="dl ctx">       test: ["CMD-SHELL", "pg_isready -h localhost -U biblioteca -d biblioteca"]</span><span class="dl ctx">       interval: 2s</span><span class="dl ctx">       timeout: 3s</span><span class="dl ctx">       retries: 15</span><span class="dl ctx"> </span><span class="dl ctx"> volumes:</span><span class="dl ctx">   pgdata:</span></code></pre>
+<pre class="cb-body cb-diff" id="c55-diff" hidden><code><span class="dl ctx"> name: biblioteca-tutorial</span><span class="dl ctx"> </span><span class="dl ctx"> services:</span><span class="dl ctx">   app:</span><span class="dl ctx">     build:</span><span class="dl ctx">       context: ..</span><span class="dl ctx">       dockerfile: infra/Dockerfile</span><span class="dl add">+    environment:</span><span class="dl add">+      # dentro da rede do compose, o banco atende pelo nome do serviço: db</span><span class="dl add">+      DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca</span><span class="dl ctx">     ports:</span><span class="dl ctx">       - "3000:3000"</span><span class="dl add">+    depends_on:</span><span class="dl add">+      db:</span><span class="dl add">+        condition: service_healthy</span><span class="dl add">+</span><span class="dl add">+  # a suíte de testes, rodando dentro da rede e contra o banco de testes:</span><span class="dl add">+  # docker compose -f infra/compose.yaml run --rm --build test</span><span class="dl add">+  test:</span><span class="dl add">+    build:</span><span class="dl add">+      context: ..</span><span class="dl add">+      dockerfile: infra/Dockerfile</span><span class="dl add">+    command: ["bun", "test"]</span><span class="dl add">+    environment:</span><span class="dl add">+      DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca_test</span><span class="dl add">+    depends_on:</span><span class="dl add">+      db:</span><span class="dl add">+        condition: service_healthy</span><span class="dl add">+    # com um profile, o "docker compose -f infra/compose.yaml up" não sobe este serviço</span><span class="dl add">+    profiles: ["test"]</span><span class="dl ctx"> </span><span class="dl ctx">   db:</span><span class="dl ctx">     image: postgres:18</span><span class="dl ctx">     environment:</span><span class="dl ctx">       POSTGRES_USER: biblioteca</span><span class="dl ctx">       POSTGRES_PASSWORD: biblioteca</span><span class="dl ctx">       POSTGRES_DB: biblioteca</span><span class="dl ctx">     # sem "ports": o banco não fica exposto no seu computador, só os outros</span><span class="dl ctx">     # serviços deste infra/compose.yaml o enxergam, pela rede interna do Docker</span><span class="dl ctx">     volumes:</span><span class="dl ctx">       # a partir do Postgres 18 o volume é montado em /var/lib/postgresql</span><span class="dl ctx">       # (e não mais em /var/lib/postgresql/data)</span><span class="dl ctx">       - pgdata:/var/lib/postgresql</span><span class="dl ctx">     healthcheck:</span><span class="dl ctx">       test: ["CMD-SHELL", "pg_isready -h localhost -U biblioteca -d biblioteca"]</span><span class="dl ctx">       interval: 2s</span><span class="dl ctx">       timeout: 3s</span><span class="dl ctx">       retries: 15</span><span class="dl ctx"> </span><span class="dl ctx"> volumes:</span><span class="dl ctx">   pgdata:</span></code></pre>
 </div>
-<ul class="conc"><li><span><strong><code>@db:5432</code>, não <code>@localhost</code>.</strong> Dentro de um contêiner, <code>localhost</code> é o próprio contêiner. Na rede que o Compose cria, cada serviço atende pelo nome: o banco é <code>db</code>. No Windows, <code>localhost:5432</code> seria o <em>seu</em> PostgreSQL, se houver um, e não este.</span></li><li><span><strong><code>depends_on</code> com <code>service_healthy</code>.</strong> A aplicação só sobe depois que o healthcheck do banco passa, e não apenas depois que o contêiner do banco foi criado.</span></li><li><span><strong>O serviço <code>test</code></strong> usa a mesma imagem, mas roda <code>bun test</code> e aponta para o <code>biblioteca_test</code>. O <code>profiles</code> faz o <code>docker compose up</code> ignorá-lo: ele só roda quando chamado pelo nome.</span></li></ul>
+<ul class="conc"><li><span><strong><code>@db:5432</code>, não <code>@localhost</code>.</strong> Dentro de um contêiner, <code>localhost</code> é o próprio contêiner. Na rede que o Compose cria, cada serviço atende pelo nome: o banco é <code>db</code>. No Windows, <code>localhost:5432</code> seria o <em>seu</em> PostgreSQL, se houver um, e não este.</span></li><li><span><strong><code>depends_on</code> com <code>service_healthy</code>.</strong> A aplicação só sobe depois que o healthcheck do banco passa, e não apenas depois que o contêiner do banco foi criado.</span></li><li><span><strong>O serviço <code>test</code></strong> usa a mesma imagem, mas roda <code>bun test</code> e aponta para o <code>biblioteca_test</code>. O <code>profiles</code> faz o <code>docker compose -f infra/compose.yaml up</code> ignorá-lo: ele só roda quando chamado pelo nome.</span></li></ul>
 </div>
 <div class="step test"><h3>Verifique</h3>
 <p>No Windows, em <code>backend/</code>, rode o que não precisa de banco: o compilador, o verificador e os testes de <em>unidade</em>, que usam dublês em memória:</p>
@@ -2097,18 +2112,18 @@ Fronteiras de módulo respeitadas.
 Ran 8 tests across 1 file.</code></pre></div>
 <div class="callout "><strong>E o <code>bun test</code> sem nada depois?</strong> No Windows, os testes de integração vão falhar com <em>DATABASE_URL não definida: o banco só existe na rede do Docker</em>. É o esperado: eles precisam do banco, e o banco está na rede interna. Eles rodam no contêiner de testes, abaixo.</div>
 <p>A suíte completa, dentro da rede. Na raiz:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c58">copiar</button></div></div><pre class="cb-body" id="c58"><code><i class="t-cmd">docker</i> compose run <i class="t-flag">--rm</i> <i class="t-flag">--build</i> test</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c58">copiar</button></div></div><pre class="cb-body" id="c58"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml run <i class="t-flag">--rm</i> <i class="t-flag">--build</i> test</code></pre></div>
 <div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída (final)</span></div><pre class="cb-body" id="c59"><code> 11 pass
  0 fail
  29 expect() calls
 Ran 11 tests across 3 files.</code></pre></div>
 <p>O <code>--build</code> refaz a imagem com o código atual, e o <code>--rm</code> apaga o contêiner de testes ao final. Os mesmos 11 testes de sempre, agora contra o Postgres. Por fim, recrie a aplicação com o código novo e cadastre o livro de novo, porque o do passo 04 ficou no SQLite que foi embora:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c60">copiar</button></div></div><pre class="cb-body" id="c60"><code><i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i> <i class="t-flag">--build</i> app
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c60">copiar</button></div></div><pre class="cb-body" id="c60"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i> <i class="t-flag">--build</i> app
 <i class="t-cmd">Invoke-RestMethod</i> <i class="t-flag">-Method</i> Post <i class="t-flag">-Uri</i> http://localhost:3000/livros <i class="t-flag">-ContentType</i> "application/json<i class="t-pun">; </i><i class="t-cmd">charset=utf-8"</i> <i class="t-flag">-Body</i> <i class="t-str">'{"isbn":"9780321125217","titulo":"Domain-Driven Design","autorId":1}'</i></code></pre></div>
 <p>Abra <a href="http://localhost:3000/livros/domain">http://localhost:3000/livros/domain</a> (em minúsculas, para testar o <code>ILIKE</code>) e <a href="http://localhost:3000/livros/evans">http://localhost:3000/livros/evans</a>. Confira o registro direto no Postgres:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c61">copiar</button></div></div><pre class="cb-body" id="c61"><code><i class="t-cmd">docker</i> compose exec db psql <i class="t-flag">-U</i> biblioteca <i class="t-flag">-d</i> biblioteca <i class="t-flag">-c</i> <i class="t-str">"select numero_registro, isbn, titulo from livros;"</i></code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c61">copiar</button></div></div><pre class="cb-body" id="c61"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml exec db psql <i class="t-flag">-U</i> biblioteca <i class="t-flag">-d</i> biblioteca <i class="t-flag">-c</i> <i class="t-str">"select numero_registro, isbn, titulo from livros;"</i></code></pre></div>
 <p>Agora o livro sobrevive à recriação do contêiner da aplicação, porque está no volume do banco. Recrie o contêiner e abra de novo <a href="http://localhost:3000/livros/evans">/livros/evans</a>:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c62">copiar</button></div></div><pre class="cb-body" id="c62"><code><i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i> <i class="t-flag">--force-recreate</i> app</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c62">copiar</button></div></div><pre class="cb-body" id="c62"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i> <i class="t-flag">--force-recreate</i> app</code></pre></div>
 </div>
 </div>
 <div class="fase-head" id="passo-06"><div class="fase-n">06</div><div class="fase-t"><h2>O frontend nasce com o Vite</h2></div></div>
@@ -2324,14 +2339,14 @@ Ran 11 tests across 3 files.</code></pre></div>
 </div>
 <div class="step test"><h3>Verifique</h3>
 <p>O backend mudou, então a imagem precisa ser refeita. Na raiz:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c69">copiar</button></div></div><pre class="cb-body" id="c69"><code><i class="t-cmd">docker</i> compose run <i class="t-flag">--rm</i> <i class="t-flag">--build</i> test
-<i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i> <i class="t-flag">--build</i> app</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c69">copiar</button></div></div><pre class="cb-body" id="c69"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml run <i class="t-flag">--rm</i> <i class="t-flag">--build</i> test
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i> <i class="t-flag">--build</i> app</code></pre></div>
 <div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c70"><code> 11 pass
  0 fail
  29 expect() calls
 Ran 11 tests across 3 files.</code></pre></div>
 <p><a href="http://localhost:3000/api">http://localhost:3000/api</a> responde <code>{"message":"API da Biblioteca"}</code>, e <a href="http://localhost:3000/api/livros/evans">/api/livros/evans</a> devolve o livro. O endereço antigo, <code>/livros/evans</code>, agora dá 404.</p>
-<div class="callout "><strong>O ciclo do backend, daqui em diante:</strong> mudou código em <code>backend/</code>? Rode <code>docker compose up -d --build app</code> para a mudança chegar ao contêiner, e <code>docker compose run --rm --build test</code> para os testes.</div>
+<div class="callout "><strong>O ciclo do backend, daqui em diante:</strong> mudou código em <code>backend/</code>? Rode <code>docker compose -f infra/compose.yaml up -d --build app</code> para a mudança chegar ao contêiner, e <code>docker compose -f infra/compose.yaml run --rm --build test</code> para os testes.</div>
 </div>
 </div>
 <div class="fase-head" id="passo-08"><div class="fase-n">08</div><div class="fase-t"><h2>As telas: cadastrar e buscar</h2></div></div>
@@ -2741,6 +2756,11 @@ body {
   <i class="t-key">border-radius</i><i class="t-pun">:</i> 10px;
 }
 
+<i class="t-com">/* No cadastro, soma a largura do formulário ao padding e às bordas. */</i>
+.conteudo:has(.cadastro) {
+  <i class="t-key">max-width</i><i class="t-pun">:</i> calc(420px + 4rem + 2px);
+}
+
 h1 {
   <i class="t-key">margin-top</i><i class="t-pun">:</i> 0;
   <i class="t-key">font-size</i><i class="t-pun">:</i> 1.6rem;
@@ -2861,7 +2881,7 @@ th {
 </div>
 <div class="fase-head" id="passo-09"><div class="fase-n">09</div><div class="fase-t"><h2>O backend serve o frontend, tudo no Docker</h2></div></div>
 <div class="fase-body">
-<p>Em desenvolvimento, o Vite serve a interface. Em produção não há Vite rodando: o build gera em <code>frontend/dist</code> um <code>index.html</code> e alguns arquivos JS e CSS, e quem os entrega ao navegador é a <strong>própria aplicação</strong>, o mesmo Hono que atende a API. Como a imagem não deve depender de alguém ter rodado o build antes, o próprio <code>Dockerfile</code> faz o build do React.</p>
+<p>Em desenvolvimento, o Vite serve a interface. Em produção não há Vite rodando: o build gera em <code>frontend/dist</code> um <code>index.html</code> e alguns arquivos JS e CSS, e quem os entrega ao navegador é a <strong>própria aplicação</strong>, o mesmo Hono que atende a API. Como a imagem não deve depender de alguém ter rodado o build antes, o próprio <code>infra/Dockerfile</code> faz o build do React.</p>
 <div class="step "><h3>1 · O servidor</h3>
 <p><strong>Edite</strong> <code>backend/src/server.ts</code>:</p>
 <div class="cb">
@@ -2924,13 +2944,13 @@ th {
 <i class="t-pun">}</i></code></pre>
 <pre class="cb-body cb-diff" id="c80-diff" hidden><code><span class="dl ctx"> import { Hono } from "hono";</span><span class="dl add">+import { serveStatic } from "hono/bun";</span><span class="dl ctx"> import type { UseCases } from "./composition";</span><span class="dl ctx"> import { DomainError, InvalidValue } from "./shared/domain-errors";</span><span class="dl ctx"> import { registerRoutes as registerAcervo } from "./modules/acervo";</span><span class="dl ctx"> import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";</span><span class="dl add">+</span><span class="dl add">+/** O build do React (`bun run build` em frontend/), relativo à pasta backend/. */</span><span class="dl add">+const FRONTEND = "../frontend/dist";</span><span class="dl ctx"> </span><span class="dl ctx"> function errorResponse(error: unknown): Response {</span><span class="dl ctx">   if (error instanceof InvalidInput || error instanceof InvalidValue) {</span><span class="dl ctx">     return Response.json({ error: error.message }, { status: 400 });</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   if (error instanceof NotFound) {</span><span class="dl ctx">     return Response.json({ error: error.message }, { status: 404 });</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   if (error instanceof RuleConflict || error instanceof DomainError) {</span><span class="dl ctx">     return Response.json({ error: error.message }, { status: 409 });</span><span class="dl ctx">   }</span><span class="dl ctx"> </span><span class="dl ctx">   console.error(error);</span><span class="dl ctx"> </span><span class="dl ctx">   return Response.json({ error: "Erro interno" }, { status: 500 });</span><span class="dl ctx"> }</span><span class="dl ctx"> </span><span class="dl ctx"> export function createServer(useCases: UseCases, porta = Number(process.env.PORT ?? 3000)) {</span><span class="dl ctx">   const api = new Hono();</span><span class="dl ctx"> </span><span class="dl ctx">   api.get("/", (contexto) =&gt; contexto.json({ message: "API da Biblioteca" }));</span><span class="dl ctx"> </span><span class="dl ctx">   registerAcervo(api, useCases);</span><span class="dl ctx"> </span><span class="dl ctx">   const app = new Hono();</span><span class="dl ctx"> </span><span class="dl ctx">   // toda a API mora sob /api: o resto dos endereços fica livre para o frontend</span><span class="dl ctx">   app.route("/api", api);</span><span class="dl add">+  app.all("/api/*", (contexto) =&gt; contexto.notFound());</span><span class="dl add">+</span><span class="dl add">+  // arquivos do build: index.html, JS, CSS, ícone</span><span class="dl add">+  app.use("*", serveStatic({ root: FRONTEND }));</span><span class="dl add">+</span><span class="dl add">+  // qualquer outro endereço (/cadastrar, por exemplo) é rota do React Router:</span><span class="dl add">+  // devolve o index.html e o roteador do navegador decide o que mostrar</span><span class="dl add">+  app.get("*", serveStatic({ path: `${FRONTEND}/index.html` }));</span><span class="dl ctx"> </span><span class="dl ctx">   app.notFound((contexto) =&gt;</span><span class="dl ctx">     contexto.json({ error: "Recurso não encontrado" }, 404),</span><span class="dl ctx">   );</span><span class="dl ctx"> </span><span class="dl ctx">   app.onError((error) =&gt; errorResponse(error));</span><span class="dl ctx"> </span><span class="dl ctx">   return Bun.serve({ port: porta, fetch: app.fetch });</span><span class="dl ctx"> }</span></code></pre>
 </div>
-<ul class="conc"><li><span><strong>A ordem importa.</strong> Primeiro a API, depois <code>/api/*</code> desconhecido vira 404 em JSON, depois os arquivos que existem em <code>dist</code> e, por último, o <code>index.html</code>.</span></li><li><span><strong>Por que devolver o <code>index.html</code> para qualquer endereço?</strong> <code>/cadastrar</code> não é um arquivo, é uma rota do React Router. Ao apertar <kbd>F5</kbd> nessa página, o navegador pede <code>/cadastrar</code> ao servidor, que precisa devolver o app para o roteador do navegador decidir o que mostrar.</span></li><li><span><code>../frontend/dist</code> é relativo à pasta de onde o servidor roda (<code>/app/backend</code> no contêiner). É exatamente lá que o Dockerfile vai colocar o build.</span></li></ul>
+<ul class="conc"><li><span><strong>A ordem importa.</strong> Primeiro a API, depois <code>/api/*</code> desconhecido vira 404 em JSON, depois os arquivos que existem em <code>dist</code> e, por último, o <code>index.html</code>.</span></li><li><span><strong>Por que devolver o <code>index.html</code> para qualquer endereço?</strong> <code>/cadastrar</code> não é um arquivo, é uma rota do React Router. Ao apertar <kbd>F5</kbd> nessa página, o navegador pede <code>/cadastrar</code> ao servidor, que precisa devolver o app para o roteador do navegador decidir o que mostrar.</span></li><li><span><code>../frontend/dist</code> é relativo à pasta de onde o servidor roda (<code>/app/backend</code> no contêiner). É exatamente lá que o infra/Dockerfile vai colocar o build.</span></li></ul>
 </div>
 <div class="step "><h3>2 · Build em dois estágios</h3>
-<p><strong>Edite</strong> <code>Dockerfile</code>:</p>
+<p><strong>Edite</strong> <code>infra/Dockerfile</code>:</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">dockerfile</span><span class="cb-note">Dockerfile</span><div class="cb-actions"><button class="tgl" data-target="c81-diff" data-alt="c81">ver o que mudou</button><button class="cp" data-code="c81">copiar</button></div></div>
-<pre class="cb-body" id="c81" data-file="Dockerfile" data-step="09"><code><strong class="ln-new"><i class="t-com"># Estágio 1: compila o React. Deste estágio só a pasta dist segue adiante.</i></strong>
+<div class="cb-bar"><span class="cb-lang">dockerfile</span><span class="cb-note">infra/Dockerfile</span><div class="cb-actions"><button class="tgl" data-target="c81-diff" data-alt="c81">ver o que mudou</button><button class="cp" data-code="c81">copiar</button></div></div>
+<pre class="cb-body" id="c81" data-file="infra/Dockerfile" data-step="09"><code><strong class="ln-new"><i class="t-com"># Estágio 1: compila o React. Deste estágio só a pasta dist segue adiante.</i></strong>
 <strong class="ln-new"><i class="t-kw">FROM</i> oven/bun:1-slim AS frontend</strong>
 <strong class="ln-new"></strong>
 <strong class="ln-new"><i class="t-kw">WORKDIR</i> /app/frontend</strong>
@@ -2963,10 +2983,10 @@ th {
 <pre class="cb-body cb-diff" id="c81-diff" hidden><code><span class="dl add">+# Estágio 1: compila o React. Deste estágio só a pasta dist segue adiante.</span><span class="dl add">+FROM oven/bun:1-slim AS frontend</span><span class="dl add">+</span><span class="dl add">+WORKDIR /app/frontend</span><span class="dl add">+</span><span class="dl add">+COPY frontend/package.json frontend/bun.lock ./</span><span class="dl add">+RUN bun install --frozen-lockfile</span><span class="dl add">+</span><span class="dl add">+COPY frontend/ ./</span><span class="dl add">+RUN bun run build</span><span class="dl add">+</span><span class="dl add">+# Estágio 2: a aplicação que vai rodar.</span><span class="dl ctx"> FROM oven/bun:1-slim</span><span class="dl ctx"> </span><span class="dl ctx"> WORKDIR /app/backend</span><span class="dl ctx"> </span><span class="dl ctx"> # primeiro só as dependências: enquanto package.json e bun.lock não mudarem,</span><span class="dl ctx"> # o Docker reaproveita esta camada e o build fica rápido</span><span class="dl ctx"> COPY backend/package.json backend/bun.lock ./</span><span class="dl ctx"> RUN bun install --frozen-lockfile --production</span><span class="dl ctx"> </span><span class="dl ctx"> COPY backend/ ./</span><span class="dl ctx"> </span><span class="dl add">+# o mesmo lugar relativo que no seu computador: ../frontend/dist</span><span class="dl add">+COPY --from=frontend /app/frontend/dist /app/frontend/dist</span><span class="dl add">+</span><span class="dl ctx"> ENV NODE_ENV=production</span><span class="dl ctx"> EXPOSE 3000</span><span class="dl ctx"> CMD ["bun", "src/main.ts"]</span></code></pre>
 </div>
 <p>O primeiro estágio (<code>AS frontend</code>) tem as ferramentas de build: Vite, TypeScript e as dependências de desenvolvimento. Dele, o <code>COPY --from=frontend</code> leva só a pasta <code>dist</code>. A imagem final não carrega nada do que foi preciso para compilar.</p>
-<p><strong>Edite</strong> <code>.dockerignore</code>: um <code>dist</code> local, se houver, fica de fora, porque quem gera o build agora é o Docker</p>
+<p><strong>Edite</strong> <code>infra/Dockerfile.dockerignore</code>: um <code>dist</code> local, se houver, fica de fora, porque quem gera o build agora é o Docker</p>
 <div class="cb">
-<div class="cb-bar"><span class="cb-lang">gitignore</span><span class="cb-note">.dockerignore</span><div class="cb-actions"><button class="tgl" data-target="c82-diff" data-alt="c82">ver o que mudou</button><button class="cp" data-code="c82">copiar</button></div></div>
-<pre class="cb-body" id="c82" data-file=".dockerignore" data-step="09"><code>**/node_modules
+<div class="cb-bar"><span class="cb-lang">gitignore</span><span class="cb-note">infra/Dockerfile.dockerignore</span><div class="cb-actions"><button class="tgl" data-target="c82-diff" data-alt="c82">ver o que mudou</button><button class="cp" data-code="c82">copiar</button></div></div>
+<pre class="cb-body" id="c82" data-file="infra/Dockerfile.dockerignore" data-step="09"><code>**/node_modules
 backend/data/*.sqlite*
 backend/data/*.csv
 <strong class="ln-new">frontend/dist</strong>
@@ -2978,21 +2998,21 @@ backend/data/*.csv
 </div>
 <div class="step test"><h3>Verifique</h3>
 <p>Pare o Vite (<kbd>Ctrl</kbd>+<kbd>C</kbd>) e, na raiz:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c83">copiar</button></div></div><pre class="cb-body" id="c83"><code><i class="t-cmd">docker</i> compose run <i class="t-flag">--rm</i> <i class="t-flag">--build</i> test
-<i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i> <i class="t-flag">--build</i>
-<i class="t-cmd">docker</i> compose ps</code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c83">copiar</button></div></div><pre class="cb-body" id="c83"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml run <i class="t-flag">--rm</i> <i class="t-flag">--build</i> test
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i> <i class="t-flag">--build</i>
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml ps</code></pre></div>
 <p>Abra <a href="http://localhost:3000">http://localhost:3000</a>: interface e API saindo do contêiner, com os dados no contêiner do Postgres. Vá em <em>Cadastrar</em>, aperte <kbd>F5</kbd> e confira que a página continua lá. <a href="http://localhost:3000/api/nada">/api/nada</a> deve responder <code>{"error":"Recurso não encontrado"}</code>. Cadastre um livro e depois derrube e suba tudo de novo:</p>
-<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c84">copiar</button></div></div><pre class="cb-body" id="c84"><code><i class="t-cmd">docker</i> compose down
-<i class="t-cmd">docker</i> compose up <i class="t-flag">-d</i></code></pre></div>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c84">copiar</button></div></div><pre class="cb-body" id="c84"><code><i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml down
+<i class="t-cmd">docker</i> compose <i class="t-flag">-f</i> infra/compose.yaml up <i class="t-flag">-d</i></code></pre></div>
 <p>O livro continua lá, porque o volume <code>pgdata</code> não é apagado com os contêineres.</p>
-<div class="callout warn"><strong><code>docker compose down -v</code></strong> apaga também os volumes, ou seja, <strong>todos os dados</strong> do banco, inclusive o <code>biblioteca_test</code>. Depois dele, suba de novo (<code>docker compose up -d</code>) e rode o <code>createdb</code> do passo 02.</div>
-<div class="callout ">O build é uma <strong>foto</strong> do frontend: se você mudar uma tela, ela só aparece na porta 3000 depois de outro <code>docker compose up -d --build</code>. Enquanto estiver desenvolvendo telas, use o Vite na 5173.</div>
+<div class="callout warn"><strong><code>docker compose -f infra/compose.yaml down -v</code></strong> apaga também os volumes, ou seja, <strong>todos os dados</strong> do banco, inclusive o <code>biblioteca_test</code>. Depois dele, suba de novo (<code>docker compose -f infra/compose.yaml up -d</code>) e rode o <code>createdb</code> do passo 02.</div>
+<div class="callout ">O build é uma <strong>foto</strong> do frontend: se você mudar uma tela, ela só aparece na porta 3000 depois de outro <code>docker compose -f infra/compose.yaml up -d --build</code>. Enquanto estiver desenvolvendo telas, use o Vite na 5173.</div>
 </div>
 </div>
 <div class="fase-head" id="passo-10"><div class="fase-n">10</div><div class="fase-t"><h2>Fechamento</h2></div></div>
 <div class="fase-body">
 <div class="step "><h3>Checklist</h3>
-<ul class="conc"><li><span><code>backend/</code> e <code>frontend/</code> separados, com <code>compose.yaml</code>, <code>Dockerfile</code> e <code>.dockerignore</code> na raiz.</span></li><li><span><code>docker compose ps</code> mostra o <code>db</code> só com <code>5432/tcp</code>, sem porta publicada. A única porta aberta é a 3000, do <code>app</code>.</span></li><li><span><code>bun run typecheck</code>, <code>bun run verificar</code> e <code>bun test tests/cadastrar-livro.test.ts</code> passando em <code>backend/</code>, no Windows.</span></li><li><span><code>docker compose run --rm --build test</code> com os 11 testes passando.</span></li><li><span><code>docker compose up -d --build</code> sobe <code>db</code> e <code>app</code>, e <a href="http://localhost:3000">localhost:3000</a> cadastra e busca livros.</span></li></ul>
+<ul class="conc"><li><span><code>backend/</code> e <code>frontend/</code> separados, com <code>infra/compose.yaml</code>, <code>infra/Dockerfile</code> e <code>infra/Dockerfile.dockerignore</code> em <code>infra/</code>.</span></li><li><span><code>docker compose -f infra/compose.yaml ps</code> mostra o <code>db</code> só com <code>5432/tcp</code>, sem porta publicada. A única porta aberta é a 3000, do <code>app</code>.</span></li><li><span><code>bun run typecheck</code>, <code>bun run verificar</code> e <code>bun test tests/cadastrar-livro.test.ts</code> passando em <code>backend/</code>, no Windows.</span></li><li><span><code>docker compose -f infra/compose.yaml run --rm --build test</code> com os 11 testes passando.</span></li><li><span><code>docker compose -f infra/compose.yaml up -d --build</code> sobe <code>db</code> e <code>app</code>, e <a href="http://localhost:3000">localhost:3000</a> cadastra e busca livros.</span></li></ul>
 </div>
 <div class="step commit"><h3>Entrega</h3>
 <p>Na raiz:</p>
@@ -3006,20 +3026,20 @@ backend/data/*.csv
 <div class="tw"><table>
 <tr><th>Sintoma</th><th>Causa e solução</th></tr>
 <tr><td><em>error during connect</em> / <em>Cannot connect to the Docker daemon</em></td><td>O Docker Desktop não está aberto. Abra e espere o ícone ficar estável.</td></tr>
-<tr><td><em>DATABASE_URL não definida</em> ao rodar <code>bun test</code> ou <code>bun run dev</code> no Windows</td><td>É o esperado: o banco só existe na rede do Docker. No Windows, rode só <code>bun test tests/cadastrar-livro.test.ts</code>. A suíte completa é <code>docker compose run --rm --build test</code>, e a aplicação, <code>docker compose up -d --build app</code>.</td></tr>
-<tr><td>Uma ferramenta do Windows (pgAdmin, DBeaver) não conecta em <code>localhost:5432</code></td><td>De propósito: o banco não tem porta publicada, e <code>localhost:5432</code> é o PostgreSQL do Windows, se houver um. Para consultar, use <code>docker compose exec db psql -U biblioteca -d biblioteca</code>.</td></tr>
-<tr><td><em>port is already allocated</em> na 3000</td><td>Outro programa usa a 3000, talvez um <code>bun run dev</code> esquecido. Feche-o, ou troque para <code>"3001:3000"</code> no <code>compose.yaml</code> e no proxy do <code>vite.config.ts</code>.</td></tr>
+<tr><td><em>DATABASE_URL não definida</em> ao rodar <code>bun test</code> ou <code>bun run dev</code> no Windows</td><td>É o esperado: o banco só existe na rede do Docker. No Windows, rode só <code>bun test tests/cadastrar-livro.test.ts</code>. A suíte completa é <code>docker compose -f infra/compose.yaml run --rm --build test</code>, e a aplicação, <code>docker compose -f infra/compose.yaml up -d --build app</code>.</td></tr>
+<tr><td>Uma ferramenta do Windows (pgAdmin, DBeaver) não conecta em <code>localhost:5432</code></td><td>De propósito: o banco não tem porta publicada, e <code>localhost:5432</code> é o PostgreSQL do Windows, se houver um. Para consultar, use <code>docker compose -f infra/compose.yaml exec db psql -U biblioteca -d biblioteca</code>.</td></tr>
+<tr><td><em>port is already allocated</em> na 3000</td><td>Outro programa usa a 3000, talvez um <code>bun run dev</code> esquecido. Feche-o, ou troque para <code>"3001:3000"</code> no <code>infra/compose.yaml</code> e no proxy do <code>vite.config.ts</code>.</td></tr>
 <tr><td><em>database "biblioteca_test" does not exist</em></td><td>Falta o <code>createdb</code> do passo 02, ou ele se perdeu com um <code>down -v</code>.</td></tr>
-<tr><td>Mudei o backend e nada mudou</td><td>O código vai para o contêiner no build: <code>docker compose up -d --build app</code>.</td></tr>
-<tr><td>Tela em branco ou erro de proxy no Vite (5173)</td><td>O contêiner <code>app</code> está parado. Confira com <code>docker compose ps</code> e suba com <code>docker compose up -d app</code>.</td></tr>
+<tr><td>Mudei o backend e nada mudou</td><td>O código vai para o contêiner no build: <code>docker compose -f infra/compose.yaml up -d --build app</code>.</td></tr>
+<tr><td>Tela em branco ou erro de proxy no Vite (5173)</td><td>O contêiner <code>app</code> está parado. Confira com <code>docker compose -f infra/compose.yaml ps</code> e suba com <code>docker compose -f infra/compose.yaml up -d app</code>.</td></tr>
 <tr><td><code>&amp;&amp;</code> dá erro no terminal</td><td>O Windows PowerShell 5.1 não tem <code>&amp;&amp;</code>. Rode um comando por linha.</td></tr>
 <tr><td>Acentos estranhos (<code>jÃ¡</code>) no <code>Invoke-RestMethod</code></td><td>O PowerShell 5.1 lê a resposta como Latin-1. O dado está certo: confira no navegador.</td></tr>
-<tr><td><code>docker compose up --build</code> falha em <code>bun install --frozen-lockfile</code></td><td>O <code>bun.lock</code> está desatualizado em relação ao <code>package.json</code>. Rode <code>bun install</code> na pasta correspondente e tente de novo.</td></tr>
+<tr><td><code>docker compose -f infra/compose.yaml up --build</code> falha em <code>bun install --frozen-lockfile</code></td><td>O <code>bun.lock</code> está desatualizado em relação ao <code>package.json</code>. Rode <code>bun install</code> na pasta correspondente e tente de novo.</td></tr>
 <tr><td>O build falha no estágio <code>frontend</code></td><td>Erro de TypeScript nas telas. Rode <code>bun run build</code> em <code>frontend/</code> para ver o erro mais rápido.</td></tr>
 </table></div>
 </div>
 <div class="step "><h3>Para pensar</h3>
-<div class="refl"><p><strong>1.</strong> “Trocar de banco é trocar duas linhas.” Quanto custou de verdade? O que estava errado no contrato, e por que ele parecia certo enquanto só existia o SQLite?</p><p><strong>2.</strong> Nenhum arquivo de <code>domain/</code> com regra de negócio mudou nesta aula. Isso foi sorte ou consequência do desenho das fases 31 a 45?</p><p><strong>3.</strong> Deixar o banco sem porta tirou a exposição, mas obrigou o backend e os testes de integração a rodarem em contêineres. Que outro arranjo daria acesso ao banco só para você, sem abri-lo para a rede? E o que ele custaria?</p><p><strong>4.</strong> O número de registro é <code>COUNT(*) + 1</code> do ano. Com o SQLite síncrono, dois cadastros nunca se intercalavam. Com <code>await</code> e Postgres, o que acontece se dois cadastros chegarem ao mesmo tempo? Que mecanismo do banco resolveria isso?</p><p><strong>5.</strong> Rode <code>docker compose exec app ls data</code>. Por que existe um arquivo SQLite dentro do contêiner, se a aplicação usa Postgres? (Dica: o que acontece quando um módulo é importado?)</p><p><strong>6.</strong> O <code>ILIKE</code> mostrou que dois adapters podem ter a mesma assinatura e comportamentos diferentes. Como um <em>teste de contrato</em>, a mesma suíte rodando contra os dois adapters, pegaria isso automaticamente?</p></div>
+<div class="refl"><p><strong>1.</strong> “Trocar de banco é trocar duas linhas.” Quanto custou de verdade? O que estava errado no contrato, e por que ele parecia certo enquanto só existia o SQLite?</p><p><strong>2.</strong> Nenhum arquivo de <code>domain/</code> com regra de negócio mudou nesta aula. Isso foi sorte ou consequência do desenho das fases 31 a 45?</p><p><strong>3.</strong> Deixar o banco sem porta tirou a exposição, mas obrigou o backend e os testes de integração a rodarem em contêineres. Que outro arranjo daria acesso ao banco só para você, sem abri-lo para a rede? E o que ele custaria?</p><p><strong>4.</strong> O número de registro é <code>COUNT(*) + 1</code> do ano. Com o SQLite síncrono, dois cadastros nunca se intercalavam. Com <code>await</code> e Postgres, o que acontece se dois cadastros chegarem ao mesmo tempo? Que mecanismo do banco resolveria isso?</p><p><strong>5.</strong> Rode <code>docker compose -f infra/compose.yaml exec app ls data</code>. Por que existe um arquivo SQLite dentro do contêiner, se a aplicação usa Postgres? (Dica: o que acontece quando um módulo é importado?)</p><p><strong>6.</strong> O <code>ILIKE</code> mostrou que dois adapters podem ter a mesma assinatura e comportamentos diferentes. Como um <em>teste de contrato</em>, a mesma suíte rodando contra os dois adapters, pegaria isso automaticamente?</p></div>
 </div>
 </div>
 </main>

@@ -3,6 +3,8 @@ import { InvalidInput } from "../../../shared/errors";
 export type ReaderInput = { name: string; cpf: string; email: string; phone: string };
 export type Reader = ReaderInput & { id: number };
 
+export type ReaderView = { id: number; name: string; cpf: string; email: string; phone: string };
+
 /** O CPF identifica o leitor; pontuação não faz parte do valor persistido. */
 export function normalizeCpf(value: string): string {
   if (!/^[\d.\-\s]+$/.test(value)) throw new InvalidInput("CPF inválido.");

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { parseReaderInput } from "../../domain/Reader";
-import { SearchReaders } from "./SearchReaders";
+import { SearchReaders } from "./searchReaders";
 import { ana, bruno, InMemoryReaderRepository } from "#tests/reader-doubles";
 import { api } from "#tests/api";
 import { testReader } from "#tests/reader-fixtures";

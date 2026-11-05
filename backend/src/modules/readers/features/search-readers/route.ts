@@ -4,11 +4,14 @@ import { parsePositiveId } from "../../../../shared/http";
 import { readerJson } from "../../infrastructure/json";
 import { PostgresReaderRepository } from "../../infrastructure/PostgresReaderRepository";
 import { SearchReaders } from "./SearchReaders";
-
-/** UC10: busca leitores e consulta um leitor. */
+import { searchReadersCached } from "./searchReadersCached";
+ 
+/** UC10: busca leitores (com cache no Redis) e consulta um leitor. */
 export function registerRoutes(api: Hono): void {
   api.get("/leitores", async c => {
-    const readers = await new SearchReaders(new PostgresReaderRepository(sql)).execute(c.req.query("q"));
+    const { readers, cache } = await searchReadersCached(new SearchReaders(new PostgresReaderRepository(sql)), c.req.query("q"));
+    // HIT, MISS ou BYPASS (sem Redis): aparece no DevTools
+    c.header("X-Cache", cache);
     return c.json(readers.map(readerJson));
   });
   api.get("/leitores/:id", async c => {

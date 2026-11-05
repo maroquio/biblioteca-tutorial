@@ -36,3 +36,4 @@ const PREFIX = process.env.REDIS_PREFIX ?? "biblioteca";
 export function redisKey(...parts: string[]): string {
   return [PREFIX, ...parts].join(":");
 }
+

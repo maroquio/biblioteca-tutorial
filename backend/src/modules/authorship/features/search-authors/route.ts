@@ -9,7 +9,6 @@ import { searchAuthorsCached } from "./searchAuthorsCached";
 export function registerRoutes(api: Hono): void {
   api.get("/autores", async (c) => {
     const { authors, cache } = await searchAuthorsCached(c.req.query("q") ?? "", authorshipIntegration);
-    // HIT, MISS ou BYPASS (sem Redis): dá para ver o cache funcionando no DevTools
     c.header("X-Cache", cache);
     return c.json(authors.map(authorJson));
   });

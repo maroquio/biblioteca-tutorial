@@ -1,0 +1,61 @@
+import type { RedisClient } from "bun";
+import { ready, redis, redisKey } from "../../../infrastructure/redis";
+import type { Reader } from "../domain/Reader";
+
+export type CacheStatus = "HIT" | "MISS" | "BYPASS";
+
+/** Um resultado em cache vale por 60 s mesmo que ninguém o invalide. */
+const TTL_SECONDS = 60;
+
+const GENERATION = redisKey("leitores", "buscas", "geracao");
+
+/** Um hash por geração, um campo por termo, cada campo com o próprio TTL (HSETEX). */
+export function generationHash(generation: number): string {
+  return redisKey("leitores", "buscas", String(generation));
+}
+
+/**
+ * Sem q e com q vazio caem no mesmo campo, e a busca usa ILIKE: " Ana " e "ana"
+ * são o mesmo resultado. O CPF com máscara não vira só dígitos: "529.982.247-25"
+ * não casa com nome nem e-mail, mas "52998224725" pode casar, então os dois
+ * termos nem sempre devolvem a mesma lista.
+ */
+export function field(term = ""): string {
+  return `q:${term.trim().toLocaleLowerCase("pt-BR")}`;
+}
+
+/** Devolve null quando não há Redis (bypass): quem chamou segue direto para o Postgres. */
+export async function readCachedSearch(term: string | undefined, client: RedisClient | null = redis): Promise<{ generation: number; readers: Reader[] | null } | null> {
+  if (!client) return null;
+  try {
+    await ready(client);
+    const generation = Number(await client.get(GENERATION) ?? 0);
+    const cached = await client.hget(generationHash(generation), field(term));
+    return { generation, readers: cached === null ? null : JSON.parse(cached) as Reader[] };
+  } catch (error) {
+    console.warn("Cache de leitores indisponível:", (error as Error).message);
+    return null;
+  }
+}
+
+/** Grava na geração lida antes da consulta; se ela já foi invalidada, ninguém lê este resultado. */
+export async function writeCachedSearch(term: string | undefined, generation: number, readers: Reader[], client: RedisClient | null = redis): Promise<void> {
+  if (!client) return;
+  try {
+    await ready(client);
+    await client.send("HSETEX", [generationHash(generation), "EX", String(TTL_SECONDS), "FIELDS", "1", field(term), JSON.stringify(readers)]);
+  } catch (error) {
+    console.warn("Cache de leitores indisponível:", (error as Error).message);
+  }
+}
+
+/** Chame depois do COMMIT; antes dele, uma leitura concorrente gravaria o dado antigo na geração nova. */
+export async function invalidateReaderSearch(client: RedisClient | null = redis): Promise<void> {
+  if (!client) return;
+  try {
+    await ready(client);
+    await client.incr(GENERATION);
+  } catch (error) {
+    console.warn("Cache de leitores indisponível:", (error as Error).message);
+  }
+}

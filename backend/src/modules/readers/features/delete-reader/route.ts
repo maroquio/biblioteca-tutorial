@@ -4,12 +4,14 @@ import { PostgresReaderHistory } from "../../../../integration/PostgresReaderHis
 import { parsePositiveId } from "../../../../shared/http";
 import { PostgresReaderRepository } from "../../infrastructure/PostgresReaderRepository";
 import { DeleteReader } from "./DeleteReader";
+import { invalidateReaderSearch } from "../..";
 
 /** UC12: exclui um leitor sem histórico. */
 export function registerRoutes(api: Hono): void {
   api.delete("/leitores/:id", async c => {
     const id = parsePositiveId(c.req.param("id"));
     await inTransaction(tx => new DeleteReader(new PostgresReaderRepository(tx), new PostgresReaderHistory(tx)).execute(id));
+    await invalidateReaderSearch();
     return c.body(null, 204);
   });
 }

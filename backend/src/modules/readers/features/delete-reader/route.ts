@@ -2,6 +2,7 @@ import type { Hono } from "hono";
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { PostgresReaderHistory } from "../../../../integration/PostgresReaderHistory";
 import { parsePositiveId } from "../../../../shared/http";
+import { invalidateReaderSearch } from "../../infrastructure/searchCache";
 import { PostgresReaderRepository } from "../../infrastructure/PostgresReaderRepository";
 import { DeleteReader } from "./DeleteReader";
 
@@ -10,6 +11,7 @@ export function registerRoutes(api: Hono): void {
   api.delete("/leitores/:id", async c => {
     const id = parsePositiveId(c.req.param("id"));
     await inTransaction(tx => new DeleteReader(new PostgresReaderRepository(tx), new PostgresReaderHistory(tx)).execute(id));
+    await invalidateReaderSearch();
     return c.body(null, 204);
   });
 }

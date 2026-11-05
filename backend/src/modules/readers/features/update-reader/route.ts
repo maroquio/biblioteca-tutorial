@@ -2,6 +2,7 @@ import type { Hono } from "hono";
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { parsePositiveId, readJsonBody } from "../../../../shared/http";
 import { readerJson } from "../../infrastructure/json";
+import { invalidateReaderSearch } from "../../infrastructure/searchCache";
 import { PostgresReaderRepository } from "../../infrastructure/PostgresReaderRepository";
 import { UpdateReader } from "./UpdateReader";
 
@@ -11,6 +12,7 @@ export function registerRoutes(api: Hono): void {
     const id = parsePositiveId(c.req.param("id"));
     const body = await readJsonBody(c);
     const reader = await inTransaction(tx => new UpdateReader(new PostgresReaderRepository(tx)).execute(id, body));
+    await invalidateReaderSearch();
     return c.json(readerJson(reader));
   });
 }

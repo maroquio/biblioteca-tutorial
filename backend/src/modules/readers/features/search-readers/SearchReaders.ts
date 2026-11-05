@@ -5,3 +5,4 @@ export class SearchReaders {
   execute(term?: string) { return this.repository.search(term); }
   get(id: number) { return this.repository.get(id); }
 }
+

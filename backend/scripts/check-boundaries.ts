@@ -4,7 +4,7 @@ import { dirname, join, normalize } from "node:path";
 
 const problems: string[] = [];
 
-/** Quem é o dono de cada tabela. Nenhum módulo cita uma tabela que não é dele. */
+
 const TABLE_OWNERS: Record<string, string> = {
   livros: "catalog",
   exemplares: "catalog",
@@ -16,13 +16,14 @@ const TABLE_OWNERS: Record<string, string> = {
   emprestimos: "circulation",
 };
 
-/** O mesmo vale para o Redis: o primeiro trecho de redisKey(...) diz o módulo dono da chave. */
+
 const KEY_OWNERS: Record<string, string> = {
   autoria: "authorship",
   acervo: "catalog",
+  leitores: "readers",
 };
 
-/** Pasta da fatia (src/modules/<módulo>/features/<fatia>), ou null fora de uma fatia. */
+
 function sliceOf(path: string): string | null {
   const parts = path.split("/");
   return parts[3] === "features" && parts[4] ? parts.slice(0, 5).join("/") : null;
@@ -30,7 +31,6 @@ function sliceOf(path: string): string | null {
 
 for await (const rawFile of new Glob("src/modules/**/*.ts").scan(".")) {
   const file = rawFile.replaceAll("\\", "/");
-  // testes montam cenários com dados de vários módulos e de outras fatias
   if (file.endsWith(".test.ts")) continue;
 
   const module = file.split("/")[2]!;
@@ -76,10 +76,7 @@ for await (const rawFile of new Glob("src/modules/**/*.ts").scan(".")) {
   }
 }
 
-/**
- * O frontend segue as mesmas fronteiras: uma tela (page.tsx) não importa outra
- * e um módulo só usa outro pelo index.ts. Caminhos relativos à pasta frontend/.
- */
+
 const FRONTEND = "../frontend";
 
 if (existsSync(FRONTEND)) {

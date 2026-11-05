@@ -1,4 +1,5 @@
 import { invalidateAuthorSearch } from "../modules/authorship";
+import { invalidateReaderSearch } from "../modules/readers";
 
 /**
  * Os dados derivados do Redis podem ter ficado para trás: o servidor esteve
@@ -6,5 +7,8 @@ import { invalidateAuthorSearch } from "../modules/authorship";
  * Recalcula tudo a partir do Postgres, a fonte da verdade.
  */
 export async function refreshDerivedData(): Promise<void> {
-  await invalidateAuthorSearch();
+  await Promise.all([
+    invalidateAuthorSearch(),
+    invalidateReaderSearch(),
+  ]);
 }

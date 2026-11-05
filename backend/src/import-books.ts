@@ -1,5 +1,4 @@
 import { prepareDatabase } from "./composition";
-import { redis } from "./infrastructure/redis";
 import { catalogIntegration } from "./integration/catalogIntegration";
 import { parseBookInput } from "./modules/catalog/domain/Book";
 import { createBook } from "./modules/catalog/features/create-book/createBook";
@@ -32,6 +31,3 @@ for (const row of rows) {
 }
 
 console.log(`importados: ${imported} | rejeitados: ${rejected}`);
-
-// sem isto, a conexão aberta com o Redis manteria o processo vivo
-redis?.close();

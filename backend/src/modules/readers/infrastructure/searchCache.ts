@@ -1,0 +1,56 @@
+import type { RedisClient } from "bun";
+import { ready, redis, redisKey } from "../../../infrastructure/redis";
+import type { Reader } from "../domain/Reader";
+ 
+export type CacheStatus = "HIT" | "MISS" | "BYPASS";
+ 
+/** Um resultado em cache vale por 60 s mesmo que ninguém o invalide. */
+const TTL_SECONDS = 60;
+ 
+/** O primeiro trecho, "leitores", diz que a chave pertence ao módulo Leitores. */
+const GENERATION = redisKey("leitores", "buscas", "geracao");
+ 
+/** Cada geração é um hash: um campo por termo, cada um com o próprio TTL (HSETEX). */
+function generationHash(generation: number): string {
+  return redisKey("leitores", "buscas", String(generation));
+}
+ 
+function field(term: string): string {
+  return `q:${term.trim().toLocaleLowerCase("pt-BR")}`;
+}
+ 
+/** Lê a geração atual e, nela, o termo. Devolve null sem Redis (bypass). */
+export async function readCachedReaderSearch(term: string, client: RedisClient | null = redis): Promise<{ generation: number; readers: Reader[] | null } | null> {
+  if (!client) return null;
+  try {
+    await ready(client);
+    const generation = Number(await client.get(GENERATION) ?? 0);
+    const cached = await client.hget(generationHash(generation), field(term));
+    return { generation, readers: cached === null ? null : JSON.parse(cached) as Reader[] };
+  } catch (error) {
+    console.warn("Cache de leitores indisponível:", (error as Error).message);
+    return null;
+  }
+}
+ 
+/** Grava na geração em que a leitura começou; se ela já foi invalidada, ninguém lê. */
+export async function writeCachedReaderSearch(term: string, generation: number, readers: Reader[], client: RedisClient | null = redis): Promise<void> {
+  if (!client) return;
+  try {
+    await ready(client);
+    await client.send("HSETEX", [generationHash(generation), "EX", String(TTL_SECONDS), "FIELDS", "1", field(term), JSON.stringify(readers)]);
+  } catch (error) {
+    console.warn("Cache de leitores indisponível:", (error as Error).message);
+  }
+}
+ 
+
+export async function invalidateReaderSearch(client: RedisClient | null = redis): Promise<void> {
+  if (!client) return;
+  try {
+    await ready(client);
+    await client.incr(GENERATION);
+  } catch (error) {
+    console.warn("Cache de leitores indisponível:", (error as Error).message);
+  }
+}

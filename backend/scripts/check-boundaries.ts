@@ -20,7 +20,10 @@ const TABLE_OWNERS: Record<string, string> = {
 const KEY_OWNERS: Record<string, string> = {
   autoria: "authorship",
   acervo: "catalog",
+  leitores: "readers",
 };
+
+
 
 /** Pasta da fatia (src/modules/<módulo>/features/<fatia>), ou null fora de uma fatia. */
 function sliceOf(path: string): string | null {

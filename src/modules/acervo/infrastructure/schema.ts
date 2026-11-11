@@ -1,5 +1,6 @@
 import { db } from "../../../infrastructure/db";
 
+
 const COLUMNS = `
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   numero_registro TEXT NOT NULL UNIQUE,
@@ -41,4 +42,6 @@ function dropCrossModuleForeignKeys(): void {
   console.log(
     `Migração aplicada: ${foreignKeys.length} chave(s) estrangeira(s) cruzada(s) removida(s) de livros`,
   );
+
+  
 }

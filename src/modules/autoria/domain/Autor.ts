@@ -14,4 +14,6 @@ export class Autor {
      */
     readonly livrosNoAcervo: number,
   ) {}
+
+  
 }

@@ -58,6 +58,17 @@ export class Livro {
       this.dataCatalogacao,
     );
   }
+  
+  comTitulo(titulo: string): Livro {
+    return new Livro(
+      this.id,
+      this.numeroRegistro,
+      this.isbn,
+      titulo,
+      this.autorId,
+      this.dataCatalogacao,
+    );
+  }
 
   /** O que conta como "a mesma obra" é decisão do negócio, não do SQL. */
   mesmoTituloQue(outro: string): boolean {
@@ -68,3 +79,4 @@ export class Livro {
     return titulo.trim().toLowerCase();
   }
 }
+

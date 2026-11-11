@@ -11,6 +11,7 @@ import { EventBus } from "./shared/EventBus";
 import { AutorId } from "./shared/identifiers";
 
 export type UseCases = {
+  [x: string]: any;
   cadastrarLivro: CadastrarLivro;
   buscarLivro: BuscarLivro;
 };
@@ -32,7 +33,7 @@ export function buildUseCases(now: Clock = () => new Date()): UseCases {
   );
 
   return {
-    cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
-    buscarLivro: new BuscarLivro(livros, autoria),
-  };
+  cadastrarLivro: new CadastrarLivro(livros, autoria, now, bus),
+  buscarLivro: new BuscarLivro(livros, autoria),
+};
 }

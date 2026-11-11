@@ -27,6 +27,17 @@ export class Livro {
     }
   }
 
+  comTitulo(titulo: string): Livro {
+    return new Livro(
+      this.id,
+      this.numeroRegistro,
+      this.isbn,
+      titulo,
+      this.autorId,
+      this.dataCatalogacao,
+    );
+  }
+
   /** Um livro nasce por aqui — e nasce válido. */
   static catalogar(
     isbn: Isbn,

@@ -15,6 +15,16 @@ export class InMemoryLivroRepository implements LivroRepository {
   private items: Livro[] = [];
   private nextId = 1;
 
+  findById(id: LivroId): Livro | null {
+    return this.items.find((livro) => livro.id?.equals(id)) ?? null;
+  }
+
+  updateTitulo(livro: Livro): void {
+    this.items = this.items.map((atual) =>
+      atual.id?.equals(livro.id!) ? livro : atual,
+    );
+  }
+
   contarNoAcervoDoAutor(autorId: AutorId): number {
     return this.items.filter((item) => item.autorId.equals(autorId)).length;
   }
@@ -42,7 +52,9 @@ export class InMemoryLivroRepository implements LivroRepository {
   searchByTitulo(termo: string): Livro[] {
     const alvo = termo.toLowerCase();
 
-    return this.items.filter((item) => item.titulo.toLowerCase().includes(alvo));
+    return this.items.filter((item) =>
+      item.titulo.toLowerCase().includes(alvo),
+    );
   }
 
   findByAutorIds(autorIds: AutorId[]): Livro[] {

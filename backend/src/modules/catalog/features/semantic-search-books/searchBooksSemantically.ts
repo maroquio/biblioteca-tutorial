@@ -1,24 +1,21 @@
-import type { RedisClient } from "bun";
 import { embedder as defaultEmbedder } from "../../../../infrastructure/embedder";
 import { sql } from "../../../../infrastructure/postgres";
-import { ready, redis } from "../../../../infrastructure/redis";
 import { civilDate } from "../../../../shared/dates";
 import type { Embedder } from "../../../../shared/Embedder";
 import { InvalidInput, ServiceUnavailable } from "../../../../shared/errors";
 import type { BookView } from "../../domain/Book";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { ensureBookIndex, knnSearch, reconcileBookIndex, type KnnHit } from "../../infrastructure/bookIndex";
+import { ensureBookVectors, knnSearch, reconcileBookVectors, type KnnHit } from "../../infrastructure/bookVectors";
 import { toBookView, type BookRow } from "../../infrastructure/books";
 
 const MAX_LENGTH = 200;
 
-async function nearestBooks(q: string, integration: CatalogIntegration, embedder: Embedder, client: RedisClient, limit: number): Promise<KnnHit[]> {
+async function nearestBooks(q: string, integration: CatalogIntegration, embedder: Embedder, limit: number): Promise<KnnHit[]> {
   try {
-    await ready(client);
-    // índice recém-criado está vazio: reconstrói em segundo plano e responde com o que houver
-    if (await ensureBookIndex(embedder, client)) void reconcileBookIndex(integration, embedder, client);
+    // tabela recém-criada está vazia: reconstrói em segundo plano e responde com o que houver
+    if (await ensureBookVectors(embedder)) void reconcileBookVectors(integration, embedder);
     const [vector] = await embedder.embed([q], "query");
-    return await knnSearch(vector!, limit, client);
+    return await knnSearch(vector!, limit);
   } catch (error) {
     console.warn("Busca semântica indisponível:", (error as Error).message);
     throw new ServiceUnavailable("A busca semântica está indisponível no momento");
@@ -26,22 +23,22 @@ async function nearestBooks(q: string, integration: CatalogIntegration, embedder
 }
 
 /**
- * UC24: transforma a consulta em vetor, pede ao Redis os livros mais próximos e
- * descarta os que estão longe demais: o KNN sempre devolve `limit` vizinhos,
+ * UC24: transforma a consulta em vetor, pede ao Postgres os livros mais próximos
+ * via pgvector e descarta os que estão longe demais: o KNN sempre devolve `limit` vizinhos,
  * mesmo para uma consulta sem relação nenhuma com o acervo.
  */
 export async function searchBooksSemantically(
   term: string,
   integration: CatalogIntegration,
-  { embedder = defaultEmbedder, client = redis, limit = 10, now = new Date() }:
-    { embedder?: Embedder | null; client?: RedisClient | null; limit?: number; now?: Date } = {},
+  { embedder = defaultEmbedder, limit = 10, now = new Date() }:
+    { embedder?: Embedder | null; client?: unknown; limit?: number; now?: Date } = {},
 ): Promise<{ book: BookView; distance: number }[]> {
   const q = term.trim();
   if (q === "") throw new InvalidInput("Informe o que você procura");
   if (q.length > MAX_LENGTH) throw new InvalidInput(`A busca aceita até ${MAX_LENGTH} caracteres`);
-  if (!embedder || !client) throw new ServiceUnavailable("A busca semântica está indisponível no momento");
+  if (!embedder) throw new ServiceUnavailable("A busca semântica está indisponível no momento");
 
-  const hits = (await nearestBooks(q, integration, embedder, client, limit)).filter((hit) => hit.distance <= embedder.maxDistance);
+  const hits = (await nearestBooks(q, integration, embedder, limit)).filter((hit) => hit.distance <= embedder.maxDistance);
   if (hits.length === 0) return [];
 
   // o Postgres é a fonte da verdade: um livro excluído que ainda esteja no índice fica de fora

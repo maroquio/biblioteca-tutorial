@@ -61,8 +61,14 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
+/** Garante que a extensão pgvector está instalada no banco. */
+async function createVectorExtension(): Promise<void> {
+  await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+}
+
+/** Prepara as tabelas do Acervo: a extensão vector, livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await createVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { UseCases } from "./composition";
 import { DomainError, InvalidValue } from "./shared/domain-errors";
 import { registerRoutes as registerAcervo } from "./modules/acervo";
+import { registerRoutes as registerAvaliacao } from "./modules/avaliacao";
 import { InvalidInput, NotFound, RuleConflict } from "./shared/errors";
 
 function errorResponse(error: unknown): Response {
@@ -28,6 +29,7 @@ export function createServer(useCases: UseCases, porta = Number(process.env.PORT
   app.get("/", (contexto) => contexto.json({ message: "API da Biblioteca" }));
 
   registerAcervo(app, useCases);
+  registerAvaliacao(app, useCases);
 
   app.notFound((contexto) =>
     contexto.json({ error: "Recurso não encontrado" }, 404),

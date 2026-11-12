@@ -12,5 +12,7 @@ export type {
   EventPublisher,
   LivroCatalogado,
 } from "./domain/events";
+export type { ConsultaDeLivros } from "./ConsultaDeLivros";
 export type { LivroJson } from "./output";
 export { registerRoutes } from "./routes";
+

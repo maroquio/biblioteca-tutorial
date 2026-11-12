@@ -12,7 +12,8 @@ import { searchAuthors } from "./searchAuthors";
  */
 export async function searchAuthorsCached(term: string, integration: AuthorshipIntegration, client: RedisClient | null = redis): Promise<{ authors: AuthorView[]; cache: CacheStatus }> {
   const cached = await readCachedSearch(term, client);
-  if (cached?.authors) return { authors: cached.authors, cache: "HIT" };
+  if (cached?.authors) return { authors: cached.
+    authors, cache: "HIT" };
   const authors = await searchAuthors(term, integration);
   if (!cached) return { authors, cache: "BYPASS" };
   await writeCachedSearch(term, cached.generation, authors, client);

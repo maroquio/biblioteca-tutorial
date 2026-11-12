@@ -8,7 +8,8 @@ import { SearchReaders } from "./SearchReaders";
 /** UC10: busca leitores e consulta um leitor. */
 export function registerRoutes(api: Hono): void {
   api.get("/leitores", async c => {
-    const readers = await new SearchReaders(new PostgresReaderRepository(sql)).execute(c.req.query("q"));
+    const {readers, cache} = await new SearchReaders(new PostgresReaderRepository(sql)).execute(c.req.query("q"));
+    c.header("X-Cache", cache);
     return c.json(readers.map(readerJson));
   });
   api.get("/leitores/:id", async c => {

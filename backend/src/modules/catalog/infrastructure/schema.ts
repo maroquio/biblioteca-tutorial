@@ -1,10 +1,16 @@
 import { sql } from "../../../infrastructure/postgres";
 import { inTransaction } from "../../../infrastructure/transaction";
 
-/**
- * A mesma tabela `livros` do SQLite, na sintaxe do Postgres. `autor_id`
- * continua sendo só um inteiro: nada de chave estrangeira entre módulos.
- */
+async function enableVectorExtension(): Promise<void> {
+  try {
+    await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+  } catch (error) {
+    if (!/already exists|duplicate key/i.test((error as Error).message)) {
+      throw error;
+    }
+  }
+}
+
 async function createBooksTable(): Promise<void> {
   await sql`
     CREATE TABLE IF NOT EXISTS livros (
@@ -18,14 +24,12 @@ async function createBooksTable(): Promise<void> {
   `;
 }
 
-/** UC01: o registro bibliográfico deixa de exigir um número de cópia física. */
 async function dropBookCopyRequirement(): Promise<void> {
   await inTransaction(async (tx) => {
     await tx`ALTER TABLE livros ALTER COLUMN numero_registro DROP NOT NULL`;
   });
 }
 
-/** Migração idempotente: só limpa o campo antigo depois de comprovar a cópia. */
 async function prepareCopies(): Promise<void> {
   await inTransaction(async (tx) => {
     await tx`CREATE TABLE IF NOT EXISTS exemplares (
@@ -61,8 +65,8 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await enableVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

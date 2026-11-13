@@ -43,8 +43,9 @@ services:
     # com um profile, o "docker compose -f infra/compose.yaml up" não sobe este serviço
     profiles: ["test"]
 
+  # Postgres 18 com a extensão pgvector (os vetores da busca semântica moram aqui)
   db:
-    image: postgres:18
+    image: pgvector/pgvector:pg18
     environment:
       POSTGRES_USER: biblioteca
       POSTGRES_PASSWORD: biblioteca
@@ -61,9 +62,10 @@ services:
       timeout: 3s
       retries: 15
 
-  # Redis 8: cache e índice da busca semântica. Sem "ports" e sem volume de
-  # propósito: ele só guarda dados derivados. Se o contêiner sumir, o servidor
-  # reconstrói tudo a partir do Postgres, que continua sendo a fonte da verdade.
+  # Redis 8: cache da busca de autores. Sem "ports" e sem volume de propósito:
+  # ele só guarda dados derivados. Se o contêiner sumir, o cache se refaz sozinho
+  # a partir do Postgres, que continua sendo a fonte da verdade. Os vetores da
+  # busca semântica não ficam aqui: estão no Postgres, com o pgvector.
   redis:
     image: redis:8
     healthcheck:

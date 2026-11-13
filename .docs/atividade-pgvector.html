@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Biblioteca — Atividade: busca semântica com pgvector</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#111827; --muted:#5b6472; --line:#e3e7ed;
+  --accent:#1d4ed8; --accent-soft:#eef3ff; --ok:#047857; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --prof:#6d28d9; --prof-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e6edf7;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",SFMono-Regular,ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.87em;background:#eef1f5;border:1px solid #e0e5ec;border-radius:4px;padding:.08em .34em;white-space:nowrap}
+.ref{color:var(--muted);font-style:italic}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:264px minmax(0,1fr);gap:0;max-width:1400px;margin:0 auto}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--card);padding:20px 12px 60px}
+.side h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+.side a{display:block;padding:5px 9px;border-radius:7px;text-decoration:none;color:#374151;font-size:13.5px;line-height:1.35}
+.side a:hover{background:var(--accent-soft);color:var(--accent)}
+.side a.mk{font-weight:700}
+.side .num{display:inline-block;min-width:26px;color:#94a3b8;font-family:var(--mono);font-size:11.5px}
+main{padding:0 44px 120px;min-width:0}
+
+/* hero */
+.hero{margin:0 -44px 44px;padding:56px 44px 44px;background:linear-gradient(160deg,#0f172a 0%,#1e3a8a 100%);color:#fff}
+.hero .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;margin:0 0 12px}
+.hero h1{font-family:var(--serif);font-size:40px;line-height:1.15;margin:0 0 14px;font-weight:700}
+.hero p{margin:0;max-width:70ch;opacity:.9;font-size:17px}
+.hero .chips{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 13px;font-size:12.5px}
+
+/* seções */
+section.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px 34px;margin:0 0 26px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+h2.sec{font-family:var(--serif);font-size:27px;margin:0 0 6px;line-height:1.25}
+h3{font-family:var(--serif);font-size:20px;margin:26px 0 8px}
+h4{font-size:15px;margin:20px 0 6px}
+h5,h6{font-size:14px;margin:16px 0 6px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:0 0 5px}
+blockquote{margin:0 0 16px;padding:2px 0 2px 16px;border-left:3px solid #cbd5e1;color:var(--muted)}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+
+/* fase */
+article.fase{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 0 30px;margin:0 0 30px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.fase-head{padding:22px 34px 18px;border-bottom:1px solid var(--line);background:#fbfcfe;display:flex;gap:18px;align-items:flex-start}
+.fase-n{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:19px;font-weight:700}
+.fase.mk .fase-n{background:#b91c1c}
+.fase-t{min-width:0}
+.fase-t h2{font-family:var(--serif);font-size:24px;margin:0 0 4px;line-height:1.25}
+.fase-t .req{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.fase-body{padding:0 34px}
+.lead{margin:22px 0 4px;padding:16px 18px;background:var(--accent-soft);border:1px solid #d7e3ff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;font-size:16.5px}
+.lead p{margin:0}
+
+.step{margin-top:26px}
+.step > h3{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.step.test > h3{color:var(--ok)}
+.step.commit > h3{color:var(--warn)}
+
+/* código */
+.cb{margin:0 0 16px;border:1px solid #1e293b;border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 14px;background:#111c31;border-bottom:1px solid #1e293b}
+.cb-lang{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8ba0c4}
+.cb-actions{display:flex;gap:6px}
+.cb button{font:inherit;font-size:11.5px;font-family:var(--sans);background:#1e293b;color:#cbd5e1;border:1px solid #33415a;border-radius:6px;padding:3px 10px;cursor:pointer}
+.cb button:hover{background:#2a3a52;color:#fff}
+.cb button.done{background:#065f46;border-color:#047857;color:#d1fae5}
+.cb-body{margin:0;padding:14px 16px;overflow-x:auto;background:var(--code-bg)}
+.cb-body code{background:none;border:0;padding:0;white-space:pre;color:var(--code-ink);font-size:13px;line-height:1.6;font-family:var(--mono)}
+.cb-out{border-color:#cbd5e1;background:#f8fafc}
+.cb-out .cb-bar{background:#eef2f7;border-bottom-color:#dde3ec}
+.cb-out .cb-lang{color:#64748b}
+.cb-fig{border-style:dashed}
+.cb-fig .cb-bar{background:#0d1626}
+.cb-note{align-self:center;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:#8ba0c4;opacity:.8}
+.ln-new{font-weight:700;color:#fde047}
+.cb-out .cb-body{background:#f8fafc}
+.cb-out .cb-body code{color:#0f172a}
+.cb-diff code{white-space:pre}
+.dl{display:block}
+.dl.add{background:rgba(16,185,129,.14);color:#a7f3d0}
+.dl.del{background:rgba(239,68,68,.14);color:#fecaca}
+
+/* tabelas */
+.tw{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f4f6f9;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:0}
+
+/* diagramas */
+figure.diagram{margin:0 0 20px;padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.diagram-scroll{overflow-x:auto}
+svg.dg{display:block;width:100%;height:auto;max-width:100%;min-width:520px}
+figure.diagram figcaption{margin-top:10px;font-size:13px;color:var(--muted);text-align:center}
+.diagram.missing{color:#b91c1c;font-size:13px}
+
+/* professor */
+aside.prof{margin:18px 0;padding:16px 20px;background:var(--prof-soft);border:1px solid #ddd6fe;border-left:4px solid var(--prof);border-radius:0 10px 10px 0}
+aside.prof h4{margin:0 0 8px;color:var(--prof);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+aside.prof p:last-child{margin-bottom:0}
+.conc{margin:0 0 18px;padding:0;list-style:none}
+.conc li{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin:0 0 7px;font-size:15px}
+.conc li::before{content:"◆";color:var(--accent);flex:0 0 auto;font-size:11px;line-height:1.7}
+.refl{padding:18px 20px;background:#fffdf5;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:0 10px 10px 0}
+.refl p:last-child{margin-bottom:0}
+
+.callout{padding:16px 20px;border-radius:10px;border:1px solid var(--line);background:#f8fafc;margin:0 0 18px}
+.callout.good{background:var(--ok-soft);border-color:#a7f3d0}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}
+.entrevista{font-family:var(--serif);font-size:17.5px;line-height:1.75;background:#fffdf7;border:1px solid #e8e0cc;border-radius:12px;padding:26px 30px;position:relative}
+.entrevista::before{content:"\201C";position:absolute;top:-6px;left:14px;font-size:72px;color:#e0d5b8;font-family:var(--serif);line-height:1}
+.entrevista p{margin:0 0 12px;padding-left:26px}
+.entrevista .quem{padding-left:26px;font-family:var(--sans);font-size:13px;color:var(--muted);font-style:normal}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 18px}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-family:var(--serif);font-size:30px;line-height:1.1;color:var(--accent)}
+.stat span{font-size:13px;color:var(--muted)}
+
+footer{padding:40px 44px 60px;color:var(--muted);font-size:13.5px;text-align:center}
+.top{position:fixed;right:22px;bottom:22px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-size:13px;cursor:pointer;opacity:.85;font-family:var(--sans)}
+.top:hover{opacity:1}
+
+@media (max-width:1020px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);max-height:280px}
+  main{padding:0 18px 80px}
+  .hero{margin:0 -18px 28px;padding:36px 18px 30px}
+  .hero h1{font-size:29px}
+  section.doc,.fase-head,.fase-body{padding-left:18px;padding-right:18px}
+}
+@media print{
+  .side,.top,.cb button{display:none}
+  .wrap{display:block}
+  body{background:#fff;font-size:11pt}
+  .hero{background:#fff;color:#000;margin:0;padding:0 0 20px;border-bottom:2px solid #000}
+  .hero .chip{border-color:#999;background:#f2f2f2;color:#000}
+  article.fase,section.doc{break-inside:avoid-page;box-shadow:none;border-color:#ccc}
+  .cb{border-color:#ccc}
+  .cb-bar{background:#eee}.cb-lang{color:#333}
+  .cb-note{color:#555}
+  .ln-new{font-weight:700;color:#000}
+  .cb-body,.cb-body code{background:#f7f7f7;color:#000}
+  .dl.add{background:#e6f7ee;color:#065f46}.dl.del{background:#fdeaea;color:#991b1b}
+}
+/* gerar-fases:inicio */
+/* tokens de código, pré-renderizados pelo gerador */
+.cb-body i{font-style:normal}
+.cb-body{--t-com:#64748b;--t-str:#86efac;--t-num:#fca5a5;--t-kw:#c4b5fd;
+  --t-typ:#7dd3fc;--t-fn:#fdba74;--t-pun:#94a3b8;--t-key:#93c5fd;
+  --t-cmd:#fdba74;--t-flag:#c4b5fd}
+.cb-out .cb-body{--t-com:#64748b;--t-str:#15803d;--t-num:#b91c1c;--t-kw:#6d28d9;
+  --t-typ:#0369a1;--t-fn:#b45309;--t-pun:#64748b;--t-key:#1d4ed8;
+  --t-cmd:#b45309;--t-flag:#6d28d9}
+.t-com{color:var(--t-com);font-style:italic}
+.t-str{color:var(--t-str)}
+.t-num{color:var(--t-num)}
+.t-kw{color:var(--t-kw)}
+.t-typ{color:var(--t-typ)}
+.t-fn{color:var(--t-fn)}
+.t-pun{color:var(--t-pun)}
+.t-key{color:var(--t-key)}
+.t-cmd{color:var(--t-cmd);font-weight:600}
+.t-flag{color:var(--t-flag)}
+
+/* linha que a fase acrescenta: negrito e fundo, por cima dos tokens.
+   inline-block com min-width leva o fundo até a margem direita do bloco, para a
+   marcação virar uma faixa e não um borrão do tamanho do texto */
+.ln-new{display:inline-block;min-width:100%;font-weight:700;color:inherit;
+  background:rgba(253,224,71,.13);box-shadow:inset 3px 0 0 #fde047}
+.cb-out .ln-new{background:rgba(180,83,9,.11);box-shadow:inset 3px 0 0 #b45309}
+
+/* objetivo, no lugar do lead curto da versão de sala */
+.step.objetivo > h3{color:var(--accent)}
+.step.objetivo p{margin:0 0 12px}
+.step.objetivo p:last-child{margin-bottom:0}
+/* gerar-fases:fim */.dl.ctx{color:#cbd5e1}
+kbd{font-family:var(--mono);font-size:.82em;background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:4px;padding:.05em .4em}
+.cb-bar .cb-note{margin-left:12px;margin-right:auto}
+/* dicas recolhíveis e barema */
+details.dica{margin:0 0 16px;border:1px solid #d7e3ff;border-radius:10px;background:#f8faff}
+details.dica > summary{cursor:pointer;padding:10px 16px;font-weight:700;font-size:14.5px;color:var(--accent);list-style:none}
+details.dica > summary::-webkit-details-marker{display:none}
+details.dica > summary::before{content:"▸";display:inline-block;width:16px;transition:transform .15s}
+details.dica[open] > summary::before{transform:rotate(90deg)}
+details.dica > .dica-body{padding:2px 18px 6px}
+td.pts,th.pts{text-align:right;white-space:nowrap;font-family:var(--mono)}
+tr.total td{font-weight:800;background:#f4f6f9}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side">
+<h2>Atividade</h2>
+<a href="#topo"><span class="num">•</span>Visão geral</a>
+<h2>Preparação</h2>
+<a href="#passo-00"><span class="num">00</span>Uma branch sua, no seu fork</a>
+<h2>O trabalho</h2>
+<a href="#passo-01"><span class="num">01</span>O que fazer</a>
+<a href="#passo-02"><span class="num">02</span>O que reaproveitar</a>
+<a href="#passo-03"><span class="num">03</span>pgvector em 15 minutos</a>
+<a href="#passo-04"><span class="num">04</span>Dicas, parte por parte</a>
+<a href="#passo-05"><span class="num">05</span>Armadilhas</a>
+<a href="#passo-06"><span class="num">06</span>Critérios de aceite</a>
+<a href="#passo-07"><span class="num">07</span>Veja funcionando</a>
+<h2>Fechamento</h2>
+<a href="#passo-08"><span class="num">08</span>Para discutir</a>
+<a href="#passo-09"><span class="num">09</span>Barema (20 pontos)</a>
+<a href="#passo-10"><span class="num">10</span>Entrega</a>
+<a href="#desafio"><span class="num">★</span>Desafio opcional</a>
+</nav>
+<main>
+<div class="hero">
+  <p class="kicker">Tópicos Especiais em Engenharia de Software II · IFES</p>
+  <h1>Atividade — busca semântica com pgvector</h1>
+  <p>Nos passos 04 a 08 da aula, a busca semântica de livros (UC24) guardou os vetores num índice HNSW do Redis. Nesta atividade, os vetores mudam de casa e vão para o próprio <strong>PostgreSQL</strong>, com a extensão <strong>pgvector</strong>. O embedder, o Gemini, o limiar, a rota e a página continuam os mesmos. Mudam o lugar onde os vetores ficam guardados e a consulta que encontra os vizinhos.</p>
+  <div class="chips"><span class="chip">UC24</span><span class="chip">pgvector</span><span class="chip">vector(N)</span><span class="chip">HNSW</span><span class="chip">&lt;=&gt; distância cosseno</span><span class="chip">ON DELETE CASCADE</span><span class="chip">20 pontos</span></div>
+</div>
+
+<div class="fase-body" id="topo">
+<div class="callout good"><strong>Este enunciado dá bastante dica.</strong> Ele não traz a solução, mas mostra cada peça do pgvector com exemplos de código em <em>domínios de brinquedo</em>: uma tabela <code>brinquedo</code> com vetores de 3 dimensões e uma tabela <code>filmes</code>. Encaixar essas peças no projeto da biblioteca é com você. As dicas mais detalhadas ficam fechadas: abra só quando travar.</div>
+<div class="tw"><table>
+<tr><th>Passo</th><th>O que acontece</th><th>Como saber que deu certo</th></tr>
+<tr><td>00</td><td>fork, branch nova e linha de base</td><td>suíte verde; anote o número de testes</td></tr>
+<tr><td>01–02</td><td>entender o escopo e o que se reaproveita</td><td>você sabe dizer quais arquivos mudam e quais ficam</td></tr>
+<tr><td>03</td><td>trocar a imagem do Postgres e testar o pgvector no <code>psql</code></td><td>o seu <code>EXPLAIN</code> mostra <code>Index Scan</code></td></tr>
+<tr><td>04–05</td><td>implementar, com as dicas e sem cair nas armadilhas</td><td>a busca responde pelo Postgres</td></tr>
+<tr><td>06</td><td>testes e critérios de aceite</td><td>suíte, tipos e fronteiras verdes</td></tr>
+<tr><td>07</td><td>ver no navegador, no <code>psql</code> e com o Redis parado</td><td>a busca semântica responde com o Redis desligado</td></tr>
+<tr><td>10</td><td>entregar</td><td>a branch no seu fork, no GitHub</td></tr>
+</table></div>
+</div>
+
+<!-- ============================================================ 00 -->
+<div class="fase-head" id="passo-00"><div class="fase-n">00</div><div class="fase-t"><h2>Uma branch sua, no seu fork</h2></div></div>
+<div class="fase-body">
+<p>É o mesmo ritual da atividade de cache. Se você já fez aquela, o fork e os remotos já estão prontos e você pode ir direto para <a href="#branch">a branch da atividade</a>.</p>
+
+<div class="step "><h3>Confira quem está autenticado</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c1">copiar</button></div></div><pre class="cb-body" id="c1"><code>gh auth status</code></pre></div>
+<p>Se não estiver autenticado, ou se a conta mostrada não for a sua, rode <code>gh auth login</code> (<em>GitHub.com</em>, <em>HTTPS</em>, <em>Login with a web browser</em>) e depois <code>gh auth setup-git</code>, para o <code>git push</code> usar essa mesma conta.</p>
+</div>
+
+<div class="step "><h3>O seu fork e os remotos</h3>
+<p>Ainda não tem o projeto no computador?</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c2">copiar</button></div></div><pre class="cb-body" id="c2"><code>gh repo fork maroquio/biblioteca-tutorial --clone
+cd biblioteca-tutorial</code></pre></div>
+<p>Já tem? Confira com <code>git remote -v</code>: <code>origin</code> precisa ser o <strong>seu</strong> fork e <code>upstream</code> o do professor. Se <code>origin</code> aponta para <code>maroquio</code>, rode <code>gh repo fork --remote</code>. Se falta o <code>upstream</code>, rode <code>git remote add upstream https://github.com/maroquio/biblioteca-tutorial.git</code>.</p>
+</div>
+
+<div class="step " id="branch"><h3>A branch da atividade</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c3">copiar</button></div></div><pre class="cb-body" id="c3"><code>git status
+git fetch upstream
+git switch -c atividade-pgvector upstream/saas-evolution/fase02</code></pre></div>
+<p>A branch sai de <code>upstream/saas-evolution/fase02</code> porque ali está a busca semântica com Redis completa, igual à do roteiro, até o passo 08. Ela é o ponto de partida e a referência desta atividade. Se o <code>git status</code> mostrar alterações sem commit, faça o commit delas na branch atual antes de trocar.</p>
+</div>
+
+<div class="step test"><h3>Confira a linha de base</h3>
+<p>Com o Docker Desktop aberto:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c4">copiar</button></div></div><pre class="cb-body" id="c4"><code>docker compose -f infra/compose.yaml up -d db redis
+docker compose -f infra/compose.yaml run --rm --build test</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c5"><code> N pass
+ 0 fail</code></pre></div>
+<p><strong>Anote o N.</strong> É a sua linha de base. No fim, alguns testes do Redis vão ser substituídos pelos seus, então o número muda, mas o <code>0 fail</code> não pode mudar. Se o banco de testes não existir, crie com <code>docker compose -f infra/compose.yaml exec db createdb -U biblioteca biblioteca_test</code>.</p>
+<p>Para ver a busca semântica de verdade no navegador (passo 07), você precisa da sua chave do Gemini em <code>infra/.env</code>, como na aula. <strong>Os testes não precisam dela</strong>: eles usam o embedder de hash.</p>
+</div>
+</div>
+
+<!-- ============================================================ 01 -->
+<div class="fase-head" id="passo-01"><div class="fase-n">01</div><div class="fase-t"><h2>O que fazer</h2></div></div>
+<div class="fase-body">
+<div class="lead"><p>Leve o armazenamento dos vetores da busca semântica (UC24) do Redis para o <strong>PostgreSQL com pgvector</strong>, sem mudar o contrato da API: <code>GET /api/busca-semantica/livros?q=</code> continua respondendo o mesmo JSON, com a mesma <code>distancia</code>, e a página <code>/livros/semantica</code> funciona sem nenhuma alteração.</p></div>
+
+<div class="step "><h3>Dentro do escopo</h3>
+<ul class="conc">
+<li><span>O serviço <code>db</code> do compose passa a ter a extensão pgvector.</span></li>
+<li><span>A aplicação cria a extensão <code>vector</code> sozinha, de forma idempotente, tanto no banco da aula quanto no de testes.</span></li>
+<li><span>Uma tabela de vetores dos livros, do módulo <strong>Acervo</strong>, com uma coluna <code>vector(N)</code> (N vem do embedder) e um índice <strong>HNSW</strong> com distância cosseno.</span></li>
+<li><span>Cadastrar, editar e excluir livro e renomear autor mantêm essa tabela em dia, <strong>depois do COMMIT</strong>, sem derrubar a escrita se o Gemini falhar.</span></li>
+<li><span>O seed e a subida do servidor reconciliam: livros sem vetor, ou com texto desatualizado, ganham vetor novo.</span></li>
+<li><span>Trocar de embedder (outro modelo ou outra dimensão) refaz a tabela, como o Redis refazia o índice.</span></li>
+<li><span>A busca acha os vizinhos com o operador <code>&lt;=&gt;</code> no Postgres, aplica o mesmo limiar <code>maxDistance</code> e responde o mesmo JSON, com 400 e 503 como antes.</span></li>
+<li><span>O Redis deixa de guardar o índice dos livros: a busca semântica funciona com o Redis parado.</span></li>
+<li><span>Testes automatizados para tudo isso.</span></li>
+</ul>
+</div>
+
+<div class="step "><h3>Fora do escopo</h3>
+<ul>
+<li><strong>O frontend</strong> não muda.</li>
+<li><strong>O embedder</strong> (<code>Embedder.ts</code>, <code>gemini.ts</code>, <code>hashEmbedder.ts</code>, <code>embedder.ts</code>) não muda.</li>
+<li><strong>O cache da busca de autores</strong> continua no Redis. O Redis não sai do projeto, só deixa de cuidar dos vetores.</li>
+<li><strong>O limiar</strong> continua 0,38 para o Gemini e 0,6 para o hash. O passo 02 explica por quê.</li>
+<li><strong>Busca híbrida</strong> (palavra-chave + vetor) fica para a discussão do passo 08.</li>
+</ul>
+</div>
+</div>
+
+<!-- ============================================================ 02 -->
+<div class="fase-head" id="passo-02"><div class="fase-n">02</div><div class="fase-t"><h2>O que reaproveitar</h2></div></div>
+<div class="fase-body">
+<p>A boa notícia: quase tudo o que a aula construiu continua valendo. O roteiro separou <em>quem calcula</em> o vetor (a porta <code>Embedder</code>) de <em>quem guarda</em> o vetor (o <code>bookIndex.ts</code>). Agora você troca só quem guarda. Leia a tabela com a pergunta: "este arquivo sabe que os vetores estão no Redis?"</p>
+
+<div class="step "><h3>Arquivo por arquivo</h3>
+<div class="tw"><table>
+<tr><th>Arquivo (em <code>backend/</code>)</th><th>Destino</th><th>Por quê</th></tr>
+<tr><td><code>src/shared/Embedder.ts</code></td><td>fica igual</td><td>A porta não sabe onde os vetores moram. O <code>id</code> e o <code>dimensions</code> vão ser ainda mais úteis agora.</td></tr>
+<tr><td><code>src/infrastructure/gemini.ts</code><br><code>…/hashEmbedder.ts</code><br><code>…/embedder.ts</code></td><td>ficam iguais</td><td>Continuam transformando textos em <code>Float32Array</code>.</td></tr>
+<tr><td><code>src/modules/catalog/infrastructure/bookIndex.ts</code></td><td><strong>a referência, e o centro da mudança</strong></td><td>Leia linha por linha. Cada função dele tem um equivalente no pgvector (veja a tabela seguinte). Você pode reescrever este arquivo ou criar um novo ao lado, por exemplo <code>bookVectors.ts</code>, e apagar o antigo.</td></tr>
+<tr><td><code>…/features/semantic-search-books/searchBooksSemantically.ts</code></td><td>muda pouco</td><td>A validação (400), o 503 sem embedder, o corte pelo limiar e a montagem com <code>toBookView</code> continuam. Sai o Redis (<code>ready</code>, <code>client</code>, <code>knnSearch</code>).</td></tr>
+<tr><td><code>…/semantic-search-books/route.ts</code> e <code>infrastructure/json.ts</code></td><td>ficam iguais</td><td>O contrato da API não muda.</td></tr>
+<tr><td><code>…/create-book/createBook.ts</code><br><code>…/update-book/updateBook.ts</code><br><code>…/delete-book/deleteBook.ts</code></td><td>muda no máximo o <code>import</code></td><td>A chamada de sincronização já está no lugar certo: <strong>depois</strong> do <code>inTransaction</code>.</td></tr>
+<tr><td><code>src/modules/catalog/index.ts</code></td><td>mantenha os nomes</td><td>Se a API pública continuar exportando <code>reconcileBookIndex</code> e <code>syncAuthorBookIndex</code>, quantos arquivos <em>fora</em> do módulo precisam mudar? (Resposta: nenhum. É para isso que serve a fronteira do módulo.)</td></tr>
+<tr><td><code>src/integration/derivedData.ts</code></td><td>releia</td><td>O <code>refreshDerivedData</code> continua necessário depois do seed. Mas releia o comentário de <code>refreshDerivedDataOnConnect</code>: reindexar os livros quando o <em>Redis</em> reconecta ainda faz sentido?</td></tr>
+<tr><td><code>src/modules/catalog/infrastructure/schema.ts</code></td><td>talvez</td><td>Um bom lugar para criar a extensão. A tabela fica para depois (passo 04).</td></tr>
+<tr><td><code>scripts/check-boundaries.ts</code></td><td>muda</td><td>A tabela nova tem dono: <code>TABLE_OWNERS</code>.</td></tr>
+<tr><td><code>infra/compose.yaml</code></td><td>muda</td><td>A imagem do <code>db</code>. Aproveite e corrija o comentário do Redis, que diz que ele guarda o índice da busca semântica.</td></tr>
+<tr><td><code>…/catalog/infrastructure/book-index.test.ts</code><br><code>…/catalog/infrastructure/knn-reply.test.ts</code></td><td>substituídos</td><td>Testam detalhes do Redis (o hash, o RESP2/RESP3). Os seus testes novos ocupam o lugar deles.</td></tr>
+<tr><td><code>…/semantic-search-books/semantic-search-books.test.ts</code></td><td><strong>não toque</strong></td><td>Ele só usa a API. Tem que passar <strong>sem mudar uma linha</strong>: é o seu teste de regressão.</td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>Do Redis para o pgvector, peça por peça</h3>
+<div class="tw"><table>
+<tr><th>No Redis (<code>bookIndex.ts</code>)</th><th>No pgvector</th></tr>
+<tr><td>Um hash por livro, <code>acervo:livro:&lt;id&gt;</code>, com os campos <code>texto</code> e <code>embedding</code></td><td>Uma linha por livro numa tabela, com uma coluna de texto e uma coluna <code>vector(N)</code></td></tr>
+<tr><td><code>FT.CREATE … VECTOR HNSW … DIM … DISTANCE_METRIC COSINE</code></td><td><code>CREATE INDEX … USING hnsw (coluna vector_cosine_ops)</code></td></tr>
+<tr><td>A chave <code>acervo:livros:modelo</code> lembra qual embedder criou o índice</td><td>Você decide como lembrar: uma coluna, uma tabelinha de metadados… (dica no passo 04)</td></tr>
+<tr><td><code>FT.DROPINDEX … DD</code> quando o modelo muda</td><td><code>DROP TABLE</code> e criar de novo com a dimensão nova</td></tr>
+<tr><td><code>HSET</code>, que cria ou atualiza</td><td><code>INSERT … ON CONFLICT … DO UPDATE</code> (o "upsert")</td></tr>
+<tr><td><code>DEL</code> quando o livro some do Postgres</td><td>Uma chave estrangeira com <code>ON DELETE CASCADE</code> faz isso por você, <strong>dentro</strong> da mesma transação do <code>DELETE</code></td></tr>
+<tr><td><code>HSTRLEN</code> para achar o vetor de tamanho errado, que o Redis recusa <em>calado</em></td><td>O pgvector recusa <em>alto</em>: <code>expected 768 dimensions, not 1024</code></td></tr>
+<tr><td><code>SCAN</code> das chaves para achar órfãos na reconciliação</td><td>Com a chave estrangeira, não existem órfãos. Só faltam livros sem vetor</td></tr>
+<tr><td><code>FT.SEARCH … KNN 10 @embedding $vetor</code> e o <code>parseKnnReply</code> (RESP2 e RESP3)</td><td><code>ORDER BY coluna &lt;=&gt; $1 LIMIT 10</code>. A distância chega como <code>number</code></td></tr>
+<tr><td>Buscar no Postgres os livros dos ids e descartar os excluídos</td><td>O livro excluído levou o vetor junto. Um <code>JOIN</code> com <code>livros</code> é opcional</td></tr>
+<tr><td>Redis reiniciado é índice vazio, e é preciso reconstruir (passo 07 da aula)</td><td>Os vetores ficam no volume do Postgres e sobrevivem a reinícios</td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>Por que o limiar não muda</h3>
+<p>No Redis, <code>DISTANCE_METRIC COSINE</code> devolve <strong>1 − cos(θ)</strong>. No pgvector, o operador <code>&lt;=&gt;</code> devolve exatamente a mesma coisa: <strong>1 − cos(θ)</strong>. Para os mesmos dois vetores, os dois bancos dão o mesmo número. O <code>maxDistance</code> de 0,38 que a turma calibrou no passo 08 continua valendo, e a página continua mostrando a similaridade como <code>1 − distancia</code>.</p>
+</div>
+</div>
+
+<!-- ============================================================ 03 -->
+<div class="fase-head" id="passo-03"><div class="fase-n">03</div><div class="fase-t"><h2>pgvector em 15 minutos</h2></div></div>
+<div class="fase-body">
+<p>Antes de mexer no projeto, brinque com o pgvector num banco descartável, com vetores de <strong>3 dimensões</strong>, pequenos o bastante para fazer a conta de cabeça. Tudo o que você vai precisar no projeto aparece aqui.</p>
+
+<div class="step "><h3>1. Troque a imagem do Postgres</h3>
+<p>O <code>postgres:18</code> oficial não traz o pgvector. A imagem <code>pgvector/pgvector:pg18</code> é o mesmo Postgres 18, com a extensão já compilada. Em <code>infra/compose.yaml</code>, no serviço <code>db</code>, troque <code>image: postgres:18</code> por <code>image: pgvector/pgvector:pg18</code>. Depois recrie o contêiner:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c6">copiar</button></div></div><pre class="cb-body" id="c6"><code>docker compose -f infra/compose.yaml up -d db</code></pre></div>
+<div class="callout"><strong>E os meus dados?</strong> Ficam. A versão do Postgres é a mesma (18) e o volume <code>pgdata</code> é o mesmo: o contêiner novo abre os arquivos do antigo. A extensão só existe num banco depois que alguém roda <code>CREATE EXTENSION</code> nele.</div>
+</div>
+
+<div class="step "><h3>2. Um banco de brinquedo</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c7">copiar</button></div></div><pre class="cb-body" id="c7"><code>docker compose -f infra/compose.yaml exec db createdb -U biblioteca brincadeira
+docker compose -f infra/compose.yaml exec db psql -U biblioteca -d brincadeira</code></pre></div>
+<p>Agora você está no <code>psql</code>. Ative a extensão e confira:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">psql</span><div class="cb-actions"><button class="cp" data-code="c8">copiar</button></div></div><pre class="cb-body" id="c8"><code>CREATE EXTENSION IF NOT EXISTS vector;
+\dx</code></pre></div>
+<p>Na lista de extensões aparece a linha <code>vector</code>, com a versão (0.8.1 ou mais nova) e a descrição <em>vector data type and ivfflat and hnsw access methods</em>.</p>
+</div>
+
+<div class="step "><h3>3. Uma tabela com vetores</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">psql</span><div class="cb-actions"><button class="cp" data-code="c10">copiar</button></div></div><pre class="cb-body" id="c10"><code>CREATE TABLE brinquedo (
+  id   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nome TEXT NOT NULL,
+  v    vector(3) NOT NULL          -- 3 dimensões; no projeto, N vem do embedder
+);
+
+-- o vetor entra como texto entre colchetes
+INSERT INTO brinquedo (nome, v) VALUES
+  ('gato',      '[0.9, 0.1, 0.0]'),
+  ('leão',      '[0.8, 0.2, 0.1]'),
+  ('geladeira', '[0.0, 0.1, 0.9]');</code></pre></div>
+<p>Pense na 1ª dimensão como "é um felino" e na 3ª como "é um eletrodoméstico". O Gemini faz algo parecido, só que com 768 dimensões que ninguém sabe nomear.</p>
+</div>
+
+<div class="step "><h3>4. Os vizinhos mais próximos</h3>
+<p>A consulta é o vetor <code>[1, 0, 0]</code>, "algo bem felino". Quem está mais perto?</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">psql</span><div class="cb-actions"><button class="cp" data-code="c11">copiar</button></div></div><pre class="cb-body" id="c11"><code>SELECT nome, round((v &lt;=&gt; '[1, 0, 0]')::numeric, 4) AS distancia
+FROM brinquedo
+ORDER BY v &lt;=&gt; '[1, 0, 0]'
+LIMIT 2;</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c12"><code> nome | distancia
+------+-----------
+ gato |    0.0061
+ leão |    0.0369</code></pre></div>
+<p>Repare no par <code>ORDER BY … LIMIT</code>: é a forma do KNN no SQL, e é ela que o índice HNSW sabe acelerar. O <code>round</code> é só para a saída ficar legível. No projeto você quer a distância inteira.</p>
+<div class="tw"><table>
+<tr><th>Operador</th><th>Mede</th><th>Classe de operadores do índice</th></tr>
+<tr><td><code>&lt;=&gt;</code></td><td>distância cosseno, 1 − cos(θ): <strong>a da aula</strong></td><td><code>vector_cosine_ops</code></td></tr>
+<tr><td><code>&lt;-&gt;</code></td><td>distância euclidiana (L2)</td><td><code>vector_l2_ops</code></td></tr>
+<tr><td><code>&lt;#&gt;</code></td><td>produto interno, com sinal trocado</td><td><code>vector_ip_ops</code></td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>5. A dimensão é verificada</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">psql</span><div class="cb-actions"><button class="cp" data-code="c13">copiar</button></div></div><pre class="cb-body" id="c13"><code>INSERT INTO brinquedo (nome, v) VALUES ('erro', '[1, 2]');
+SELECT nome, vector_dims(v) FROM brinquedo LIMIT 1;</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c14"><code>ERROR:  expected 3 dimensions, not 2
+ nome | vector_dims
+------+-------------
+ gato |           3</code></pre></div>
+<p>Compare com o Redis, que aceitava o <code>HSET</code> e simplesmente deixava o livro fora do índice. Por isso o <code>bookIndex.ts</code> precisava do <code>HSTRLEN</code>. Aqui o erro aparece na hora.</p>
+</div>
+
+<div class="step "><h3>6. O índice HNSW</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">psql</span><div class="cb-actions"><button class="cp" data-code="c15">copiar</button></div></div><pre class="cb-body" id="c15"><code>CREATE INDEX ON brinquedo USING hnsw (v vector_cosine_ops);
+
+-- com 3 linhas, o planejador prefere ler a tabela inteira (Seq Scan);
+-- desligar o Seq Scan só nesta sessão mostra que o índice PODE ser usado
+SET enable_seqscan = off;
+EXPLAIN SELECT nome FROM brinquedo ORDER BY v &lt;=&gt; '[1, 0, 0]' LIMIT 2;
+RESET enable_seqscan;</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada (trecho)</span></div><pre class="cb-body" id="c16"><code> Limit  (cost=…)
+   -&gt;  Index Scan using brinquedo_v_idx on brinquedo  (cost=…)
+         Order By: (v &lt;=&gt; '[1,0,0]'::vector)</code></pre></div>
+<p>Faça o teste ao contrário: troque o <code>&lt;=&gt;</code> do <code>EXPLAIN</code> por <code>&lt;-&gt;</code>. O índice deixa de ser usado, porque ele foi criado para a distância cosseno. <strong>Operador e classe de operadores precisam combinar.</strong></p>
+</div>
+
+<div class="step "><h3>7. Os vizinhos, mas só os próximos o bastante</h3>
+<p>O KNN sempre devolve <code>LIMIT</code> vizinhos, até para uma consulta sem relação nenhuma. Na aula, o corte pelo limiar era feito em TypeScript. No SQL, uma subconsulta resolve, e o índice continua trabalhando na consulta de dentro:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">psql</span><div class="cb-actions"><button class="cp" data-code="c17">copiar</button></div></div><pre class="cb-body" id="c17"><code>SELECT nome, distancia
+FROM (
+  SELECT nome, v &lt;=&gt; '[1, 0, 0]' AS distancia
+  FROM brinquedo
+  ORDER BY v &lt;=&gt; '[1, 0, 0]'
+  LIMIT 10
+) AS vizinhos
+WHERE distancia &lt;= 0.5;</code></pre></div>
+<p>Saem o gato e o leão. A geladeira, a uma distância de 1, fica de fora. As duas formas (filtrar no SQL ou no TypeScript) valem na atividade.</p>
+<div class="callout good"><strong>Checkpoint.</strong> Se o seu <code>EXPLAIN</code> mostrou <code>Index Scan</code>, você já sabe a maior parte do que precisa. Saia com <code>\q</code>. Se quiser, apague o banco de brinquedo com <code>docker compose -f infra/compose.yaml exec db dropdb -U biblioteca brincadeira</code>.</div>
+</div>
+</div>
+
+<!-- ============================================================ 04 -->
+<div class="fase-head" id="passo-04"><div class="fase-n">04</div><div class="fase-t"><h2>Dicas, parte por parte</h2></div></div>
+<div class="fase-body">
+<p>Uma ordem que funciona bem: extensão → tabela → gravar → reconciliar → buscar → fronteiras → limpar o Redis. Rode a suíte depois de cada parte. Os exemplos usam uma tabela <code>filmes</code> imaginária, com uma <code>filmes_vetores</code> ao lado: a forma é a mesma do projeto, os nomes e as decisões não.</p>
+
+<div class="step "><h3>4.1 A extensão</h3>
+<p>O <code>prepareDatabase()</code> (em <code>src/composition.ts</code>) roda quando o servidor sobe <strong>e</strong> quando a suíte de testes começa (veja <code>tests/api.ts</code>). Então, se o módulo Acervo criar a extensão no próprio <code>prepare</code>, os dois bancos (<code>biblioteca</code> e <code>biblioteca_test</code>) ficam cobertos. <code>CREATE EXTENSION IF NOT EXISTS</code> pode rodar quantas vezes for preciso.</p>
+<p>A extensão é instalada <strong>por banco</strong>, não por servidor. Ter rodado no <code>brincadeira</code> não vale para os outros.</p>
+</div>
+
+<div class="step "><h3>4.2 A tabela, e o problema da dimensão</h3>
+<p>A coluna precisa de uma dimensão fixa (<code>vector(N)</code>) para ganhar o índice HNSW. Só que N depende do embedder: <strong>1024</strong> na suíte (hash), <strong>768</strong> na aplicação (Gemini). E o embedder pode ser <code>null</code>, quando não há chave. Por isso a tabela não deve nascer no <code>prepare</code>, junto com as outras.</p>
+<p>A saída é a mesma do Redis: um <code>ensure</code> que recebe o embedder, cria a tabela e o índice se faltarem, recria tudo se o modelo mudou e diz se precisou criar (para disparar a reconciliação). Releia <code>ensureBookIndex</code> no <code>bookIndex.ts</code>: a lógica é a mesma, mudam os comandos.</p>
+
+<details class="dica"><summary>Dica: por que <code>${n}</code> não funciona dentro do CREATE TABLE</summary><div class="dica-body">
+<p>A <em>tagged template</em> <code>sql`…`</code> do Bun transforma cada <code>${…}</code> num parâmetro (<code>$1</code>, <code>$2</code>…). Isso protege contra SQL injection, mas o Postgres só aceita parâmetros onde vai um <em>valor</em>. Um tipo como <code>vector(768)</code> faz parte da estrutura do comando, então <code>vector($1)</code> dá erro de sintaxe. Para DDL com número variável, monte o texto e use <code>sql.unsafe</code>, mas só depois de garantir que o número é mesmo um número:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">ts</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c18">copiar</button></div></div><pre class="cb-body" id="c18"><code>// ❌ vira "... vector($1) ..." e o Postgres responde: syntax error at or near "$1"
+await sql`CREATE TABLE filmes_vetores (v vector(${dimensoes}))`;
+
+// ✅ "unsafe" porque o texto vai cru para o banco: valide antes
+async function criarTabelaDeFilmes(dimensoes: number): Promise&lt;void&gt; {
+  if (!Number.isInteger(dimensoes) || dimensoes &lt; 1 || dimensoes &gt; 2000) {
+    throw new Error(`Dimensão inválida: ${dimensoes}`);
+  }
+  await sql.unsafe(`
+    CREATE TABLE IF NOT EXISTS filmes_vetores (
+      filme_id INTEGER PRIMARY KEY,
+      v vector(${dimensoes}) NOT NULL
+    )`);
+}</code></pre></div>
+<p>Por que no máximo 2000? É o limite do índice HNSW para o tipo <code>vector</code>.</p>
+</div></details>
+
+<details class="dica"><summary>Dica: como lembrar qual embedder criou a tabela</summary><div class="dica-body">
+<p>Só a dimensão não basta. Dois modelos diferentes com 768 dimensões produzem vetores que não se comparam. Por isso o Redis guardava o <code>embedder.id</code> (modelo + dimensão), e você precisa guardá-lo também. Algumas opções, todas aceitas:</p>
+<ul>
+<li><strong>Uma coluna</strong> com o id do modelo em cada linha. Para saber se a tabela é de outro modelo, basta perguntar se existe alguma linha com id diferente. É a opção mais simples.</li>
+<li><strong>Uma tabelinha de metadados</strong> do módulo, com uma linha só (<code>modelo</code>).</li>
+<li><strong>Um comentário</strong> na tabela (<code>COMMENT ON TABLE … IS '…'</code>), lido com <code>obj_description</code>. É elegante, mas pouca gente conhece.</li>
+</ul>
+<p>Se quiser conferir a dimensão da coluna que já existe, o catálogo do Postgres responde:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c19">copiar</button></div></div><pre class="cb-body" id="c19"><code>SELECT format_type(atttypid, atttypmod) AS tipo
+FROM pg_attribute
+WHERE attrelid = to_regclass('filmes_vetores') AND attname = 'v';
+-- uma linha com tipo = 'vector(3)', ou nenhuma linha se a tabela não existe</code></pre></div>
+<p>Quando o modelo muda: <code>DROP TABLE</code>, criar de novo e devolver <code>true</code>, para quem chamou disparar a reconciliação, como o <code>syncBookIndex</code> já faz com o <code>created</code>.</p>
+</div></details>
+
+<details class="dica"><summary>Dica: a chave estrangeira</summary><div class="dica-body">
+<p>O vetor de um filme não faz sentido sem o filme. A tabela de vetores aponta para a tabela principal, e o <code>CASCADE</code> apaga o vetor junto:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c20">copiar</button></div></div><pre class="cb-body" id="c20"><code>filme_id INTEGER PRIMARY KEY REFERENCES filmes(id) ON DELETE CASCADE</code></pre></div>
+<p>A tabela de vetores e <code>livros</code> são do mesmo módulo (Acervo), então a chave estrangeira entre as duas é permitida. A regra "nada de chave estrangeira entre módulos" do <code>schema.ts</code> vale entre módulos <em>diferentes</em>. Leia também a armadilha 2 do passo 05.</p>
+</div></details>
+</div>
+
+<div class="step "><h3>4.3 Do <code>Float32Array</code> para o Postgres</h3>
+<p>O embedder devolve <code>Float32Array</code>. O pgvector aceita o formato de texto que você usou no <code>psql</code>, <code>'[0.9,0.1,0]'</code>, e o <code>::vector</code> converte o parâmetro:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">ts</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c21">copiar</button></div></div><pre class="cb-body" id="c21"><code>/** O formato de texto do pgvector: "[0.9,0.1,0]". */
+function comoTextoDoPgvector(vetor: Float32Array): string {
+  return `[${Array.from(vetor).join(",")}]`;
+}
+
+const consulta = comoTextoDoPgvector(new Float32Array([1, 0, 0]));
+const linhas = await sql`
+  SELECT nome, v &lt;=&gt; ${consulta}::vector AS distancia
+  FROM brinquedo
+  ORDER BY v &lt;=&gt; ${consulta}::vector
+  LIMIT 2
+` as { nome: string; distancia: number }[];
+// linhas[0] = { nome: "gato", distancia: 0.00611… }  ← já é number</code></pre></div>
+<p>Compare com o Redis, que pedia um <code>Buffer</code> binário de FLOAT32 e devolvia a distância como texto.</p>
+</div>
+
+<div class="step "><h3>4.4 Gravar, e só pagar o embedding quando o texto mudou</h3>
+<p>O <code>syncIds</code> do Redis já tem a lógica certa: monta o texto (<code>indexText</code>, título + autor), compara com o texto guardado e só chama o embedder para os que mudaram. Reaproveite isso. No Postgres, você pode buscar os textos guardados de <strong>todos</strong> os ids numa consulta só (com <code>IN ${sql(ids)}</code>, que o projeto já usa), em vez de um <code>HGET</code> por livro.</p>
+<p>Para gravar, o "upsert":</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">ts</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c22">copiar</button></div></div><pre class="cb-body" id="c22"><code>await sql`
+  INSERT INTO filmes_vetores (filme_id, sinopse, v)
+  VALUES (${filme.id}, ${filme.sinopse}, ${comoTextoDoPgvector(vetor)}::vector)
+  ON CONFLICT (filme_id) DO UPDATE
+    SET sinopse = EXCLUDED.sinopse, v = EXCLUDED.v
+`;</code></pre></div>
+<p><code>EXCLUDED</code> é "a linha que eu tentei inserir". Sem o <code>ON CONFLICT</code>, reindexar um livro que já tem vetor daria erro de chave primária duplicada.</p>
+<p>E o contrato de "nunca lança" do <code>syncBookIndex</code> continua: se o Gemini cair, a escrita do livro já aconteceu e não pode virar erro 500. O livro fica sem vetor até a próxima reconciliação.</p>
+</div>
+
+<div class="step "><h3>4.5 Excluir</h3>
+<p>Com <code>ON DELETE CASCADE</code>, o vetor some no mesmo <code>DELETE FROM livros</code>, na mesma transação. Pense nisto: o <code>deleteBook</code> ainda precisa chamar a sincronização depois do COMMIT? Não faz mal deixar a chamada lá, mas você deve saber explicar se ela ainda faz alguma coisa.</p>
+</div>
+
+<div class="step "><h3>4.6 Reconciliar</h3>
+<p>O que pode estar faltando agora? Livros <strong>sem linha</strong> de vetor (o seed escreve direto em <code>livros</code>; o Gemini estava fora do ar quando o livro foi cadastrado) e linhas com <strong>texto desatualizado</strong> (o autor foi renomeado enquanto o Gemini estava fora). Órfãos não existem mais: a chave estrangeira não deixa.</p>
+<p>O jeito mais simples reaproveita o que você já tem: passe <strong>todos</strong> os ids de <code>livros</code> para a sua função de sincronização, e a comparação de texto pula quem já está em dia. Se quiser ir direto aos que não têm vetor, um <code>LEFT JOIN</code> resolve:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c23">copiar</button></div></div><pre class="cb-body" id="c23"><code>-- filmes que ainda não têm vetor
+SELECT f.id
+FROM filmes f
+LEFT JOIN filmes_vetores fv ON fv.filme_id = f.id
+WHERE fv.filme_id IS NULL;</code></pre></div>
+<p>O <code>refreshDerivedData</code> já chama a reconciliação depois de todo seed. Se você mantiver o nome <code>reconcileBookIndex</code> no <code>index.ts</code> do Acervo, ele nem percebe a troca.</p>
+<p>Mas olhe com atenção o <code>src/main.ts</code>: na subida, quem dispara o <code>refreshDerivedData</code> é o <code>onconnect</code> do <strong>Redis</strong>. Se o Redis não subir, os vetores, que agora estão no Postgres, ficam sem reconciliar. Faz sentido a reconciliação dos vetores depender do Redis? Decida onde ela deve acontecer na subida (a pergunta 3 do passo 08 volta a esse assunto).</p>
+</div>
+
+<div class="step "><h3>4.7 A busca</h3>
+<ul>
+<li>A consulta do usuário vira vetor do mesmo jeito: <code>embedder.embed([q], "query")</code>. O <code>"query"</code> importa para o Gemini.</li>
+<li>O KNN é o par <code>ORDER BY coluna &lt;=&gt; vetor LIMIT n</code> do passo 03, com a <strong>expressão</strong> no <code>ORDER BY</code>, para o índice reconhecer.</li>
+<li>Se a sua função de vizinhos continuar devolvendo <code>{ id, distance }[]</code> (o tipo <code>KnnHit</code>), o resto de <code>searchBooksSemantically</code> fica praticamente igual: o corte pelo limiar, a busca dos livros por id e o <code>toBookView</code>.</li>
+<li>O que ainda pode dar 503? O embedder <code>null</code> e uma falha do Gemini. Mantenha o <code>try/catch</code> que transforma falha em <code>ServiceUnavailable</code>.</li>
+<li>O teste <code>UC24: sem embedder a busca é 503</code> passa <code>{ embedder: null }</code> nas opções. Pode tirar o <code>client</code> das opções, mas mantenha o <code>embedder</code>.</li>
+<li>Quando terminar, nenhum arquivo do caminho da busca semântica e da indexação deve importar <code>infrastructure/redis</code>.</li>
+</ul>
+</div>
+
+<div class="step "><h3>4.8 Fronteiras</h3>
+<p>Registre a tabela nova em <code>TABLE_OWNERS</code>, em <code>scripts/check-boundaries.ts</code>, com o dono <code>catalog</code>. Assim, se algum outro módulo tentar ler os vetores direto, o verificador reclama. Rode <code>bun run check-boundaries</code> na pasta <code>backend</code>.</p>
+</div>
+
+<div class="step "><h3>4.9 E o código do Redis?</h3>
+<p>Apague o <code>bookIndex.ts</code> e os dois testes dele (<code>book-index.test.ts</code> e <code>knn-reply.test.ts</code>). O Git e o roteiro da aula guardam a versão antiga. Se preferir manter as duas implementações, veja o <a href="#desafio">desafio opcional</a>. O que <strong>não</strong> vale é deixar as duas gravando ao mesmo tempo.</p>
+<p>O índice antigo continua dentro do Redis em execução. Como o Redis não tem volume, <code>docker compose -f infra/compose.yaml restart redis</code> limpa tudo, e o cache de autores se refaz sozinho.</p>
+</div>
+</div>
+
+<!-- ============================================================ 05 -->
+<div class="fase-head" id="passo-05"><div class="fase-n">05</div><div class="fase-t"><h2>Armadilhas</h2></div></div>
+<div class="fase-body">
+<p>Cada item abaixo já derrubou alguém. Leia antes de implementar e releia quando algo der errado.</p>
+
+<div class="step "><h3>1. Mesmo banco não quer dizer mesma transação</h3>
+<p>Agora que os vetores estão no Postgres, dá vontade de calcular o embedding <strong>dentro</strong> do <code>inTransaction</code> do <code>createBook</code>, "para ficar tudo atômico". Não faça isso. Abra <code>src/infrastructure/transaction.ts</code>: toda escrita pega o <code>pg_advisory_xact_lock(22001)</code>, o que significa que <strong>todas</strong> as escritas do sistema esperam na fila. Uma chamada ao Gemini (até 10 segundos de timeout) dentro da transação seguraria a biblioteca inteira, e uma falha do Gemini desfaria o cadastro do livro. O embedding continua <strong>depois do COMMIT</strong>, onde já está.</p>
+<div class="callout warn"><strong>Os testes não pegam este erro.</strong> A suíte usa o embedder de hash, que responde na hora e nunca falha. Confira a posição da chamada <strong>lendo o código</strong>.</div>
+</div>
+
+<div class="step "><h3>2. Chave estrangeira sem CASCADE quebra a suíte</h3>
+<p><code>tests/clean-catalog.ts</code> e <code>src/integration/seed/seed.test.ts</code> fazem <code>DELETE FROM livros</code> direto. Sem <code>ON DELETE CASCADE</code>, esse <code>DELETE</code> falha com <code>violates foreign key constraint</code> assim que existir um vetor, e testes que não têm nada a ver com a busca semântica ficam vermelhos.</p>
+</div>
+
+<div class="step "><h3>3. A dimensão não é parâmetro</h3>
+<p><code>vector(${n})</code> dentro de <code>sql`…`</code> vira <code>vector($1)</code>: <code>syntax error at or near "$1"</code>. Veja a dica do 4.2.</p>
+</div>
+
+<div class="step "><h3>4. Trocar de embedder num teste afeta todos os outros</h3>
+<p>Os testes compartilham o banco <code>biblioteca_test</code>. Um teste que chama a sincronização com <code>createHashEmbedder(512)</code>, para provar que a troca de modelo refaz a tabela, <strong>apaga a tabela de 1024 dimensões</strong> que os outros testes usam. No fim desse teste, devolva o banco ao estado anterior: reconcilie com o embedder padrão e espere (<code>await</code>) terminar.</p>
+<p>Pelo mesmo motivo, um embedder "quebrado" para testar falhas deve copiar o <code>id</code> e o <code>dimensions</code> do embedder padrão. Senão o seu <code>ensure</code> acha que o modelo mudou e recria a tabela:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">ts</span><span class="cb-note">exemplo didático</span><div class="cb-actions"><button class="cp" data-code="c24">copiar</button></div></div><pre class="cb-body" id="c24"><code>const base = createHashEmbedder();
+
+// mesmo id e mesma dimensão, mas o embed sempre falha
+const foraDoAr: Embedder = { ...base, embed: async () =&gt; { throw new Error("fora do ar"); } };
+
+// mesmo id e mesma dimensão, mas conta quantas vezes foi chamado
+let chamadas = 0;
+const contador: Embedder = { ...base, embed: (textos, uso) =&gt; { chamadas++; return base.embed(textos, uso); } };</code></pre></div>
+</div>
+
+<div class="step "><h3>5. "O índice não está sendo usado!"</h3>
+<p>Com poucos livros, o planejador do Postgres prefere ler a tabela inteira (<code>Seq Scan</code>), porque é mais barato que percorrer o grafo do HNSW. Isso não é erro. Para provar que o índice <em>pode</em> ser usado, use o <code>SET enable_seqscan = off</code> do passo 03, só na sua sessão do <code>psql</code>. Se mesmo assim aparecer <code>Seq Scan</code>, confira se o operador da consulta combina com a classe de operadores do índice (<code>&lt;=&gt;</code> com <code>vector_cosine_ops</code>) e se o <code>ORDER BY</code> usa a expressão, e não outra coisa.</p>
+</div>
+
+<div class="step "><h3>6. A imagem velha</h3>
+<p>Mudar o <code>compose.yaml</code> não troca o contêiner que já está rodando. Se aparecer <code>extension "vector" is not available</code>, rode <code>docker compose -f infra/compose.yaml up -d db</code> e confira a coluna <code>IMAGE</code> em <code>docker compose -f infra/compose.yaml ps</code>.</p>
+</div>
+</div>
+
+<!-- ============================================================ 06 -->
+<div class="fase-head" id="passo-06"><div class="fase-n">06</div><div class="fase-t"><h2>Critérios de aceite</h2></div></div>
+<div class="fase-body">
+<p>A atividade está pronta quando todos os itens abaixo valem. Os de comportamento precisam estar cobertos por <strong>testes seus</strong>, num arquivo novo dentro de <code>src/modules/catalog/</code> (por exemplo, <code>infrastructure/book-vectors.test.ts</code>). Use <code>book-index.test.ts</code> como modelo: ele cria livros pela API com <code>testAuthor</code> e <code>testIsbn</code>, e você pode ler a sua tabela com <code>sql</code> direto no teste.</p>
+
+<div class="step "><h3>Comportamento</h3>
+<ul class="conc">
+<li><span>Cadastrar um livro grava uma linha com o texto <code>"Título — Autor"</code> e um vetor da dimensão do embedder (<code>vector_dims</code>).</span></li>
+<li><span>Editar o título atualiza o texto e o vetor.</span></li>
+<li><span>Excluir o livro remove a linha.</span></li>
+<li><span>Renomear o autor atualiza o texto dos livros dele.</span></li>
+<li><span>Um livro inserido direto com SQL, como faz o seed, ganha vetor depois da reconciliação.</span></li>
+<li><span>Sincronizar de novo um livro com o texto igual <strong>não</strong> chama o embedder (o embedder contador da armadilha 4).</span></li>
+<li><span>Com um embedder que falha, a sincronização não lança, e o cadastro do livro não falha.</span></li>
+<li><span>Um embedder de outra dimensão refaz a tabela: a coluna passa a ter a dimensão nova, e os livros voltam a ter vetor.</span></li>
+<li><span><code>semantic-search-books.test.ts</code> passa <strong>sem alteração nenhuma</strong>: ranking, limiar, livro excluído, 400 e 503.</span></li>
+</ul>
+</div>
+
+<div class="step "><h3>Arquitetura</h3>
+<ul class="conc">
+<li><span>A tabela de vetores pertence ao Acervo, está em <code>TABLE_OWNERS</code> e tem chave estrangeira para <code>livros</code> com <code>ON DELETE CASCADE</code>.</span></li>
+<li><span>O índice é HNSW com <code>vector_cosine_ops</code>, e a busca usa <code>&lt;=&gt;</code> com <code>ORDER BY … LIMIT</code>.</span></li>
+<li><span>O embedding é calculado <strong>depois</strong> do COMMIT, nunca dentro do <code>inTransaction</code> (confira lendo o código).</span></li>
+<li><span>Nenhum arquivo da indexação ou da busca semântica importa o Redis, e o Redis não guarda mais vetores de livros.</span></li>
+<li><span>Nenhum arquivo fora do Acervo precisou importar arquivos internos dele. O ideal é que <code>src/integration/</code> nem mude.</span></li>
+</ul>
+</div>
+
+<div class="step test"><h3>Verifique</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c25">copiar</button></div></div><pre class="cb-body" id="c25"><code>cd backend
+bun run check-boundaries
+bun run typecheck
+cd ..
+docker compose -f infra/compose.yaml run --rm --build test</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c26"><code>Fronteiras de módulo respeitadas.
+...
+ N − (testes do Redis removidos) + (os seus testes) pass
+ 0 fail</code></pre></div>
+<p>Não avance com teste vermelho. Se um teste que não é seu falhar, releia as armadilhas 2 e 4.</p>
+</div>
+</div>
+
+<!-- ============================================================ 07 -->
+<div class="fase-head" id="passo-07"><div class="fase-n">07</div><div class="fase-t"><h2>Veja funcionando</h2></div></div>
+<div class="fase-body">
+<div class="step "><h3>No navegador</h3>
+<p>Com a sua chave em <code>infra/.env</code>:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c27">copiar</button></div></div><pre class="cb-body" id="c27"><code>docker compose -f infra/compose.yaml up -d --build app</code></pre></div>
+<p>O servidor sobe, cria a extensão e reconcilia os livros, e você vê a contagem no log (<code>docker compose -f infra/compose.yaml logs app</code>). Se o banco da aula ainda não tem os 50 livros, gere-os em <a href="http://localhost:3000/livros/seed">/livros/seed</a>. Depois abra <a href="http://localhost:3000/livros/semantica">/livros/semantica</a> e repita as buscas do passo 08 da aula ("mistério e assassinato", "vingança", "aventura no mar"). Os resultados e as similaridades devem ser os mesmos de quando os vetores estavam no Redis.</p>
+</div>
+
+<div class="step "><h3>Dentro do Postgres</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c28">copiar</button></div></div><pre class="cb-body" id="c28"><code>docker compose -f infra/compose.yaml exec db psql -U biblioteca -d biblioteca</code></pre></div>
+<p>Explore com <code>\dx</code>, <code>\d &lt;sua tabela&gt;</code> (aparecem a coluna <code>vector(768)</code>, a chave estrangeira e o índice <code>hnsw</code>), um <code>SELECT count(*)</code> comparado com o de <code>livros</code>, e um <code>SELECT … vector_dims(…) … LIMIT 5</code>. Por fim, pegue o vetor de um livro e procure os vizinhos dele, <strong>sem chamar o Gemini</strong>:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">sql</span><span class="cb-note">adapte aos nomes que você escolheu</span><div class="cb-actions"><button class="cp" data-code="c29">copiar</button></div></div><pre class="cb-body" id="c29"><code>-- "livros parecidos com o livro 1", direto no banco
+SELECT l.titulo, round((v.coluna_do_vetor &lt;=&gt; alvo.coluna_do_vetor)::numeric, 3) AS distancia
+FROM sua_tabela v
+JOIN livros l ON l.id = v.livro_id
+CROSS JOIN (SELECT coluna_do_vetor FROM sua_tabela WHERE livro_id = 1) AS alvo
+ORDER BY v.coluna_do_vetor &lt;=&gt; alvo.coluna_do_vetor
+LIMIT 5;</code></pre></div>
+<p>Com o Redis, essa consulta exigiria dois comandos e um programa no meio. Guarde a ideia para a pergunta 1 do passo 08.</p>
+</div>
+
+<div class="step "><h3>Com o Redis parado</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c30">copiar</button></div></div><pre class="cb-body" id="c30"><code>docker compose -f infra/compose.yaml stop redis</code></pre></div>
+<p>Busque de novo em <code>/livros/semantica</code>: continua funcionando. A busca de autores responde <code>X-Cache: BYPASS</code>, mas também funciona. Antes desta atividade, a busca semântica respondia 503 nesta situação. Suba o Redis de novo com <code>start redis</code>.</p>
+</div>
+</div>
+
+<!-- ============================================================ 08 -->
+<div class="fase-head" id="passo-08"><div class="fase-n">08</div><div class="fase-t"><h2>Para discutir</h2></div></div>
+<div class="fase-body">
+<div class="step "><h3>Responda na descrição do commit, ou leve para a discussão em sala</h3>
+<div class="refl">
+<p><strong>1. Redis ou pgvector?</strong> Liste o que o projeto ganhou com a mudança (fonte única da verdade, <code>CASCADE</code>, <code>JOIN</code>, backup, nada a reconstruir quando o Redis reinicia…) e o que perdeu ou pode perder (carga no banco principal, latência, escalar a busca separadamente…). Em que tamanho de acervo, ou em que tráfego, você voltaria a pensar num banco vetorial separado?</p>
+<p><strong>2. Por que não dentro da transação?</strong> Explique com as suas palavras a armadilha 1. Existe algum jeito de ter o vetor "sempre em dia" sem chamar o Gemini dentro da transação? (Pense em fila, em <code>outbox</code>, em reconciliação periódica.)</p>
+<p><strong>3. O passo 07 da aula ainda vale?</strong> O <code>refreshDerivedDataOnConnect</code> reindexava os livros quando o Redis voltava. Depois da sua mudança, o que ainda precisa acontecer quando o Redis reconecta?</p>
+<p><strong>4. Aproximado.</strong> O HNSW é um índice <em>aproximado</em>: ele pode, em tese, deixar de fora um vizinho que a busca exata (o <code>Seq Scan</code>) encontraria. Com 50 livros, isso importa? E com 5 milhões? Pesquise o parâmetro <code>hnsw.ef_search</code>.</p>
+<p><strong>5. Filtros.</strong> Como você faria "livros parecidos com <em>mistério</em>, mas só os que têm exemplar disponível" no pgvector? E no Redis? Qual dos dois fica mais natural, sabendo que exemplares e empréstimos já estão no Postgres?</p>
+</div>
+</div>
+</div>
+
+<!-- ============================================================ 09 -->
+<div class="fase-head" id="passo-09"><div class="fase-n">09</div><div class="fase-t"><h2>Barema (20 pontos)</h2></div></div>
+<div class="fase-body">
+<div class="tw"><table>
+<tr><th>Item</th><th>O que é avaliado</th><th class="pts">Pontos</th></tr>
+<tr><td>Infraestrutura</td><td>Imagem com pgvector; extensão criada pela aplicação, idempotente, nos dois bancos.</td><td class="pts">2</td></tr>
+<tr><td>Esquema</td><td>Tabela do Acervo com <code>vector(N)</code> vindo do embedder; chave estrangeira com <code>CASCADE</code>; índice HNSW com <code>vector_cosine_ops</code>; dono em <code>TABLE_OWNERS</code>.</td><td class="pts">4</td></tr>
+<tr><td>Indexação</td><td>Cadastrar, editar, excluir e renomear autor mantêm a tabela em dia; embedding depois do COMMIT; só reembeda quando o texto muda; falha do embedder não derruba a escrita.</td><td class="pts">4</td></tr>
+<tr><td>Reconciliação e troca de modelo</td><td>Livros sem vetor (seed) são indexados; trocar o embedder refaz a tabela e reindexa.</td><td class="pts">3</td></tr>
+<tr><td>Busca</td><td>KNN no Postgres com <code>&lt;=&gt;</code> e <code>ORDER BY … LIMIT</code>; limiar aplicado; mesmo JSON; 400 e 503 preservados; sem Redis no caminho.</td><td class="pts">4</td></tr>
+<tr><td>Testes</td><td><code>semantic-search-books.test.ts</code> intacto e verde; testes novos cobrindo os critérios de comportamento; suíte, <code>typecheck</code> e <code>check-boundaries</code> verdes.</td><td class="pts">3</td></tr>
+<tr class="total"><td colspan="2">Total</td><td class="pts">20</td></tr>
+</table></div>
+<p>As perguntas do passo 08 não valem nota separada, mas são a melhor preparação para a arguição.</p>
+</div>
+
+<!-- ============================================================ 10 -->
+<div class="fase-head" id="passo-10"><div class="fase-n">10</div><div class="fase-t"><h2>Entrega</h2></div></div>
+<div class="fase-body">
+<div class="step commit"><h3>Commit e push</h3>
+<p>Na raiz do projeto. Confira no <code>git status</code> que entram só os arquivos da atividade (o <code>infra/.env</code> com a sua chave <strong>não</strong> pode aparecer):</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c31">copiar</button></div></div><pre class="cb-body" id="c31"><code>git status
+git add -A
+git commit -m "feat: mover o índice da busca semântica do Redis para o pgvector"
+git push -u origin atividade-pgvector</code></pre></div>
+<p>Pode (e deve) fazer vários commits ao longo do caminho, um por parte do passo 04. O que conta é a branch no fim.</p>
+</div>
+
+<div class="step "><h3>O link da entrega</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c32">copiar</button></div></div><pre class="cb-body" id="c32"><code>gh browse --no-browser --repo seu-usuario/biblioteca-tutorial --branch atividade-pgvector</code></pre></div>
+<p>Troque <code>seu-usuario</code> pelo usuário que o <code>gh auth status</code> mostrou. Abra o link para conferir que o código está lá e envie-o ao professor.</p>
+</div>
+
+<div class="step "><h3>Problemas comuns</h3>
+<div class="tw"><table>
+<tr><th>Sintoma</th><th>Causa e solução</th></tr>
+<tr><td><code>extension "vector" is not available</code> ou <code>could not open extension control file</code></td><td>O contêiner <code>db</code> ainda roda a imagem antiga. Armadilha 6.</td></tr>
+<tr><td><code>type "vector" does not exist</code></td><td>A extensão não foi criada <em>neste</em> banco (o de testes?), ou a tabela foi criada antes dela.</td></tr>
+<tr><td><code>syntax error at or near "$1"</code></td><td>Parâmetro dentro de DDL. Armadilha 3.</td></tr>
+<tr><td><code>expected 768 dimensions, not 1024</code></td><td>A tabela foi criada por outro embedder, e o seu <code>ensure</code> não a refez. Dica do 4.2.</td></tr>
+<tr><td><code>violates foreign key constraint</code> em testes que não são seus</td><td>Falta <code>ON DELETE CASCADE</code>. Armadilha 2.</td></tr>
+<tr><td>Testes da busca semântica falham só quando rodam junto com os seus</td><td>Algum teste seu trocou o embedder e não restaurou a tabela. Armadilha 4.</td></tr>
+<tr><td>A busca sempre responde 503 na aplicação</td><td>Falta a <code>GEMINI_API_KEY</code> em <code>infra/.env</code>, ou o app subiu antes de você criar o arquivo. Rode <code>up -d --build app</code> de novo.</td></tr>
+<tr><td><code>EXPLAIN</code> mostra <code>Seq Scan</code></td><td>Normal com poucos livros. Armadilha 5.</td></tr>
+<tr><td><code>fatal: invalid reference: upstream/saas-evolution/fase02</code></td><td>Faltou o <code>git fetch upstream</code>.</td></tr>
+<tr><td><code>Cannot connect to the Docker daemon</code></td><td>O Docker Desktop não está aberto.</td></tr>
+</table></div>
+</div>
+</div>
+
+<!-- ============================================================ desafio -->
+<div class="fase-head" id="desafio"><div class="fase-n">★</div><div class="fase-t"><h2>Desafio opcional: as duas implementações atrás de uma porta</h2></div></div>
+<div class="fase-body">
+<p>Não vale ponto extra, mas é o melhor treino de portas e adaptadores do semestre. Em vez de apagar o Redis, crie uma porta, por exemplo <code>BookVectorStore</code>, com as operações que a busca e a indexação usam (algo como sincronizar ids, reconciliar e achar os vizinhos de um vetor), e dois adaptadores: o do Redis (o <code>bookIndex.ts</code> de hoje, quase sem mudança) e o seu, do pgvector. Uma variável de ambiente, como <code>VECTOR_STORE=pgvector|redis</code>, escolhe qual usar, como <code>EMBEDDING_PROVIDER</code> escolhe o embedder em <code>embedder.ts</code>.</p>
+<p>O teste que mostra que deu certo: <strong>a mesma bateria de testes</strong> rodando contra os dois adaptadores, com o mesmo resultado. Se você conseguir, responda também: o que precisou entrar na porta que você não esperava?</p>
+</div>
+
+<footer>Biblioteca — atividade da fase 02 da evolução SaaS · busca semântica com pgvector</footer>
+</main>
+</div>
+<button class="top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ topo</button>
+<script>
+document.addEventListener("click", (e) => {
+  const cp = e.target.closest(".cp");
+  if (cp) {
+    const el = document.getElementById(cp.dataset.code);
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      const t = cp.textContent; cp.textContent = "copiado!"; cp.classList.add("done");
+      setTimeout(() => { cp.textContent = t; cp.classList.remove("done"); }, 1400);
+    });
+  }
+});
+</script>
+</body>
+</html>

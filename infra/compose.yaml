@@ -1,0 +1,69 @@
+name: biblioteca-tutorial
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    environment:
+      # dentro da rede do compose, o banco atende pelo nome do serviço: db
+      DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca
+      # e o Redis, pelo nome redis; o prefixo separa as chaves da aplicação das dos testes
+      REDIS_URL: redis://redis:6379
+      REDIS_PREFIX: biblioteca
+      # vem de infra/.env (copie infra/.env.example); vazia, a busca semântica fica indisponível
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # a suíte de testes, rodando dentro da rede e contra o banco de testes:
+  # docker compose -f infra/compose.yaml run --rm --build test
+  test:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    command: ["bun", "test"]
+    environment:
+      DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca_test
+      REDIS_URL: redis://redis:6379
+      REDIS_PREFIX: biblioteca_test
+      # embeddings determinísticos, sem rede e sem chave: a suíte nunca chama o Gemini
+      EMBEDDING_PROVIDER: hash
+      GEMINI_API_KEY: ""
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # com um profile, o "docker compose -f infra/compose.yaml up" não sobe este serviço
+    profiles: ["test"]
+
+  db:
+    image: pgvector/pgvector:pg18
+    environment:
+      POSTGRES_USER: biblioteca
+      POSTGRES_PASSWORD: biblioteca
+      POSTGRES_DB: biblioteca
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U biblioteca -d biblioteca"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  redis:
+    image: redis:8
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pgdata:

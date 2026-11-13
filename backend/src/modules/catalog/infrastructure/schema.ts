@@ -61,8 +61,24 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
+/**
+ * UC24: o tipo `vector` e o índice HNSW vêm da extensão pgvector, que é
+ * instalada por banco, não por servidor. O prepare roda na subida do servidor e
+ * no começo da suíte, então os dois bancos (biblioteca e biblioteca_test) ficam
+ * cobertos. IF NOT EXISTS torna o comando idempotente, e o lock das escritas
+ * evita que dois processos subindo juntos tentem instalá-la ao mesmo tempo.
+ * A tabela dos vetores não nasce aqui: a dimensão dela depende do embedder
+ * (veja ensureBookIndex em bookVectors.ts).
+ */
+async function createVectorExtension(): Promise<void> {
+  await inTransaction(async (tx) => {
+    await tx`CREATE EXTENSION IF NOT EXISTS vector`;
+  });
+}
+
+/** Prepara o Acervo: a extensão pgvector, livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await createVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

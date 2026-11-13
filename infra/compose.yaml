@@ -44,7 +44,10 @@ services:
     profiles: ["test"]
 
   db:
-    image: postgres:18
+    # o mesmo Postgres 18 do postgres:18 oficial, com a extensão pgvector já
+    # compilada (tipo vector e índice HNSW, usados pela busca semântica UC24);
+    # a aplicação roda o CREATE EXTENSION em cada banco ao subir
+    image: pgvector/pgvector:pg18
     environment:
       POSTGRES_USER: biblioteca
       POSTGRES_PASSWORD: biblioteca

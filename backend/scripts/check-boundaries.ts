@@ -8,6 +8,7 @@ const problems: string[] = [];
 const TABLE_OWNERS: Record<string, string> = {
   livros: "catalog",
   livros_vetores: "catalog",
+  livros_vetores_configuracao: "catalog",
   exemplares: "catalog",
   acervo_sequencias: "catalog",
   autores: "authorship",

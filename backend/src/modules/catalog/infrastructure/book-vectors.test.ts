@@ -5,7 +5,7 @@ import { sql } from "../../../infrastructure/postgres";
 import { catalogIntegration } from "../../../integration/catalogIntegration";
 import type { Embedder } from "../../../shared/Embedder";
 import { reconcileBookIndex } from "../index";
-import { syncBookIndex } from "./bookIndex";
+import { ensureBookIndex, syncBookIndex } from "./bookVectors";
 
 type VectorRow = { text: string; dimensions: number; embedding: string; model: string };
 
@@ -139,4 +139,10 @@ test("UC24 pgvector: esquema tem cascade e HNSW por distância cosseno", async (
 
   expect(constraint?.delete_action).toBe("c");
   expect(index?.indexdef).toContain("vector_cosine_ops");
+});
+
+test("UC24 pgvector: recusa dimensão inválida antes de montar o DDL", async () => {
+  await expect(ensureBookIndex({ ...createHashEmbedder(), dimensions: 0 })).rejects.toThrow(
+    "Dimensão inválida para pgvector: 0",
+  );
 });

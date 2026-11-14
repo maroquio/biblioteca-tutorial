@@ -44,7 +44,10 @@ services:
     profiles: ["test"]
 
   db:
-    image: postgres:18
+    # o mesmo Postgres 18 (Debian trixie, como o postgres:18), com a extensão pgvector
+    # já compilada (busca semântica, UC24). A variante trixie mantém a mesma glibc da
+    # imagem oficial: com a pg18 (bookworm) o volume antigo acusa collation version mismatch
+    image: pgvector/pgvector:pg18-trixie
     environment:
       POSTGRES_USER: biblioteca
       POSTGRES_PASSWORD: biblioteca
@@ -61,9 +64,10 @@ services:
       timeout: 3s
       retries: 15
 
-  # Redis 8: cache e índice da busca semântica. Sem "ports" e sem volume de
-  # propósito: ele só guarda dados derivados. Se o contêiner sumir, o servidor
-  # reconstrói tudo a partir do Postgres, que continua sendo a fonte da verdade.
+  # Redis 8: cache da busca de autores. Sem "ports" e sem volume de propósito:
+  # ele só guarda dados derivados. Se o contêiner sumir, o cache se refaz a partir
+  # do Postgres, que continua sendo a fonte da verdade. Os vetores da busca
+  # semântica moram no próprio Postgres (pgvector), não aqui.
   redis:
     image: redis:8
     healthcheck:

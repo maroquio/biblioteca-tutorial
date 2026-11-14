@@ -1,7 +1,7 @@
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { RuleConflict } from "../../../../shared/errors";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { syncBookIndex } from "../../infrastructure/bookIndex";
+import { syncBookIndex } from "../../infrastructure/bookVectors";
 import { findBook } from "../../infrastructure/books";
 
 export async function deleteBook(id: number, integration: CatalogIntegration): Promise<void> {
@@ -21,6 +21,7 @@ export async function deleteBook(id: number, integration: CatalogIntegration): P
     return book;
   });
   await integration.bookCountsChanged([book.authorId]);
-  // o livro não existe mais no Postgres: syncBookIndex o remove do índice
+  // o ON DELETE CASCADE já removeu o vetor na mesma transação do DELETE: aqui não
+  // sobra nada a fazer, mas a chamada mantém o padrão "efeitos derivados depois do COMMIT"
   await syncBookIndex([id], integration);
 }

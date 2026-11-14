@@ -126,6 +126,20 @@ test("UC24 pgvector: mudar modelo ou dimensão recria e repovoa a tabela", async
   expect((await vectorRow(book.id))?.dimensions).toBe(standard.dimensions);
 });
 
+test("UC24 pgvector: mudar o modelo com a mesma dimensão também recria a tabela", async () => {
+  const standard = createHashEmbedder();
+  const author = await testAuthor();
+  const book = await createBook(`Modelo ${crypto.randomUUID().slice(0, 8)}`, author.id);
+  const alternative: Embedder = { ...standard, id: `${standard.id}-alternativo` };
+  try {
+    expect((await reconcileBookIndex(catalogIntegration, alternative)).indexed).toBeGreaterThan(0);
+    expect((await vectorRow(book.id))?.model).toBe(alternative.id);
+  } finally {
+    await reconcileBookIndex(catalogIntegration, standard);
+  }
+  expect((await vectorRow(book.id))?.model).toBe(standard.id);
+});
+
 test("UC24 pgvector: esquema tem cascade e HNSW por distância cosseno", async () => {
   const [constraint] = await sql`
     SELECT confdeltype AS delete_action

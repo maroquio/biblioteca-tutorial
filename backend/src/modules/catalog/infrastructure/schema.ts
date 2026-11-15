@@ -2,6 +2,14 @@ import { sql } from "../../../infrastructure/postgres";
 import { inTransaction } from "../../../infrastructure/transaction";
 
 /**
+ * pgvector: o tipo `vector` e o índice HNSW da busca semântica. A extensão é
+ * instalada por banco, e o prepare roda tanto no da aula quanto no de testes.
+ */
+async function createVectorExtension(): Promise<void> {
+  await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+}
+
+/**
  * A mesma tabela `livros` do SQLite, na sintaxe do Postgres. `autor_id`
  * continua sendo só um inteiro: nada de chave estrangeira entre módulos.
  */
@@ -61,8 +69,13 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
+/**
+ * Prepara o Acervo: a extensão vector, livros, a migração de UC01 e os
+ * exemplares de UC13, nesta ordem. A tabela dos vetores fica de fora: a
+ * dimensão dela depende do embedder (veja ensureBookIndex em bookVectors.ts).
+ */
 export async function prepareCatalog(): Promise<void> {
+  await createVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

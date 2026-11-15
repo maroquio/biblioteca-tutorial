@@ -21,6 +21,6 @@ export async function deleteBook(id: number, integration: CatalogIntegration): P
     return book;
   });
   await integration.bookCountsChanged([book.authorId]);
-  // o livro não existe mais no Postgres: syncBookIndex o remove do índice
+  // ON DELETE CASCADE já remove o vetor junto com o livro.
   await syncBookIndex([id], integration);
 }

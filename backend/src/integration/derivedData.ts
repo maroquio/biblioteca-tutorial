@@ -11,8 +11,9 @@ import { catalogIntegration } from "./catalogIntegration";
  */
 export async function refreshDerivedData(): Promise<void> {
   await invalidateAuthorSearch();
-  const { indexed, removed } = await reconcileBookIndex(catalogIntegration);
-  console.log(`Índice semântico: ${indexed} livro(s) indexado(s), ${removed} removido(s)`);
+  // os vetores saem junto com o livro (CASCADE): a reconciliação só indexa, nunca remove
+  const { indexed } = await reconcileBookIndex(catalogIntegration);
+  console.log(`Busca semântica: ${indexed} livro(s) indexado(s)`);
 }
 
 /**

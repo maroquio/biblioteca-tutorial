@@ -1,21 +1,40 @@
+
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { civilDate } from "../../../../shared/dates";
 import type { BookInput, BookView } from "../../domain/Book";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { syncBookIndex } from "../../infrastructure/bookIndex";
+import { syncBookVectors } from "../../infrastructure/bookVectors";
 import { checkBookRules, findBook, toBookView, type BookRow } from "../../infrastructure/books";
 
 export async function updateBook(id: number, input: BookInput, integration: CatalogIntegration, now = new Date()): Promise<BookView> {
   let authorIds: number[] = [];
+
   const book = await inTransaction(async (tx) => {
     const previous = await findBook(tx, id);
+
     authorIds = [previous.authorId, input.authorId];
+
     await checkBookRules(tx, input, integration, id);
-    const [row] = await tx`UPDATE livros SET isbn = ${input.isbn}, titulo = ${input.title}, autor_id = ${input.authorId} WHERE id = ${id} RETURNING id, isbn, titulo AS title, autor_id AS "authorId", data_catalogacao AS "catalogedOn"` as BookRow[];
+
+    const [row] = await tx`
+      UPDATE livros
+      SET isbn = ${input.isbn},
+          titulo = ${input.title},
+          autor_id = ${input.authorId}
+      WHERE id = ${id}
+      RETURNING id, isbn, titulo AS title, autor_id AS "authorId", data_catalogacao AS "catalogedOn"
+    ` as BookRow[];
+
     await integration.syncAuthorBookCounts(tx, authorIds);
+
     return toBookView(tx, row!, integration, civilDate(now));
   });
+
+  // Efeitos derivados somente depois do COMMIT.
   await integration.bookCountsChanged(authorIds);
-  await syncBookIndex([id], integration);
+
+  // Atualiza o vetor do livro no PostgreSQL.
+  await syncBookVectors([id], integration);
+
   return book;
 }

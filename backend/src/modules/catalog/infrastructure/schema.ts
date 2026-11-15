@@ -1,10 +1,20 @@
 import { sql } from "../../../infrastructure/postgres";
 import { inTransaction } from "../../../infrastructure/transaction";
 
+
+/**
+ * Garante que a extensão pgvector esteja disponível no banco.
+ */
+async function prepareVectorExtension(): Promise<void> {
+  await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+}
+
+
 /**
  * A mesma tabela `livros` do SQLite, na sintaxe do Postgres. `autor_id`
  * continua sendo só um inteiro: nada de chave estrangeira entre módulos.
  */
+
 async function createBooksTable(): Promise<void> {
   await sql`
     CREATE TABLE IF NOT EXISTS livros (
@@ -63,6 +73,7 @@ async function prepareCopies(): Promise<void> {
 
 /** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await prepareVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

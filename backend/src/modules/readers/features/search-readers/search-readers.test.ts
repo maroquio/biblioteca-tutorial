@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { parseReaderInput } from "../../domain/Reader";
 import { SearchReaders } from "./SearchReaders";
 import { ana, bruno, InMemoryReaderRepository } from "#tests/reader-doubles";
-import { api } from "#tests/api";
+import { api, testName } from "#tests/api";
 import { testReader } from "#tests/reader-fixtures";
 
 type ReaderJson = Awaited<ReturnType<typeof testReader>>;

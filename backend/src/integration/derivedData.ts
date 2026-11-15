@@ -4,6 +4,11 @@ import { invalidateAuthorSearch } from "../modules/authorship";
 import { reconcileBookIndex } from "../modules/catalog";
 import { catalogIntegration } from "./catalogIntegration";
 
+export async function refreshBookVectors(): Promise<void> {
+  const { indexed } = await reconcileBookIndex(catalogIntegration);
+  console.log(`Índice semântico: ${indexed} livro(s) indexado(s)`);
+}
+
 /**
  * Os dados derivados do Redis podem ter ficado para trás: o servidor esteve
  * parado enquanto o banco mudou, ou o seed escreveu direto nas tabelas.
@@ -11,8 +16,7 @@ import { catalogIntegration } from "./catalogIntegration";
  */
 export async function refreshDerivedData(): Promise<void> {
   await invalidateAuthorSearch();
-  const { indexed, removed } = await reconcileBookIndex(catalogIntegration);
-  console.log(`Índice semântico: ${indexed} livro(s) indexado(s), ${removed} removido(s)`);
+  await refreshBookVectors();
 }
 
 /**
@@ -20,7 +24,7 @@ export async function refreshDerivedData(): Promise<void> {
  * conseguiram invalidar o cache nem indexar livros. Por isso cada conexão (a
  * primeira e cada reconexão automática) recalcula os dados derivados.
  */
-export function refreshDerivedDataOnConnect(client: RedisClient | null = redis, refresh = refreshDerivedData): void {
+export function refreshDerivedDataOnConnect(client: RedisClient | null = redis, refresh: () => Promise<void> = invalidateAuthorSearch): void {
   if (!client) return;
   client.onconnect = () => { void refresh(); };
 }

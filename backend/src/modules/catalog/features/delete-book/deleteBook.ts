@@ -1,7 +1,6 @@
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { RuleConflict } from "../../../../shared/errors";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { syncBookIndex } from "../../infrastructure/bookIndex";
 import { findBook } from "../../infrastructure/books";
 
 export async function deleteBook(id: number, integration: CatalogIntegration): Promise<void> {
@@ -21,6 +20,6 @@ export async function deleteBook(id: number, integration: CatalogIntegration): P
     return book;
   });
   await integration.bookCountsChanged([book.authorId]);
-  // o livro não existe mais no Postgres: syncBookIndex o remove do índice
-  await syncBookIndex([id], integration);
+  // o vetor do livro foi embora no mesmo DELETE: a chave estrangeira com ON DELETE CASCADE
+  // o apaga dentro da transação, então não há nada para sincronizar depois do COMMIT
 }

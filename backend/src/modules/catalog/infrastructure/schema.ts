@@ -1,6 +1,12 @@
 import { sql } from "../../../infrastructure/postgres";
 import { inTransaction } from "../../../infrastructure/transaction";
 
+async function createVectorExtension(): Promise<void> {
+  await inTransaction(async (tx) => {
+    await tx`CREATE EXTENSION IF NOT EXISTS vector`;
+  });
+}
+
 /**
  * A mesma tabela `livros` do SQLite, na sintaxe do Postgres. `autor_id`
  * continua sendo só um inteiro: nada de chave estrangeira entre módulos.
@@ -63,6 +69,7 @@ async function prepareCopies(): Promise<void> {
 
 /** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await createVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

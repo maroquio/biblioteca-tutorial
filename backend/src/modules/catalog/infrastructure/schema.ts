@@ -61,8 +61,22 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
+/**
+ * A extensão pgvector (tipo `vector`, operador `<=>`, índice HNSW) é instalada por
+ * banco, não por servidor: vale para o banco da aula e para o de testes, que passam
+ * os dois por aqui. Idempotente, e sob o lock das escritas para o servidor e o
+ * seed não disputarem a criação. A tabela de vetores não nasce aqui: a dimensão
+ * depende do embedder (veja bookVectors.ts).
+ */
+async function prepareVectorExtension(): Promise<void> {
+  await inTransaction(async (tx) => {
+    await tx`CREATE EXTENSION IF NOT EXISTS vector`;
+  });
+}
+
+/** Prepara o Acervo: a extensão pgvector, as tabelas de livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await prepareVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

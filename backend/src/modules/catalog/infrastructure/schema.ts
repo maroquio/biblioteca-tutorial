@@ -61,8 +61,15 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
+async function enablePgVectorExtension(): Promise<void> {
+  await inTransaction(async (tx) => {
+    await tx`CREATE EXTENSION IF NOT EXISTS vector`;
+  });
+}
+
 /** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await enablePgVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

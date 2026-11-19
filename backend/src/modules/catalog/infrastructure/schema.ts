@@ -1,5 +1,6 @@
 import { sql } from "../../../infrastructure/postgres";
 import { inTransaction } from "../../../infrastructure/transaction";
+import { ensureVectorExtension } from "./bookVectors";
 
 /**
  * A mesma tabela `livros` do SQLite, na sintaxe do Postgres. `autor_id`
@@ -61,9 +62,13 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
+/**
+ * Prepara o Acervo: livros, a migração de UC01, os exemplares de UC13 e a extensão
+ * pgvector. A tabela de vetores fica de fora: a dimensão depende do embedder (ensureBookVectors).
+ */
 export async function prepareCatalog(): Promise<void> {
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();
+  await ensureVectorExtension();
 }

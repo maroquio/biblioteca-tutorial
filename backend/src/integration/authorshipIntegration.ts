@@ -1,5 +1,5 @@
 import type { AuthorshipIntegration } from "../modules/authorship";
-import { syncAuthorBookIndex } from "../modules/catalog";
+import { syncAuthorBookVectors } from "../modules/catalog";
 import { catalogIntegration } from "./catalogIntegration";
 
 export const authorshipIntegration: AuthorshipIntegration = {
@@ -9,6 +9,6 @@ export const authorshipIntegration: AuthorshipIntegration = {
   },
   async authorChanged(authorId) {
     // o nome do autor está no texto indexado de cada livro dele
-    await syncAuthorBookIndex(authorId, catalogIntegration);
+    await syncAuthorBookVectors(authorId, catalogIntegration);
   },
 };

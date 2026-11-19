@@ -2,7 +2,7 @@ import { inTransaction } from "../../../../infrastructure/transaction";
 import { civilDate } from "../../../../shared/dates";
 import type { BookInput, BookView } from "../../domain/Book";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { syncBookIndex } from "../../infrastructure/bookIndex";
+import { syncBookVectors } from "../../infrastructure/bookVectors";
 import { checkBookRules, findBook, toBookView, type BookRow } from "../../infrastructure/books";
 
 export async function updateBook(id: number, input: BookInput, integration: CatalogIntegration, now = new Date()): Promise<BookView> {
@@ -16,6 +16,6 @@ export async function updateBook(id: number, input: BookInput, integration: Cata
     return toBookView(tx, row!, integration, civilDate(now));
   });
   await integration.bookCountsChanged(authorIds);
-  await syncBookIndex([id], integration);
+  await syncBookVectors([id], integration);
   return book;
 }

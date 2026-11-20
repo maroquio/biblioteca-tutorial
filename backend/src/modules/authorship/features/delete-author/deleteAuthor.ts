@@ -1,7 +1,9 @@
+import { discardObject } from "../../../../infrastructure/storage";
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { RuleConflict } from "../../../../shared/errors";
 import type { AuthorshipIntegration } from "../../domain/AuthorshipIntegration";
 import { findAuthor } from "../../infrastructure/authors";
+import { photoKey } from "../../infrastructure/photos";
 import { invalidateAuthorSearch } from "../../infrastructure/searchCache";
 
 export async function deleteAuthor(id: number, integration: AuthorshipIntegration): Promise<void> {
@@ -11,6 +13,7 @@ export async function deleteAuthor(id: number, integration: AuthorshipIntegratio
     await tx`DELETE FROM autores WHERE id = ${id}`;
   });
   await invalidateAuthorSearch();
-  // TODO (atividade, UC26): depois do COMMIT, descarte a foto do autor no bucket,
-  // como deleteBook faz com a capa (discardObject e photoKey).
+  // o autor já saiu do Postgres: a foto não tem mais dono. Uma falha aqui vira
+  // aviso no log, nunca um erro para quem excluiu
+  await discardObject(photoKey(id));
 }

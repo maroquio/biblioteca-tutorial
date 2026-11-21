@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { createRedis, ready } from "../infrastructure/redis";
 import { refreshDerivedDataOnConnect } from "./derivedData";
 
-test("cada conexão ao Redis recalcula os dados derivados", async () => {
+test("cada conexão ao Redis dispara a invalidação do cache de autores", async () => {
   const client = createRedis(process.env.REDIS_URL!);
   let refreshes = 0;
   refreshDerivedDataOnConnect(client, async () => { refreshes++; });

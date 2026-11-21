@@ -1,7 +1,9 @@
+import { discardObject } from "../../../../infrastructure/storage";
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { RuleConflict } from "../../../../shared/errors";
 import type { AuthorshipIntegration } from "../../domain/AuthorshipIntegration";
 import { findAuthor } from "../../infrastructure/authors";
+import { photoKey } from "../../infrastructure/photos";
 import { invalidateAuthorSearch } from "../../infrastructure/searchCache";
 
 export async function deleteAuthor(id: number, integration: AuthorshipIntegration): Promise<void> {
@@ -11,6 +13,8 @@ export async function deleteAuthor(id: number, integration: AuthorshipIntegratio
     await tx`DELETE FROM autores WHERE id = ${id}`;
   });
   await invalidateAuthorSearch();
-  // TODO (atividade, UC26): depois do COMMIT, descarte a foto do autor no bucket,
-  // como deleteBook faz com a capa (discardObject e photoKey).
+  // UC26: só depois do COMMIT a foto sai do bucket. Um autor recusado (409) não
+  // chega aqui e mantém a foto; e, como discardObject nunca lança erro, uma falha
+  // do RustFS só deixa um objeto órfão, sem transformar a exclusão já feita em 503.
+  await discardObject(photoKey(id));
 }

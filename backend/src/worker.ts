@@ -1,6 +1,7 @@
 import { queue, work } from "./infrastructure/queue";
 import { catalogIntegration } from "./integration/catalogIntegration";
 import { bookIndexJob } from "./modules/catalog";
+import { loanReceiptJob } from "./modules/circulation";
 
 /**
  * O worker: o mesmo código da aplicação, com outro ponto de entrada. Não abre
@@ -15,5 +16,5 @@ console.log(`Worker ${consumer} esperando tarefas`);
 
 // TODO (atividade): registre aqui também a tarefa do comprovante do empréstimo
 // (loanReceiptJob), que chega pelo index.ts do módulo Circulação.
-await work([bookIndexJob(catalogIntegration)], { client: queue, consumer });
+await work([bookIndexJob(catalogIntegration), loanReceiptJob()], { client: queue, consumer });
 process.exit(0);

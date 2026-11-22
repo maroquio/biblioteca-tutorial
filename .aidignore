@@ -1,0 +1,14 @@
+# Material didático, não é código da aplicação
+.docs/
+.lesson-bridge/
+.playwright-mcp/
+
+# Dados locais (sqlite, csv)
+data/
+
+# Saída do próprio ai-distiller
+.aid/
+
+# Testes e scripts de verificação
+tests/
+scripts/

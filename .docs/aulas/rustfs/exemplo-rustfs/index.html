@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fotos no RustFS</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; color: #111827; }
+  form { display: flex; gap: 12px; align-items: center; padding: 16px; border: 1px dashed #94a3b8; border-radius: 12px; }
+  #erro { color: #b91c1c; min-height: 1.5em; }
+  ul { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  li { border: 1px solid #e5e7eb; border-radius: 12px; padding: 8px; font-size: 12px; word-break: break-all; }
+  img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: #f1f5f9; }
+  button { cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Fotos no RustFS</h1>
+<form id="envio">
+  <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" required>
+  <button type="submit">Enviar</button>
+</form>
+<p id="erro"></p>
+<ul id="fotos"></ul>
+<script>
+  const list = document.querySelector("#fotos");
+  const error = document.querySelector("#erro");
+
+  async function load() {
+    const photos = await (await fetch("/fotos")).json();
+    list.innerHTML = "";
+    for (const { chave, bytes } of photos) {
+      const name = chave.slice("fotos/".length);
+      const item = document.createElement("li");
+      item.innerHTML = `<img alt="" src="/fotos/${name}"><p>${chave}<br>${bytes} bytes</p><button>Excluir</button>`;
+      item.querySelector("button").onclick = async () => { await fetch(`/fotos/${name}`, { method: "DELETE" }); load(); };
+      list.append(item);
+    }
+  }
+
+  document.querySelector("#envio").onsubmit = async (event) => {
+    event.preventDefault();
+    error.textContent = "";
+    // FormData monta o corpo multipart/form-data; o navegador escolhe a fronteira
+    const response = await fetch("/fotos", { method: "POST", body: new FormData(event.target) });
+    if (!response.ok) error.textContent = (await response.json()).error;
+    event.target.reset();
+    load();
+  };
+
+  load();
+</script>
+</body>
+</html>

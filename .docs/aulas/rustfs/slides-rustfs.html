@@ -1,0 +1,2250 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Armazenamento de objetos com RustFS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪣</text></svg>">
+<style>
+:root{
+  --paper:#f6f3ec; --paper-2:#ece6d8; --card:#fffdf8; --ink:#14161c; --muted:#4f5763; --line:#d6cfbf;
+  --blue:#1d4ed8; --blue-2:#1e3a8a; --blue-soft:#e2eaff;
+  --amber:#a64b07; --amber-2:#f59e0b; --amber-soft:#fcefd6;
+  --green:#047857; --green-2:#10b981; --green-soft:#d9f3e7;
+  --red:#b91c1c; --red-2:#ef4444; --red-soft:#fde3e3;
+  --violet:#6d28d9; --violet-soft:#ede7ff;
+  --code-bg:#0f172a; --code-ink:#e6edf7;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"SF Mono",SFMono-Regular,ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#20232a;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;margin:-360px 0 0 -640px;background:var(--paper);overflow:hidden;transform-origin:center center;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+#stage::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(20,22,28,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(20,22,28,.035) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
+
+/* slides */
+.slide{position:absolute;inset:0;padding:50px 72px 70px;opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s linear .45s}
+.slide.active{opacity:1;visibility:visible;transition:opacity .45s ease}
+.slide > .kicker{font:700 15px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin:0}
+.slide > h2{font-family:var(--serif);font-size:46px;line-height:1.08;margin:12px 0 24px;font-weight:700;letter-spacing:-.01em;max-width:1100px}
+.slide p,.slide li{font-size:26px;line-height:1.38;margin:0}
+.lead{font-size:29px!important;line-height:1.4!important;max-width:1060px}
+.muted{color:var(--muted)}
+.small{font-size:21px!important}
+.tiny{font-size:17px!important}
+.mono{font-family:var(--mono)}
+.serif{font-family:var(--serif)}
+b,strong{font-weight:700}
+em{font-style:normal;color:var(--blue);font-weight:700}
+.hl-amber{background:linear-gradient(transparent 58%,#fcd9a0 58%)}
+.hl-blue{background:linear-gradient(transparent 58%,#c7d6ff 58%)}
+code{font-family:var(--mono);font-size:.86em;background:#e9e3d4;border:1px solid #d9d0bc;border-radius:6px;padding:.04em .32em}
+
+/* layout helpers */
+.row{display:flex;gap:28px;align-items:stretch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:start}
+.split-r{display:grid;grid-template-columns:.9fr 1.1fr;gap:36px;align-items:start}
+.row > *,.grid2 > *,.grid3 > *,.grid4 > *,.split > *,.split-r > *{min-width:0}
+.stack{display:flex;flex-direction:column;gap:14px}
+.center{text-align:center}
+.mt{margin-top:22px!important}.mt2{margin-top:34px!important}.mb{margin-bottom:18px!important}
+
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:0 1px 0 rgba(20,22,28,.04)}
+.card h3{font-family:var(--serif);font-size:28px;margin:0 0 8px;line-height:1.15}
+.card p,.card li{font-size:22px;line-height:1.36}
+.card.blue{background:var(--blue-soft);border-color:#b9c9f5}
+.card.amber{background:var(--amber-soft);border-color:#efcf95}
+.card.green{background:var(--green-soft);border-color:#a8dcc4}
+.card.red{background:var(--red-soft);border-color:#f2b8b8}
+.card.violet{background:var(--violet-soft);border-color:#cfc1f7}
+.card.dark{background:#14161c;color:#f4f1ea;border-color:#14161c}
+
+ul.clean{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+ul.clean li{position:relative;padding-left:40px}
+ul.clean li::before{position:absolute;left:0;top:.08em;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 17px/1 var(--sans);color:#fff;background:var(--blue);content:"•"}
+ul.clean li.ok::before{content:"✓";background:var(--green)}
+ul.clean li.bad::before{content:"✕";background:var(--red)}
+ul.clean li.q::before{content:"?";background:var(--amber)}
+ul.clean li.arrow::before{content:"→";background:var(--ink)}
+ol.steps{list-style:none;counter-reset:st;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+ol.steps li{counter-increment:st;position:relative;padding-left:52px}
+ol.steps li::before{content:counter(st);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 19px/1 var(--mono)}
+
+.callout{border-left:8px solid var(--amber-2);background:var(--amber-soft);border-radius:0 16px 16px 0;padding:16px 22px;font-size:24px;line-height:1.38}
+.callout.blue{border-color:var(--blue);background:var(--blue-soft)}
+.callout.green{border-color:var(--green);background:var(--green-soft)}
+.callout.red{border-color:var(--red);background:var(--red-soft)}
+.banner{background:var(--ink);color:#fff;border-radius:18px;padding:22px 28px;font-family:var(--serif);font-size:34px;line-height:1.2}
+.banner em{color:#ffd28a}
+
+.pill{display:inline-block;border-radius:999px;padding:4px 14px;font:700 16px/1.4 var(--sans);letter-spacing:.04em;background:var(--ink);color:#fff;vertical-align:middle}
+.pill.blue{background:var(--blue)}.pill.green{background:var(--green)}.pill.red{background:var(--red)}.pill.amber{background:var(--amber)}.pill.violet{background:var(--violet)}
+.pill.line{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+/* a "etiqueta de bagagem": é assim que desenhamos uma chave */
+.tag{display:inline-flex;align-items:center;gap:10px;font:600 .92em/1.2 var(--mono);background:var(--amber-soft);color:#5b2a03;border:2px solid #d99a3e;border-radius:6px 14px 14px 6px;padding:5px 14px 5px 10px;white-space:nowrap}
+.tag::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid #d99a3e;flex:none}
+.hex{display:inline-flex;gap:6px;flex-wrap:wrap}
+.hex b{font:700 22px/1 var(--mono);padding:9px 8px;border-radius:8px;background:#fff;border:1.5px solid var(--line);min-width:44px;text-align:center}
+.hex b.m{background:#14161c;color:#ffd28a;border-color:#14161c}
+.hex b.dim{color:#9aa1ab}
+
+table.tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:22px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;overflow:hidden}
+.tbl th,.tbl td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.3}
+.tbl th{background:var(--paper-2);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:#3b414b}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.k{font-weight:700;white-space:nowrap}
+
+/* HTTP e terminal em cartões monoespaçados */
+.msg{font:20px/1.45 var(--mono);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px 18px;white-space:pre;overflow:hidden}
+.msg .m{color:var(--blue);font-weight:700}.msg .h{color:#7c3aed}.msg .s2{color:var(--green);font-weight:700}.msg .s4{color:var(--red);font-weight:700}.msg .c{color:#8a8f98}
+.term{font:19px/1.5 var(--mono);background:#14161c;color:#e7e2d6;border-radius:14px;padding:16px 20px;white-space:pre-wrap;overflow-wrap:anywhere;overflow:hidden}
+.term .p{color:#7dd3fc}.term .o{color:#a8b0bc}.term .g{color:#86efac}.term .r{color:#fca5a5}.term .y{color:#fcd34d}
+
+/* blocos de código: realce feito por um script pequeno, mais abaixo */
+pre.code{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:16px;padding:16px 0;font:19px/1.52 var(--mono);overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.18)}
+pre.code.big{font-size:22px}
+pre.code.sm{font-size:17px}
+pre.code .l{display:block;padding:0 22px 0 66px;position:relative;white-space:pre;transition:opacity .3s,background .3s}
+pre.code .l::before{content:attr(data-n);position:absolute;left:0;width:48px;text-align:right;color:#56627a;font-size:.85em}
+pre.code.nonum .l{padding-left:24px}
+pre.code.nonum .l::before{content:none}
+pre.code.focus .l{opacity:.28}
+pre.code.focus .l.on{opacity:1;background:rgba(96,165,250,.16);box-shadow:inset 4px 0 0 #60a5fa}
+.tk-k{color:#c4b5fd}.tk-s{color:#86efac}.tk-c{color:#8796ad;font-style:italic}.tk-n{color:#fdba74}.tk-f{color:#93c5fd}.tk-t{color:#fcd34d}.tk-a{color:#f9a8d4}.tk-g{color:#7dd3fc}.tk-x{color:#fca5a5}
+.codecap{font:600 15px/1 var(--mono);color:var(--muted);margin:0 0 8px 4px;letter-spacing:.02em}
+
+/* fragmentos: um passo de cada vez */
+.frag{opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease}
+.frag.on{opacity:1;transform:none}
+.frag.only{display:none}
+svg .frag{transform:none}
+i.frag.step,i.frag.hl{display:none}
+.frag.dimafter.on.past{opacity:.35}
+
+/* SVG */
+svg{display:block;overflow:visible}
+/* herdado, e não aplicado direto no <text>: assim o atributo fill/font do próprio texto ou do <g> vence */
+svg{font-family:var(--sans);fill:var(--ink)}
+svg .t-mono{font-family:var(--mono)}
+svg .t-serif{font-family:var(--serif)}
+svg .box{fill:#fff;stroke:#1f2430;stroke-width:2.5}
+svg .box.soft{fill:var(--card);stroke:var(--line)}
+svg .wire{fill:none;stroke:#1f2430;stroke-width:2.5}
+svg .dash{fill:none;stroke:#8b8f98;stroke-width:2.5;stroke-dasharray:8 8}
+svg .draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .9s ease}
+svg .mv{transition:transform 1s cubic-bezier(.6,.05,.3,1),opacity .4s}
+.loop{animation-iteration-count:infinite}
+
+/* moldura: progresso e contador */
+#chrome{position:absolute;left:0;right:0;bottom:0;height:46px;display:flex;align-items:center;justify-content:flex-start;gap:22px;padding:0 30px 4px;font:600 15px/1 var(--sans);color:var(--muted);z-index:5;pointer-events:none}
+#chrome .part{letter-spacing:.08em;text-transform:uppercase}
+#chrome .count{font-family:var(--mono);order:-1}
+/* o contador fica à esquerda; o canto direito é dos botões de navegação */
+#progress{position:absolute;left:0;bottom:0;height:5px;background:var(--blue);transition:width .4s ease;z-index:6}
+#nav{position:fixed;right:16px;bottom:14px;display:flex;gap:8px;z-index:20;opacity:.25;transition:opacity .2s}
+#nav:hover{opacity:1}
+#nav button{font:700 15px/1 var(--sans);border:0;border-radius:10px;padding:9px 12px;background:#f6f3ec;color:#14161c;cursor:pointer}
+
+/* visão geral (tecla O) */
+#overview{position:fixed;inset:0;background:#12141a;z-index:30;display:none;overflow:auto;padding:34px 40px}
+#overview.open{display:block}
+#overview h1{font:700 26px/1 var(--serif);color:#fff;margin:0 0 6px}
+#overview p{color:#b9bec7;font:15px/1.4 var(--sans);margin:0 0 22px}
+#overview .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+#overview a{display:block;text-decoration:none;background:#2a2e37;border-radius:12px;padding:12px 14px;color:#f1eee6;border:2px solid transparent;min-height:92px}
+#overview a:hover,#overview a.cur{border-color:#60a5fa}
+#overview a small{display:block;font:600 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#93a3bd;margin-bottom:6px}
+#overview a span{font:600 16px/1.3 var(--sans)}
+#overview a i{font-style:normal;font-family:var(--mono);color:#ffd28a;margin-right:6px}
+
+/* notas na própria página (Shift+N ou quando o navegador bloqueia a janela) */
+.slide aside.notes{display:none!important}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:40vh;overflow:auto;background:#fffdf5;border-top:4px solid var(--amber-2);z-index:25;padding:16px 26px;font:18px/1.5 var(--sans);display:none}
+#notes.open{display:block}
+#notes h4{margin:0 0 6px;font:700 13px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--amber)}
+
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:16px}
+.qq{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px 20px}
+.qq > p{font-size:22px!important;font-weight:700;margin-bottom:10px!important}
+.qq .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qq button{font:19px/1.3 var(--sans);text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer;color:var(--ink)}
+.qq button:hover{border-color:var(--blue)}
+.qq.done button{cursor:default}
+.qq.done button.right{background:var(--green-soft);border-color:var(--green);font-weight:700}
+.qq.done button.wrong{background:var(--red-soft);border-color:var(--red)}
+.qq .why{display:none;margin-top:10px!important;font-size:19px!important;color:#22303f;font-weight:400!important}
+.qq.done .why{display:block}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .loop{animation:none!important}
+}
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #stage{position:relative;left:0;top:0;margin:0;transform:none!important;box-shadow:none;height:auto;overflow:visible}
+  .slide{position:relative;opacity:1;visibility:visible;height:720px;page-break-after:always}
+  .frag{opacity:1;transform:none}
+  #chrome,#progress,#nav{display:none}
+}
+
+/* capa */
+#capa{padding:0;background:radial-gradient(1200px 700px at 85% 40%,#fff9ec 0%,var(--paper) 60%)}
+#capa .txt{position:absolute;left:72px;top:92px;width:690px}
+#capa h1{font-family:var(--serif);font-size:70px;line-height:1.02;margin:18px 0 22px;letter-spacing:-.02em}
+#capa h1 em{color:var(--amber);font-style:italic;font-weight:700}
+#capa .sub{font-size:28px;line-height:1.38;color:#2d333c;max-width:620px}
+#capa .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+#capa .keys{position:absolute;left:72px;bottom:64px;font:15px/1.5 var(--sans);color:var(--muted)}
+#capa .keys kbd{font:700 13px/1 var(--mono);background:#fff;border:1.5px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:3px 7px;margin:0 2px}
+#capa svg{position:absolute;right:40px;top:90px;width:520px;height:560px}
+@keyframes drop{0%{transform:translateY(-190px);opacity:0}12%{opacity:1}55%{transform:translateY(20px)}62%{transform:translateY(8px)}70%,82%{transform:translateY(20px);opacity:1}100%{transform:translateY(150px);opacity:0}}
+#capa .falling{animation:drop 5.5s cubic-bezier(.5,0,.3,1) 0s infinite}
+#capa .falling.b{animation-delay:2.75s}
+/* sem animação: os dois objetos ficam parados, um já no bucket e outro chegando */
+@media (prefers-reduced-motion: reduce){#capa .falling{transform:translateY(20px)}#capa .falling.b{transform:translateY(-150px)}}
+/* roteiro */
+#roteiro ol{columns:2;column-gap:56px;list-style:none;padding:0;margin:8px 0 0;counter-reset:r}
+#roteiro li{counter-increment:r;break-inside:avoid;display:flex;gap:18px;align-items:baseline;padding:11px 0;border-bottom:1.5px dashed var(--line);font-size:25px}
+#roteiro li::before{content:counter(r,decimal-leading-zero);font:700 20px/1 var(--mono);color:var(--amber);min-width:32px}
+/* balanceador */
+#ilhas .lbl{font-size:20px;font-weight:700}
+/* manobrista */
+#mano .car{transition:transform 1.15s cubic-bezier(.6,.05,.3,1)}
+#mano.s1 .car{transform:translate(372px,0)}
+#mano.s3 .car{transform:translate(942px,-112px)}
+#mano.s4 .car{transform:translate(0,0)}
+#mano .ticket{opacity:0;transition:opacity .4s,transform 1s}
+#mano.s2 .ticket{opacity:1}
+#mano.s4 .ticket{transform:translate(300px,30px);opacity:0}
+#mano .qmark{opacity:0;transition:opacity .4s .7s}
+#mano.s3 .qmark{opacity:1}
+#mano.s4 .qmark{opacity:0;transition-delay:0s}
+#mano .map{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:14px}
+#mano .map div{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 16px;font-size:21px}
+#mano .map b{display:block;font:700 15px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+/* tabela comparativa */
+#compara .tbl td:nth-child(4),#compara .tbl th:nth-child(4){background:#fff6e2}
+#compara .tbl th:nth-child(4){background:#f8e3b8;color:#5b2a03}
+
+
+/* pacotes que viajam e caminhos que se desenham */
+svg .frag.mv{opacity:0;transform:translate(0,0);transition:transform 1s cubic-bezier(.6,.05,.3,1),opacity .25s}
+svg .frag.mv.on{opacity:1;transform:translate(var(--tx,0px),var(--ty,0px))}
+/* a ponta da seta (marker) não respeita o tracejado: o caminho inteiro fica invisível até o passo chegar */
+svg .frag.draw{opacity:0;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .9s ease,opacity .3s ease}
+svg .frag.draw.on{opacity:1;stroke-dashoffset:0}
+.frag.gone{opacity:0!important}
+/* anatomia */
+#anat .bframe{border:3px dashed #8b8f98;border-radius:22px;padding:40px 22px 22px;position:relative;transition:border-color .3s,background .3s}
+#anat .bframe .bl0{position:absolute;top:-17px;left:22px;background:var(--paper);padding:0 10px;font:700 20px/1.6 var(--mono)}
+#anat .objc{background:#fff;border:2.5px solid #1f2430;border-radius:16px;overflow:hidden}
+#anat .band{padding:14px 18px;border-bottom:2px solid #1f2430;transition:background .3s,box-shadow .3s}
+#anat .band:last-child{border-bottom:0}
+#anat .band .bl{display:block;font:700 14px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+#anat .band .hex b{font-size:18px;padding:6px 6px;min-width:36px}
+#anat .meta{font:18px/1.55 var(--mono)}
+#anat.s1:not(.s2) .b-key{background:var(--amber-soft);box-shadow:inset 8px 0 0 var(--amber-2)}
+#anat.s2:not(.s3) .b-data{background:var(--blue-soft);box-shadow:inset 8px 0 0 var(--blue)}
+#anat.s3:not(.s4) .b-meta{background:var(--violet-soft);box-shadow:inset 8px 0 0 var(--violet)}
+#anat.s4 .bframe{border-color:var(--green);background:rgba(4,120,87,.06)}
+#anat ul.clean li{font-size:23px}
+/* namespace plano */
+#plano .keys{font:23px/1 var(--mono);display:flex;flex-direction:column;gap:6px}
+#plano .keys div{padding:10px 14px;border-radius:10px;background:#fff;border:1.5px solid var(--line);transition:background .3s,border-color .3s,opacity .3s}
+#plano.s2 .keys div{opacity:.35}
+#plano.s2 .keys div.lv{opacity:1;background:var(--amber-soft);border-color:#d99a3e}
+#plano .tree{font:21px/1.62 var(--mono);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 18px}
+#plano .fd{display:inline-block;width:22px;height:15px;background:#f8d48a;border:2px solid #a66b13;border-radius:2px 4px 3px 3px;margin-right:9px;vertical-align:-1px;position:relative}
+#plano .fd::before{content:"";position:absolute;left:-2px;top:-7px;width:10px;height:5px;background:#f8d48a;border:2px solid #a66b13;border-bottom:0;border-radius:3px 3px 0 0}
+#plano .ob{display:inline-block;width:14px;height:17px;background:#fff;border:2px solid #4f5763;border-radius:2px;margin-right:9px;vertical-align:-2px}
+/* imutável */
+#imut .vers{position:relative;height:230px}
+#imut .ver{position:absolute;left:0;right:0;top:0;background:#fff;border:2.5px solid #1f2430;border-radius:16px;padding:16px 20px;font:19px/1.6 var(--mono);transition:transform .9s cubic-bezier(.6,.05,.3,1),opacity .6s}
+#imut .ver h4{font:700 15px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;margin:0 0 10px;color:var(--muted)}
+#imut .v2{transform:translateX(560px);opacity:0;background:#f4fbf7;border-color:var(--green)}
+#imut.s1 .v2{transform:none;opacity:1}
+#imut.s1 .v1{transform:translate(-26px,24px) scale(.94);opacity:.35}
+/* URL */
+#url .bigurl{font:700 38px/1.3 var(--mono);background:#fff;border:2.5px solid #1f2430;border-radius:18px;padding:26px 30px;letter-spacing:-.01em;white-space:nowrap}
+#url .u-e{color:var(--blue)}#url .u-b{color:var(--violet)}#url .u-k{color:var(--amber)}
+#url .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}
+#url .legend div{border-top:6px solid;padding-top:10px;font-size:22px}
+/* troca de mensagens */
+.lane{width:1136px;height:104px;margin:-2px 0 16px}
+.xgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.xgrid .msg{font-size:19px}
+.xlabel{font:700 15px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 4px}
+/* compatíveis */
+#padrao .logos{display:flex;flex-wrap:wrap;gap:10px}
+#padrao .logos span{font:700 19px/1 var(--sans);padding:12px 16px;border-radius:12px;background:#fff;border:1.5px solid var(--line)}
+#padrao .logos span.me{background:var(--amber-soft);border-color:#d99a3e;color:#5b2a03}
+
+
+#chaves .auth{font:20px/1.5 var(--mono);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px 18px;white-space:normal;word-break:break-all}
+#chaves .auth .ak{background:#e2eaff;color:var(--blue-2);font-weight:700;border-radius:4px;padding:0 4px}
+#chaves .auth .sg{background:#fcefd6;color:#5b2a03;font-weight:700;border-radius:4px;padding:0 4px}
+#presign .urlb{font:20px/1.75 var(--mono);background:#fff;border:2.5px solid #1f2430;border-radius:16px;padding:16px 22px;white-space:pre}
+#presign .urlb span{border-radius:5px;padding:1px 3px;transition:background .3s,color .3s}
+#presign.s1 .p-cred{background:#e2eaff;color:var(--blue-2)}
+#presign.s2 .p-time{background:#d9f3e7;color:var(--green)}
+#presign.s3 .p-sig{background:#fcefd6;color:#5b2a03}
+#presign ul.clean li{font-size:22px}
+#prod{background:linear-gradient(180deg,#fff7e8 0%,var(--paper) 70%)}
+#prod > .kicker{color:var(--amber)}
+#prod .why li{font-size:21px}
+#prod > h2{max-width:930px}
+#prod .stamp{position:absolute;right:62px;top:44px;transform:rotate(6deg);border:4px solid var(--amber);color:var(--amber);font:800 19px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.6)}
+#usar .card li{font-size:22px}
+#rustfs .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+#rustfs .fact{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px}
+#rustfs .fact b{display:block;font:700 23px/1.2 var(--serif);margin-bottom:6px}
+#rustfs .fact span{font-size:19px;color:#3c434d;line-height:1.35}
+#porque .tl{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-top:34px}
+#porque .tl::before{content:"";position:absolute;left:10px;right:10px;top:12px;height:5px;background:#d6cfbf;border-radius:3px}
+#porque .ev{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
+#porque .ev::before{content:"";position:absolute;top:-31px;left:18px;width:18px;height:18px;border-radius:50%;background:var(--red);border:4px solid var(--paper)}
+#porque .ev time{display:block;font:700 16px/1 var(--mono);color:var(--red);margin-bottom:8px}
+#porque .ev p{font-size:19px;line-height:1.35}
+#ec .blk{transition:transform 1s cubic-bezier(.6,.05,.3,1),opacity .4s}
+
+
+.slide.codeslide{padding-left:46px;padding-right:46px}
+.slide.codeslide > h2{font-size:38px;margin:8px 0 14px}
+.codewrap{position:relative}
+.explain{position:absolute;right:22px;top:20px;width:310px}
+.explain .frag{position:absolute;left:0;right:0;top:0}
+.explain .card{padding:16px 18px;box-shadow:0 10px 28px rgba(15,23,42,.25)}
+.explain .card p{font-size:20px;line-height:1.35}
+.explain .card b.t{display:block;font:700 14px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+#ready .lbl{font-size:18px;font-weight:700}
+#console .browser{background:#fff;border:2.5px solid #1f2430;border-radius:16px;overflow:hidden;height:470px;position:relative}
+#console .bar{background:#ece6d8;border-bottom:2px solid #1f2430;padding:10px 16px;display:flex;gap:10px;align-items:center}
+#console .bar i{width:13px;height:13px;border-radius:50%;display:inline-block}
+#console .addr{flex:1;background:#fff;border-radius:8px;padding:6px 12px;font:17px/1.2 var(--mono)}
+#console .screen{position:absolute;left:0;right:0;top:52px;bottom:0;padding:24px 28px}
+#console .login{width:380px;margin:30px auto 0;display:flex;flex-direction:column;gap:12px}
+#console .login label{font:700 14px/1 var(--sans);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+#console .login div{border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;font:18px/1 var(--mono)}
+#console .login button{font:700 18px/1 var(--sans);background:var(--ink);color:#fff;border:0;border-radius:8px;padding:12px}
+#console .screen.s-b,#console .screen.s-o{background:#fff}
+#console .crow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1.5px solid var(--line);font:19px/1.2 var(--mono)}
+#console .crow small{font:15px/1 var(--sans);color:var(--muted)}
+#console .ctitle{font:700 22px/1 var(--serif);margin:0 0 12px}
+#trap .fixes{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#errs .tbl td{font-size:20px}
+#client .tbl td{font-size:17px}
+#client .tbl th{font-size:15px}
+
+
+.stepnotes{position:relative;height:66px;margin-top:14px}
+.stepnotes > .frag{position:absolute;left:0;right:0;top:0}
+.stepnotes .callout{font-size:21px;padding:12px 18px}
+#app .mock{background:#fff;border:2.5px solid #1f2430;border-radius:16px;overflow:hidden}
+#app .mock .bar{background:#ece6d8;border-bottom:2px solid #1f2430;padding:9px 14px;font:16px/1 var(--mono)}
+#app .mock .in{padding:18px 20px}
+#app .mock h4{font:700 26px/1 var(--sans);margin:0 0 14px}
+#app .mock .drop{border:2px dashed #94a3b8;border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center;font-size:17px}
+#app .mock .drop span{background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:6px;padding:6px 10px}
+#app .mock .drop b{background:#14161c;color:#fff;border-radius:6px;padding:6px 12px;font-size:16px}
+#app .mock .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+#app .mock .thumbs div{border:1.5px solid #e5e7eb;border-radius:10px;padding:6px;font:11px/1.3 var(--mono);color:#475569}
+#app .mock .thumbs i{display:block;aspect-ratio:1;border-radius:6px;margin-bottom:5px}
+#app .tbl td{font-size:19px}
+#sig .row3{display:grid;grid-template-columns:150px 1fr 230px;gap:18px;align-items:center;padding:14px 0;border-bottom:1.5px dashed var(--line)}
+#sig .row3 > b{font:700 26px/1 var(--serif)}
+#sig .ascii{font:700 26px/1 var(--mono);color:var(--amber)}
+#run .tbl td{font-size:18px;padding:8px 14px}
+#run .tbl td.mono{font-size:17px}
+
+
+#recap .grid3 .card{padding:16px 20px}
+#recap .card h3{font-size:24px}
+#recap .card p{font-size:19px}
+#recap .card .n{font:700 15px/1 var(--mono);color:var(--amber);display:block;margin-bottom:6px}
+#ponte{background:linear-gradient(160deg,#0f172a 0%,#1e3a8a 100%);color:#fff}
+#ponte > .kicker{color:#ffd28a}
+#ponte > h2{color:#fff}
+#ponte ol.steps li{color:#eef2ff}
+#ponte ol.steps li::before{background:#ffd28a;color:#14161c}
+#ponte .callout{background:rgba(255,255,255,.1);border-color:#ffd28a;color:#fff}
+#ponte code{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2);color:#fff}
+#refs li{font-size:20px}
+#refs .mono{font-size:18px;color:var(--blue-2)}
+
+</style>
+</head>
+<body>
+<div id="stage">
+
+
+<section class="slide" id="capa" data-title="Capa" data-part="Abertura">
+  <div class="txt">
+    <p class="kicker" style="font:700 15px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">TEES II · Ifes 2026.2 · Biblioteca, fase 03</p>
+    <h1>Armazenamento de objetos com <em>RustFS</em></h1>
+    <p class="sub">Do zero: o que é um objeto, por que ele existe, como o S3 funciona e um upload de imagens com Bun&nbsp;+&nbsp;TypeScript.</p>
+    <div class="chips"><span class="pill">API S3</span><span class="pill amber">RustFS 1.0.5</span><span class="pill blue">Bun 1.4</span><span class="pill line">Docker Compose</span></div>
+  </div>
+  <svg viewBox="0 0 520 560" aria-label="Objetos caindo dentro de um bucket">
+    <!-- borda de trás do bucket -->
+    <ellipse cx="260" cy="250" rx="190" ry="44" fill="#efe7d4" stroke="#1f2430" stroke-width="3"/>
+    <!-- alça, atrás dos objetos que caem -->
+    <path d="M70 250 Q40 150 140 95" fill="none" stroke="#1f2430" stroke-width="3"/>
+    <path d="M450 250 Q480 150 380 95" fill="none" stroke="#1f2430" stroke-width="3"/>
+    <path d="M140 95 Q260 40 380 95" fill="none" stroke="#1f2430" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+    <!-- objetos caindo -->
+    <g class="falling loop">
+      <g transform="translate(170 150)">
+        <rect width="180" height="118" rx="12" fill="#fff" stroke="#1f2430" stroke-width="2.5"/>
+        <rect width="180" height="34" rx="12" fill="#fcefd6" stroke="#1f2430" stroke-width="2.5"/>
+        <text x="16" y="23" class="t-mono" font-size="15" font-weight="700" fill="#5b2a03">livros/7/capa</text>
+        <text x="16" y="62" class="t-mono" font-size="14" fill="#475569">89 50 4E 47 0D 0A…</text>
+        <text x="16" y="96" class="t-mono" font-size="14" fill="#1d4ed8">image/png · 7 KB</text>
+      </g>
+    </g>
+    <g class="falling loop b">
+      <g transform="translate(200 150)">
+        <rect width="160" height="108" rx="12" fill="#fff" stroke="#1f2430" stroke-width="2.5"/>
+        <rect width="160" height="34" rx="12" fill="#e2eaff" stroke="#1f2430" stroke-width="2.5"/>
+        <text x="14" y="23" class="t-mono" font-size="15" font-weight="700" fill="#1e3a8a">autores/3/foto</text>
+        <text x="14" y="62" class="t-mono" font-size="14" fill="#475569">FF D8 FF E0…</text>
+        <text x="14" y="92" class="t-mono" font-size="14" fill="#1d4ed8">image/jpeg</text>
+      </g>
+    </g>
+    <!-- corpo do bucket, na frente dos objetos -->
+    <path d="M70 250 L118 500 Q260 548 402 500 L450 250 Q260 330 70 250 Z" fill="#fffdf8" stroke="#1f2430" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M70 250 Q260 330 450 250" fill="none" stroke="#1f2430" stroke-width="3"/>
+    <path d="M100 350 Q260 405 420 350" fill="none" stroke="#d6cfbf" stroke-width="2"/>
+    <text x="260" y="430" text-anchor="middle" class="t-serif" font-size="34" font-weight="700">bucket</text>
+    <text x="260" y="462" text-anchor="middle" class="t-mono" font-size="19" fill="#4f5763">biblioteca</text>
+  </svg>
+  <p class="keys"><kbd>→</kbd> avança · <kbd>←</kbd> volta · <kbd>O</kbd> índice · <kbd>N</kbd> notas · <kbd>F</kbd> tela cheia</p>
+  <aside class="notes">Boas-vindas. Hoje a biblioteca ganha um lugar para guardar arquivos: as capas dos livros. Antes de mexer no projeto, vamos entender o conceito do zero e terminar com um mini-app que roda em 80 linhas. Teclas: → avança, O abre o índice, N abre estas notas numa janela separada.</aside>
+</section>
+
+<section class="slide" id="roteiro" data-title="Roteiro">
+  <p class="kicker">Roteiro</p>
+  <h2>Do problema até o código, em onze passos</h2>
+  <ol>
+    <li>O problema de guardar arquivos</li>
+    <li>Bloco, arquivo e objeto</li>
+    <li>Anatomia de um objeto</li>
+    <li>A API HTTP do S3</li>
+    <li>Segurança e URLs assinadas</li>
+    <li>Quando usar (e quando não usar)</li>
+    <li>O RustFS</li>
+    <li>O RustFS no Docker</li>
+    <li>O cliente S3 do Bun</li>
+    <li>Um mini-app de fotos</li>
+    <li>Recapitulação e quiz</li>
+  </ol>
+  <aside class="notes">Mostre o caminho: primeiro o porquê (1 a 6), depois a ferramenta (7 e 8), por fim o código (9 e 10). O quiz no fim checa os conceitos que caem na atividade.</aside>
+</section>
+
+<section class="slide" id="onde" data-title="Onde guardar os bytes?" data-part="1 · O problema">
+  <p class="kicker">1 · O problema</p>
+  <h2>Alguém envia a capa de um livro. Onde ela fica?</h2>
+  <svg viewBox="0 0 1136 400" style="width:1136px;height:400px">
+    <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f2430"/></marker></defs>
+    <!-- navegador -->
+    <rect x="10" y="110" width="250" height="180" rx="14" class="box"/>
+    <rect x="10" y="110" width="250" height="34" rx="14" fill="#ece6d8" stroke="#1f2430" stroke-width="2.5"/>
+    <circle cx="32" cy="127" r="6" fill="#ef4444"/><circle cx="52" cy="127" r="6" fill="#f59e0b"/><circle cx="72" cy="127" r="6" fill="#10b981"/>
+    <rect x="70" y="166" width="130" height="96" rx="8" fill="#fcefd6" stroke="#d99a3e" stroke-width="2"/>
+    <path d="M84 246 L118 206 L142 230 L160 214 L188 246 Z" fill="#d99a3e"/><circle cx="170" cy="190" r="10" fill="#f59e0b"/>
+    <text x="135" y="320" text-anchor="middle" font-size="22" font-weight="700">Navegador</text>
+    <!-- servidor -->
+    <path d="M270 200 H440" class="wire" marker-end="url(#ar1)"/>
+    <text x="355" y="186" text-anchor="middle" class="t-mono" font-size="17">upload</text>
+    <rect x="450" y="140" width="230" height="120" rx="14" class="box"/>
+    <text x="565" y="192" text-anchor="middle" font-size="26" font-weight="700">Servidor</text>
+    <text x="565" y="224" text-anchor="middle" class="t-mono" font-size="18" fill="#4f5763">Bun + Hono</text>
+    <!-- destinos -->
+    <g class="frag" data-f="1">
+      <path d="M690 180 L838 70" class="dash" marker-end="url(#ar1)"/>
+      <rect x="846" y="20" width="280" height="96" rx="14" class="box"/>
+      <text x="986" y="62" text-anchor="middle" font-size="23" font-weight="700">Disco do servidor</text>
+      <text x="986" y="92" text-anchor="middle" class="t-mono" font-size="16" fill="#4f5763">uploads/capa-7.jpg</text>
+    </g>
+    <g class="frag" data-f="2">
+      <path d="M690 200 L838 200" class="dash" marker-end="url(#ar1)"/>
+      <rect x="846" y="152" width="280" height="96" rx="14" class="box"/>
+      <text x="986" y="194" text-anchor="middle" font-size="23" font-weight="700">Banco de dados</text>
+      <text x="986" y="224" text-anchor="middle" class="t-mono" font-size="16" fill="#4f5763">coluna BYTEA</text>
+    </g>
+    <g class="frag" data-f="3">
+      <path d="M690 220 L838 330" class="dash" marker-end="url(#ar1)"/>
+      <rect x="846" y="284" width="280" height="96" rx="14" fill="#fcefd6" stroke="#a64b07" stroke-width="2.5" stroke-dasharray="6 6"/>
+      <text x="986" y="344" text-anchor="middle" font-size="40" font-weight="700" fill="#a64b07">???</text>
+    </g>
+  </svg>
+  <p class="lead frag" data-f="3">Os bytes de uma imagem precisam morar em algum lugar. As duas primeiras ideias são as mais comuns, e as duas têm problemas.</p>
+  <aside class="notes">Pergunte à turma antes de avançar: "onde vocês guardariam?". Quase todo mundo responde disco ou banco. As próximas telas mostram por que nenhum dos dois escala bem.</aside>
+</section>
+
+<section class="slide" id="disco" data-title="Opção 1: o disco do servidor">
+  <p class="kicker">1 · O problema</p>
+  <h2>Opção 1: gravar no disco do servidor</h2>
+  <div class="split">
+    <div class="stack">
+      <pre class="code nonum big" data-lang="ts">// recebe o upload e grava numa pasta local
+const file = form.get("capa") as File;
+await Bun.write(`uploads/${id}.jpg`, file);</pre>
+      <p class="callout green">Funciona no seu computador. É a primeira coisa que todo mundo tenta.</p>
+    </div>
+    <ul class="clean">
+      <li class="bad frag">O contêiner é recriado a cada deploy. Sem volume, as fotos vão embora junto.</li>
+      <li class="bad frag">O disco do servidor enche. Aumentar costuma exigir parar a máquina.</li>
+      <li class="bad frag">O backup do banco não inclui a pasta <code>uploads/</code>: são dois backups para manter em sincronia.</li>
+      <li class="q frag">E quando a aplicação tiver duas cópias rodando?</li>
+    </ul>
+  </div>
+  <aside class="notes">O ponto central não é "disco é ruim": é que o arquivo fica preso a UMA máquina. O último item puxa a próxima tela.</aside>
+</section>
+
+<section class="slide" id="ilhas" data-title="Duas instâncias, dois discos">
+  <p class="kicker">1 · O problema</p>
+  <h2>Duas instâncias atrás de um balanceador</h2>
+  <svg viewBox="0 24 1136 426" style="width:1136px;height:426px">
+    <defs>
+      <marker id="arB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1d4ed8"/></marker>
+      <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a64b07"/></marker>
+    </defs>
+    <rect x="0" y="175" width="190" height="100" rx="14" class="box"/>
+    <text x="95" y="232" text-anchor="middle" font-size="22" font-weight="700">Navegador</text>
+    <rect x="330" y="185" width="200" height="80" rx="14" class="box"/>
+    <text x="430" y="232" text-anchor="middle" font-size="21" font-weight="700">Balanceador</text>
+    <path d="M190 225 H330" class="wire"/>
+    <path d="M530 210 L650 105" class="wire"/><path d="M530 240 L650 345" class="wire"/>
+    <!-- instância A -->
+    <rect x="650" y="40" width="250" height="130" rx="14" class="box"/>
+    <text x="775" y="98" text-anchor="middle" font-size="24" font-weight="700">Instância A</text>
+    <text x="775" y="130" text-anchor="middle" class="t-mono" font-size="16" fill="#4f5763">Bun</text>
+    <g transform="translate(950 50)"><ellipse cx="70" cy="14" rx="70" ry="14" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><path d="M0 14 V96 Q70 124 140 96 V14" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><ellipse cx="70" cy="14" rx="70" ry="14" fill="#ece6d8" stroke="#1f2430" stroke-width="2.5"/><text x="70" y="52" text-anchor="middle" font-size="17" font-weight="700">disco A</text></g>
+    <!-- instância B -->
+    <rect x="650" y="280" width="250" height="130" rx="14" class="box"/>
+    <text x="775" y="338" text-anchor="middle" font-size="24" font-weight="700">Instância B</text>
+    <text x="775" y="370" text-anchor="middle" class="t-mono" font-size="16" fill="#4f5763">Bun</text>
+    <g transform="translate(950 290)"><ellipse cx="70" cy="14" rx="70" ry="14" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><path d="M0 14 V96 Q70 124 140 96 V14" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><ellipse cx="70" cy="14" rx="70" ry="14" fill="#ece6d8" stroke="#1f2430" stroke-width="2.5"/><text x="70" y="52" text-anchor="middle" font-size="17" font-weight="700">disco B</text></g>
+    <!-- passo 1: upload cai na A -->
+    <path d="M96 175 V150 H430 V185 M520 200 L640 110" pathLength="1" class="frag draw" data-f="1" fill="none" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" marker-end="url(#arB)"/>
+    <g class="frag" data-f="1" style="transition-delay:.6s"><rect x="200" y="122" width="200" height="40" rx="10" fill="#1d4ed8"/><text x="300" y="149" text-anchor="middle" fill="#fff" class="t-mono" font-size="18" font-weight="700">POST capa.jpg</text></g>
+    <g class="frag" data-f="2"><rect x="968" y="114" width="104" height="32" rx="8" fill="#d9f3e7" stroke="#047857" stroke-width="2"/><text x="1020" y="136" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">capa.jpg ✓</text></g>
+    <!-- passo 3: a leitura cai na B -->
+    <path d="M96 275 V300 H430 V265 M520 250 L640 340" pathLength="1" class="frag draw" data-f="3" fill="none" stroke="#a64b07" stroke-width="6" stroke-linecap="round" marker-end="url(#arA)"/>
+    <g class="frag" data-f="3" style="transition-delay:.6s"><rect x="200" y="308" width="200" height="40" rx="10" fill="#a64b07"/><text x="300" y="335" text-anchor="middle" fill="#fff" class="t-mono" font-size="18" font-weight="700">GET capa.jpg</text></g>
+    <g class="frag" data-f="4"><rect x="958" y="354" width="124" height="32" rx="8" fill="#fde3e3" stroke="#b91c1c" stroke-width="2"/><text x="1020" y="376" text-anchor="middle" font-size="16" font-weight="700" fill="#b91c1c">vazio</text>
+      <rect x="664" y="420" width="222" height="30" rx="8" fill="#b91c1c"/><text x="775" y="441" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">404 · não está aqui</text></g>
+  </svg>
+  <p class="lead frag" data-f="5" style="margin-top:-6px">Com duas instâncias, <span class="hl-amber">cada disco vira uma ilha</span>. O arquivo precisa ficar num lugar que <em>todas</em> enxerguem.</p>
+  <aside class="notes">Passo a passo: o upload cai na A e fica no disco A. A próxima leitura cai na B (o balanceador escolhe), e a B não tem o arquivo: 404. Isso acontece de verdade assim que se escala horizontalmente.</aside>
+</section>
+
+<section class="slide" id="blob" data-title="Opção 2: BLOB no banco">
+  <p class="kicker">1 · O problema</p>
+  <h2>Opção 2: guardar os bytes numa coluna do banco</h2>
+  <div class="split">
+    <div class="stack">
+      <pre class="code nonum big" data-lang="sql">ALTER TABLE livros ADD COLUMN capa BYTEA;
+
+UPDATE livros SET capa = $1 WHERE id = 7;</pre>
+      <ul class="clean">
+        <li class="ok frag">Todas as instâncias enxergam o mesmo banco.</li>
+        <li class="ok frag">Entra na mesma transação do livro.</li>
+      </ul>
+    </div>
+    <ul class="clean">
+      <li class="bad frag">O banco incha: backup e restauração ficam lentos por causa de imagens que nunca mudam.</li>
+      <li class="bad frag">Cada imagem exibida ocupa uma conexão do banco, que é um recurso escasso.</li>
+      <li class="bad frag">O disco do banco é o mais caro da infraestrutura.</li>
+      <li class="bad frag">Uma CDN não consegue servir a imagem direto do banco.</li>
+    </ul>
+  </div>
+  <aside class="notes">BLOB no banco resolve o problema das ilhas, mas usa a peça mais cara e mais disputada da arquitetura para guardar bytes que só são lidos. Vale para poucos arquivos pequenos; não escala para mídia.</aside>
+</section>
+
+<section class="slide" id="requisitos" data-title="O que queremos">
+  <p class="kicker">1 · O problema</p>
+  <h2>O que queremos de um lugar para arquivos</h2>
+  <div class="grid2">
+    <ul class="clean">
+      <li class="ok frag">Compartilhado: qualquer instância lê e grava.</li>
+      <li class="ok frag">Cresce sem planejar disco: terabytes, petabytes.</li>
+      <li class="ok frag">Acessível por HTTP, de qualquer linguagem.</li>
+    </ul>
+    <ul class="clean">
+      <li class="ok frag">Barato por gigabyte e durável (cópias, redundância).</li>
+      <li class="ok frag">Com metadados: tipo, tamanho, data.</li>
+      <li class="ok frag">Separado do banco: o banco guarda só a referência.</li>
+    </ul>
+  </div>
+  <p class="banner frag mt2">Isso tem nome: <em>armazenamento de objetos</em> (object storage).</p>
+  <aside class="notes">Leia os requisitos como uma lista de desejos. O último item é a regra que vamos repetir a aula toda: no banco fica a referência; os bytes ficam no armazenamento de objetos.</aside>
+</section>
+
+<section class="slide" id="tres" data-title="Bloco, arquivo e objeto" data-part="2 · Três jeitos de guardar">
+  <p class="kicker">2 · Três jeitos de guardar dados</p>
+  <h2>Bloco, arquivo e objeto</h2>
+  <div class="grid3">
+    <div class="card frag">
+      <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+        <g class="t-mono" font-size="14">
+          <rect x="10" y="8" width="64" height="48" rx="6" fill="#e2eaff" stroke="#1f2430" stroke-width="2"/><text x="42" y="38" text-anchor="middle" class="t-mono">0</text>
+          <rect x="80" y="8" width="64" height="48" rx="6" fill="#e2eaff" stroke="#1f2430" stroke-width="2"/><text x="112" y="38" text-anchor="middle" class="t-mono">1</text>
+          <rect x="150" y="8" width="64" height="48" rx="6" fill="#fff" stroke="#1f2430" stroke-width="2"/><text x="182" y="38" text-anchor="middle" class="t-mono">2</text>
+          <rect x="220" y="8" width="64" height="48" rx="6" fill="#e2eaff" stroke="#1f2430" stroke-width="2"/><text x="252" y="38" text-anchor="middle" class="t-mono">3</text>
+          <rect x="10" y="64" width="64" height="48" rx="6" fill="#fff" stroke="#1f2430" stroke-width="2"/><text x="42" y="94" text-anchor="middle" class="t-mono">4</text>
+          <rect x="80" y="64" width="64" height="48" rx="6" fill="#e2eaff" stroke="#1f2430" stroke-width="2"/><text x="112" y="94" text-anchor="middle" class="t-mono">5</text>
+          <rect x="150" y="64" width="64" height="48" rx="6" fill="#e2eaff" stroke="#1f2430" stroke-width="2"/><text x="182" y="94" text-anchor="middle" class="t-mono">6</text>
+          <rect x="220" y="64" width="64" height="48" rx="6" fill="#fff" stroke="#1f2430" stroke-width="2"/><text x="252" y="94" text-anchor="middle" class="t-mono">7</text>
+        </g>
+      </svg>
+      <h3>Bloco</h3>
+      <p>O disco “cru”, dividido em blocos numerados. Quem organiza é o sistema operacional ou o banco.</p>
+      <p class="muted small mt">Ex.: o volume do Postgres, o disco de uma VM.</p>
+    </div>
+    <div class="card frag">
+      <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+        <g font-size="16">
+          <path d="M22 14 h40 l8 8 h50 v26 h-98z" fill="#fcefd6" stroke="#1f2430" stroke-width="2"/><text x="132" y="40" class="t-mono" font-size="16">uploads/</text>
+          <path d="M40 22 V96 M40 60 H60 M40 96 H60" fill="none" stroke="#8b8f98" stroke-width="2"/>
+          <path d="M62 50 h30 l6 6 h36 v20 h-72z" fill="#fcefd6" stroke="#1f2430" stroke-width="2"/><text x="146" y="70" class="t-mono" font-size="16">2026/</text>
+          <rect x="62" y="84" width="22" height="26" rx="3" fill="#fff" stroke="#1f2430" stroke-width="2"/><text x="94" y="104" class="t-mono" font-size="16">capa.jpg</text>
+        </g>
+      </svg>
+      <h3>Arquivo</h3>
+      <p>Pastas e caminhos. Dá para abrir, editar um trecho no meio e travar o arquivo.</p>
+      <p class="muted small mt">Ex.: o disco do seu computador, uma pasta compartilhada na rede.</p>
+    </div>
+    <div class="card amber frag">
+      <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+        <g>
+          <rect x="2" y="40" width="136" height="34" rx="6" fill="#fcefd6" stroke="#d99a3e" stroke-width="2"/><circle cx="15" cy="57" r="5" fill="#f6f3ec" stroke="#d99a3e" stroke-width="2"/>
+          <text x="26" y="62" class="t-mono" font-size="13" font-weight="700" fill="#5b2a03">livros/7/capa</text>
+          <path d="M140 57 H160" stroke="#1f2430" stroke-width="2.5"/><path d="M156 50 L168 57 L156 64z" fill="#1f2430"/>
+          <rect x="172" y="10" width="122" height="96" rx="10" fill="#fff" stroke="#1f2430" stroke-width="2"/>
+          <rect x="172" y="10" width="122" height="26" rx="10" fill="#ece6d8" stroke="#1f2430" stroke-width="2"/>
+          <text x="182" y="28" font-size="13" font-weight="700">bytes</text>
+          <text x="182" y="62" class="t-mono" font-size="12">89 50 4E 47…</text>
+          <text x="182" y="90" class="t-mono" font-size="12" fill="#1d4ed8">image/png</text>
+        </g>
+      </svg>
+      <h3>Objeto</h3>
+      <p>Uma chave aponta para os bytes e os metadados, tudo por HTTP. Não há pastas de verdade nem edição no meio.</p>
+      <p class="muted small mt">Ex.: Amazon S3, Cloudflare R2, RustFS.</p>
+    </div>
+  </div>
+  <aside class="notes">Três níveis de abstração. Bloco: o disco cru. Arquivo: o que vocês usam todo dia. Objeto: um serviço HTTP onde cada coisa guardada tem uma chave. A próxima tela traz uma analogia para o objeto.</aside>
+</section>
+
+<section class="slide" id="mano" data-title="A analogia do manobrista">
+  <p class="kicker">2 · Três jeitos de guardar dados</p>
+  <h2>Um objeto é como um carro com manobrista</h2>
+  <svg viewBox="0 0 1136 380" style="width:1136px;height:380px">
+    <!-- pessoa -->
+    <g transform="translate(70 150)"><circle cx="0" cy="0" r="18" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><path d="M-26 70 Q-24 26 0 24 Q24 26 26 70" fill="#e2eaff" stroke="#1f2430" stroke-width="2.5"/></g>
+    <text x="70" y="250" text-anchor="middle" font-size="18" font-weight="700">você</text>
+    <!-- tíquete -->
+    <g class="ticket"><g transform="translate(108 168)"><rect width="104" height="40" rx="6" fill="#fcefd6" stroke="#d99a3e" stroke-width="2.5"/><circle cx="16" cy="20" r="6" fill="#f6f3ec" stroke="#d99a3e" stroke-width="2"/><text x="64" y="28" text-anchor="middle" class="t-mono" font-size="20" font-weight="700" fill="#5b2a03">A7F3</text></g></g>
+    <!-- guarita -->
+    <rect x="420" y="200" width="180" height="120" rx="12" class="box"/>
+    <rect x="410" y="186" width="200" height="22" rx="6" fill="#a64b07"/>
+    <text x="510" y="262" text-anchor="middle" font-size="22" font-weight="700">Manobrista</text>
+    <text x="510" y="292" text-anchor="middle" class="t-mono" font-size="16" fill="#4f5763">a API</text>
+    <!-- estacionamento -->
+    <rect x="712" y="40" width="414" height="320" rx="16" fill="#ece6d8" stroke="#1f2430" stroke-width="2.5"/>
+    <text x="919" y="30" text-anchor="middle" font-size="18" font-weight="700">estacionamento</text>
+    <g fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="8 6">
+      <rect x="730" y="70" width="112" height="70" rx="6"/><rect x="855" y="70" width="112" height="70" rx="6"/><rect x="980" y="70" width="112" height="70" rx="6"/>
+      <rect x="730" y="165" width="112" height="70" rx="6"/><rect x="855" y="165" width="112" height="70" rx="6"/><rect x="980" y="165" width="112" height="70" rx="6"/>
+      <rect x="730" y="260" width="112" height="70" rx="6"/><rect x="855" y="260" width="112" height="70" rx="6"/><rect x="980" y="260" width="112" height="70" rx="6"/>
+    </g>
+    <g stroke="#1f2430" stroke-width="2">
+      <rect x="736" y="82" width="100" height="46" rx="10" fill="#94a3b8"/><rect x="861" y="82" width="100" height="46" rx="10" fill="#f59e0b"/>
+      <rect x="986" y="82" width="100" height="46" rx="10" fill="#94a3b8"/><rect x="736" y="177" width="100" height="46" rx="10" fill="#10b981"/>
+      <rect x="861" y="177" width="100" height="46" rx="10" fill="#94a3b8"/><rect x="736" y="272" width="100" height="46" rx="10" fill="#ef4444"/>
+      <rect x="861" y="272" width="100" height="46" rx="10" fill="#94a3b8"/><rect x="986" y="272" width="100" height="46" rx="10" fill="#c4b5fd"/>
+    </g>
+    <text x="919" y="215" text-anchor="middle" font-size="120" font-weight="700" fill="#a64b07" class="qmark t-serif" opacity="0">?</text>
+    <!-- o carro -->
+    <g transform="translate(44 284)"><g class="car">
+      <rect x="0" y="0" width="100" height="46" rx="12" fill="#1d4ed8" stroke="#1f2430" stroke-width="2.5"/>
+      <rect x="18" y="-16" width="58" height="22" rx="8" fill="#93c5fd" stroke="#1f2430" stroke-width="2.5"/>
+      <circle cx="24" cy="48" r="10" fill="#1f2430"/><circle cx="76" cy="48" r="10" fill="#1f2430"/>
+    </g></g>
+    <g class="frag step" data-f="1"></g><g class="frag step" data-f="2"></g><g class="frag step" data-f="3"></g><g class="frag step" data-f="4"></g>
+  </svg>
+  <div class="map frag" data-f="5">
+    <div><b>o carro</b>são os bytes do arquivo</div>
+    <div><b>o tíquete</b>é a chave do objeto</div>
+    <div><b>o manobrista</b>é a API: você nunca entra no estacionamento</div>
+  </div>
+  <aside class="notes">Avance devagar. (1) Você entrega o carro. (2) Recebe um tíquete: A7F3. (3) O carro some numa vaga que você não conhece e nem precisa conhecer. (4) Você devolve o tíquete e o carro volta. (5) O mapa: carro = bytes, tíquete = chave, manobrista = API HTTP. Você nunca anda pelo estacionamento: não há "pastas" para navegar.</aside>
+</section>
+
+<section class="slide" id="compara" data-title="Comparação lado a lado">
+  <p class="kicker">2 · Três jeitos de guardar dados</p>
+  <h2>Lado a lado</h2>
+  <table class="tbl">
+    <thead><tr><th></th><th>Bloco</th><th>Arquivo</th><th>Objeto</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Unidade</td><td>bloco de tamanho fixo</td><td>arquivo dentro de pastas</td><td>objeto: bytes + metadados</td></tr>
+      <tr><td class="k">Acesso</td><td>pelo sistema operacional</td><td>caminho <code>/pasta/arq</code></td><td>HTTP: PUT, GET, DELETE numa chave</td></tr>
+      <tr><td class="k">Editar no meio?</td><td>sim</td><td>sim</td><td><b>não</b>: substitui inteiro</td></tr>
+      <tr><td class="k">Escala</td><td>um servidor</td><td>um servidor ou um cluster</td><td>muitos servidores, quase sem limite</td></tr>
+      <tr><td class="k">Uso típico</td><td>discos de banco e de VM</td><td>pastas compartilhadas</td><td>imagens, vídeos, PDFs, backups, logs</td></tr>
+    </tbody>
+  </table>
+  <p class="callout blue mt frag">A troca: o objeto perde a edição no meio e as pastas de verdade. Em compensação, ganha escala, acesso por HTTP e preço baixo.</p>
+  <aside class="notes">Destaque a linha "Editar no meio?": é a restrição que mais confunde quem vem de arquivos. Um objeto se substitui inteiro.</aside>
+</section>
+
+
+
+<section class="slide" id="anat" data-title="Anatomia de um objeto" data-part="3 · Anatomia do objeto">
+  <p class="kicker">3 · Anatomia</p>
+  <h2>O que tem dentro de um objeto</h2>
+  <div class="split-r">
+    <div class="bframe">
+      <span class="bl0">bucket · biblioteca</span>
+      <div class="objc">
+        <div class="band b-key"><span class="bl">chave</span><span class="tag" style="font-size:22px">livros/7/capa</span></div>
+        <div class="band b-data"><span class="bl">dados</span>
+          <div class="hex"><b class="m">89</b><b class="m">50</b><b class="m">4E</b><b class="m">47</b><b>0D</b><b>0A</b><b>1A</b><b>0A</b><b class="dim">00</b><b class="dim">…</b></div>
+          <p class="small muted" style="margin-top:8px">7.853 bytes: a imagem inteira, sem interpretação</p></div>
+        <div class="band b-meta"><span class="bl">metadados</span>
+          <div class="meta">Content-Type: image/png<br>Content-Length: 7853<br>ETag: "36bbd90a…"<br>Last-Modified: 12 nov 2026 15:54</div></div>
+      </div>
+    </div>
+    <ul class="clean">
+      <li class="frag"><b>Chave</b>: o nome único do objeto dentro do bucket. É o “tíquete”.</li>
+      <li class="frag"><b>Dados</b>: os bytes, do jeito que chegaram. O serviço não abre nem entende a imagem.</li>
+      <li class="frag"><b>Metadados</b>: informações sobre os bytes, como tipo, tamanho, uma impressão digital (ETag) e a data.</li>
+      <li class="frag"><b>Bucket</b>: o “estacionamento” onde o objeto mora.</li>
+    </ul>
+  </div>
+  <aside class="notes">Um objeto tem três partes: chave, dados e metadados. Ele mora num bucket. O serviço trata os dados como uma caixa-preta de bytes: quem sabe que aquilo é PNG é o Content-Type.</aside>
+</section>
+
+<section class="slide" id="bucketchave" data-title="Bucket e chave">
+  <p class="kicker">3 · Anatomia</p>
+  <h2>Bucket e chave: o endereço do objeto</h2>
+  <div class="grid2">
+    <div class="card blue frag">
+      <h3>Bucket</h3>
+      <ul class="clean">
+        <li>O recipiente de mais alto nível. Todo objeto mora num bucket.</li>
+        <li>Tem nome (<code>biblioteca</code>, <code>biblioteca-test</code>) e regras próprias, como quem pode acessar.</li>
+        <li>Na AWS, o nome é global: ninguém mais pode criar um bucket com o mesmo nome.</li>
+      </ul>
+    </div>
+    <div class="card amber frag">
+      <h3>Chave</h3>
+      <ul class="clean">
+        <li>Um texto qualquer, de até 1.024 bytes, que identifica o objeto no bucket.</li>
+        <li>Gravar de novo na mesma chave <b>substitui</b> o objeto.</li>
+        <li>Quem escolhe a chave é o servidor, nunca o usuário: <span class="tag">livros/7/capa</span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="banner frag mt2">bucket + chave = o endereço único de um objeto</p>
+  <aside class="notes">Reforce: a chave é decidida pelo servidor. Usar o nome do arquivo que o usuário mandou abre espaço para colisões ("foto.jpg" de duas pessoas) e para nomes maliciosos.</aside>
+</section>
+
+<section class="slide" id="plano" data-title="Namespace plano: prefixos">
+  <p class="kicker">3 · Anatomia</p>
+  <h2>Não existem pastas. Existem prefixos.</h2>
+  <div class="grid2">
+    <div>
+      <p class="xlabel">o que o serviço guarda: uma lista plana de chaves</p>
+      <div class="keys">
+        <div>autores/3/foto</div>
+        <div class="lv">livros/12/capa</div>
+        <div class="lv">livros/7/capa</div>
+        <div class="lv">livros/8/capa</div>
+        <div>relatorios/2026/11/acervo.pdf</div>
+      </div>
+      <p class="small muted mt">A lista vem em ordem de texto: <code>livros/12</code> aparece antes de <code>livros/7</code>.</p>
+    </div>
+    <div class="stack">
+      <div class="frag" data-f="1">
+        <p class="xlabel">o que o console desenha</p>
+        <div class="tree"><span class="fd"></span>autores/<br>&nbsp;&nbsp;&nbsp;<span class="fd"></span>3/ <span class="ob"></span>foto<br><span class="fd"></span>livros/<br>&nbsp;&nbsp;&nbsp;<span class="fd"></span>12/ <span class="fd"></span>7/ <span class="fd"></span>8/<br><span class="fd"></span>relatorios/ …</div>
+      </div>
+      <p class="callout frag" data-f="2"><b>LIST</b> com <code>prefix=livros/</code> devolve só as chaves que começam assim.</p>
+      <p class="callout red frag" data-f="3">A barra <code>/</code> é só um caractere. Apague o último objeto com aquele prefixo e a “pasta” some sozinha.</p>
+    </div>
+  </div>
+  <aside class="notes">O console desenha pastas para ajudar a navegar, mas o armazenamento é plano: uma tabela chave → objeto. A barra é convenção. Por isso não existe "criar pasta vazia" no S3 (alguns consoles simulam criando um objeto vazio).</aside>
+</section>
+
+<section class="slide" id="imut" data-title="Metadados e imutabilidade">
+  <p class="kicker">3 · Anatomia</p>
+  <h2>Metadados, e por que um objeto não se edita</h2>
+  <div class="split">
+    <table class="tbl">
+      <thead><tr><th>Metadado</th><th>Para que serve</th></tr></thead>
+      <tbody>
+        <tr><td class="k mono">Content-Type</td><td>o tipo: <code>image/png</code>. O navegador usa para exibir.</td></tr>
+        <tr><td class="k mono">Content-Length</td><td>o tamanho, em bytes</td></tr>
+        <tr><td class="k mono">ETag</td><td>uma impressão digital: mudou o conteúdo, muda a ETag</td></tr>
+        <tr><td class="k mono">Last-Modified</td><td>quando foi gravado</td></tr>
+        <tr><td class="k mono">x-amz-meta-*</td><td>metadados seus, por exemplo <code>x-amz-meta-livro: 7</code></td></tr>
+      </tbody>
+    </table>
+    <div>
+      <div class="vers">
+        <div class="ver v1"><h4>versão 1 · livros/8/capa</h4>type: image/png<br>size: 12<br>etag: "36bbd90a…ed8f"</div>
+        <div class="ver v2"><h4>gravou de novo · mesma chave</h4>type: <b>image/jpeg</b><br>size: <b>6</b><br>etag: <b>"e4cc473c…4dc1"</b></div>
+      </div>
+      <i class="frag step" data-f="1"></i>
+      <p class="callout frag" data-f="2">Não existe “mudar a linha 3 do objeto”. Grava-se tudo de novo, e o objeto antigo é substituído por inteiro.</p>
+    </div>
+  </div>
+  <aside class="notes">Os números da direita são reais, do nosso teste com o RustFS: a mesma chave recebeu um PNG e depois um JPEG. O tipo, o tamanho e a ETag mudaram juntos. Objeto é imutável: trocar = gravar de novo.</aside>
+</section>
+
+<section class="slide" id="url" data-title="Um objeto é um endereço HTTP" data-part="4 · A API HTTP">
+  <p class="kicker">4 · A API HTTP</p>
+  <h2>Cada objeto tem um endereço HTTP</h2>
+  <div class="bigurl"><span class="u-e">http://localhost:9000</span><span class="u-b">/biblioteca</span><span class="u-k">/livros/7/capa</span></div>
+  <div class="legend">
+    <div class="frag" style="border-color:var(--blue)"><b style="color:var(--blue)">endpoint</b><br>onde o serviço atende</div>
+    <div class="frag" style="border-color:var(--violet)"><b style="color:var(--violet)">bucket</b><br>o primeiro trecho do caminho</div>
+    <div class="frag" style="border-color:var(--amber)"><b style="color:var(--amber)">chave</b><br>o resto do caminho, com as barras</div>
+  </div>
+  <p class="callout blue mt2 frag">Na AWS, o bucket também pode ir no nome do host: <code>https://biblioteca.s3.amazonaws.com/livros/7/capa</code>. É o mesmo objeto, escrito de outro jeito.</p>
+  <p class="lead mt frag">Se o objeto é um recurso HTTP, os verbos HTTP fazem o resto: <b>PUT</b>, <b>GET</b>, <b>HEAD</b>, <b>DELETE</b>.</p>
+  <aside class="notes">O formato da primeira linha é o "path-style", que o RustFS usa por padrão. O formato com o bucket no host é o "virtual-hosted style" da AWS. Para o código, tanto faz: o cliente S3 monta a URL.</aside>
+</section>
+
+<section class="slide" id="put" data-title="PUT: gravar">
+  <p class="kicker">4 · A API HTTP</p>
+  <h2>PUT grava um objeto</h2>
+  <svg class="lane" viewBox="0 0 1136 104">
+    <rect x="0" y="12" width="170" height="80" rx="14" class="box"/><text x="85" y="60" text-anchor="middle" font-size="22" font-weight="700">Cliente</text>
+    <rect x="966" y="12" width="170" height="80" rx="14" class="box"/><text x="1051" y="60" text-anchor="middle" font-size="22" font-weight="700">RustFS</text>
+    <path d="M180 52 H956" class="dash"/>
+    <g class="frag mv" data-f="1" style="--tx:556px"><rect x="190" y="30" width="200" height="44" rx="10" fill="#1d4ed8"/><text x="290" y="59" text-anchor="middle" class="t-mono" font-size="19" font-weight="700" fill="#fff">PUT + bytes</text></g>
+    <g class="frag mv" data-f="2" style="--tx:-556px"><rect x="746" y="30" width="200" height="44" rx="10" fill="#047857"/><text x="846" y="59" text-anchor="middle" class="t-mono" font-size="19" font-weight="700" fill="#fff">200 OK</text></g>
+  </svg>
+  <div class="xgrid">
+    <div class="frag" data-f="1"><p class="xlabel">requisição</p>
+<div class="msg"><span class="m">PUT</span> /biblioteca/livros/7/capa HTTP/1.1
+<span class="h">Host:</span> localhost:9000
+<span class="h">Content-Type:</span> image/png
+<span class="h">Content-Length:</span> 7853
+<span class="h">Authorization:</span> AWS4-HMAC-SHA256 …
+
+<span class="c">‰PNG␍␊␚␊ … (7.853 bytes)</span></div></div>
+    <div class="frag" data-f="2"><p class="xlabel">resposta</p>
+<div class="msg">HTTP/1.1 <span class="s2">200 OK</span>
+<span class="h">ETag:</span> "36bbd90a8f515b48…"</div>
+      <p class="callout green mt">Gravou. Se a chave já existia, o objeto antigo foi substituído.</p></div>
+  </div>
+  <aside class="notes">O corpo da requisição são os bytes crus, sem JSON e sem base64. O Content-Type enviado vira metadado do objeto. O Authorization é a assinatura: vamos abri-la na parte de segurança.</aside>
+</section>
+
+<section class="slide" id="get" data-title="GET: ler">
+  <p class="kicker">4 · A API HTTP</p>
+  <h2>GET lê um objeto</h2>
+  <svg class="lane" viewBox="0 0 1136 104">
+    <rect x="0" y="12" width="170" height="80" rx="14" class="box"/><text x="85" y="60" text-anchor="middle" font-size="22" font-weight="700">Cliente</text>
+    <rect x="966" y="12" width="170" height="80" rx="14" class="box"/><text x="1051" y="60" text-anchor="middle" font-size="22" font-weight="700">RustFS</text>
+    <path d="M180 52 H956" class="dash"/>
+    <g class="frag mv" data-f="1" style="--tx:556px"><rect x="190" y="30" width="200" height="44" rx="10" fill="#1d4ed8"/><text x="290" y="59" text-anchor="middle" class="t-mono" font-size="19" font-weight="700" fill="#fff">GET</text></g>
+    <g class="frag mv" data-f="2" style="--tx:-556px"><rect x="746" y="30" width="200" height="44" rx="10" fill="#047857"/><text x="846" y="59" text-anchor="middle" class="t-mono" font-size="19" font-weight="700" fill="#fff">200 + bytes</text></g>
+  </svg>
+  <div class="xgrid">
+    <div class="frag" data-f="1"><div class="msg"><span class="m">GET</span> /biblioteca/livros/7/capa HTTP/1.1
+<span class="h">Host:</span> localhost:9000
+<span class="h">Authorization:</span> AWS4-HMAC-SHA256 …</div></div>
+    <div class="frag" data-f="2"><div class="msg">HTTP/1.1 <span class="s2">200 OK</span>
+<span class="h">Content-Type:</span> image/png
+<span class="h">Content-Length:</span> 7853
+
+<span class="c">‰PNG␍␊␚␊ … (7.853 bytes)</span></div></div>
+    <div class="frag" data-f="3"><div class="msg"><span class="m">GET</span> /biblioteca/livros/999/capa HTTP/1.1</div></div>
+    <div class="frag" data-f="3"><div class="msg">HTTP/1.1 <span class="s4">404 Not Found</span>
+<span class="c">&lt;Code&gt;</span>NoSuchKey<span class="c">&lt;/Code&gt;</span></div></div>
+  </div>
+  <aside class="notes">A resposta devolve os bytes e o Content-Type gravado no PUT. Chave inexistente: 404 com o código NoSuchKey no corpo XML. Esse nome volta no código Bun, como error.code.</aside>
+</section>
+
+<section class="slide" id="headdel" data-title="HEAD e DELETE">
+  <p class="kicker">4 · A API HTTP</p>
+  <h2>HEAD consulta, DELETE apaga</h2>
+  <div class="grid2">
+    <div class="stack">
+      <h3 class="serif" style="font-size:30px;margin:0">HEAD: só os metadados</h3>
+      <div class="msg frag" data-f="1"><span class="m">HEAD</span> /biblioteca/livros/7/capa</div>
+      <div class="msg frag" data-f="2">HTTP/1.1 <span class="s2">200 OK</span>
+<span class="h">Content-Type:</span> image/png
+<span class="h">Content-Length:</span> 7853
+<span class="c">(sem corpo)</span></div>
+      <p class="small frag" data-f="2">Responde “existe?” e “qual o tipo?” sem baixar os bytes.</p>
+    </div>
+    <div class="stack">
+      <h3 class="serif" style="font-size:30px;margin:0">DELETE: apaga</h3>
+      <div class="msg frag" data-f="3"><span class="m">DELETE</span> /biblioteca/livros/7/capa</div>
+      <div class="msg frag" data-f="4">HTTP/1.1 <span class="s2">204 No Content</span></div>
+      <p class="callout frag" data-f="5">Apagar de novo? <b>204</b> outra vez. Apagar uma chave que não existe não é erro: o DELETE é idempotente.</p>
+    </div>
+  </div>
+  <aside class="notes">HEAD é o que os métodos exists() e stat() do Bun fazem por baixo. O DELETE idempotente simplifica o código: não precisa checar antes de apagar.</aside>
+</section>
+
+<section class="slide" id="list" data-title="LIST: listar por prefixo">
+  <p class="kicker">4 · A API HTTP</p>
+  <h2>LIST: as chaves que começam com um prefixo</h2>
+  <div class="split">
+    <div class="stack">
+      <div class="msg frag" data-f="1"><span class="m">GET</span> /biblioteca?list-type=2&amp;prefix=livros/</div>
+      <ul class="clean frag" data-f="3">
+        <li>É um GET no <b>bucket</b>, não num objeto.</li>
+        <li>Devolve até 1.000 chaves por vez. Para mais, pede-se a próxima página.</li>
+        <li>Não traz os bytes, só a lista de chaves.</li>
+      </ul>
+    </div>
+    <pre class="code nonum frag" data-f="2" data-lang="html">&lt;ListBucketResult&gt;
+  &lt;Name&gt;biblioteca&lt;/Name&gt;
+  &lt;Prefix&gt;livros/&lt;/Prefix&gt;
+  &lt;Contents&gt;
+    &lt;Key&gt;livros/7/capa&lt;/Key&gt;
+    &lt;Size&gt;7853&lt;/Size&gt;
+  &lt;/Contents&gt;
+  &lt;Contents&gt;
+    &lt;Key&gt;livros/8/capa&lt;/Key&gt;
+    &lt;Size&gt;1346&lt;/Size&gt;
+  &lt;/Contents&gt;
+  &lt;IsTruncated&gt;false&lt;/IsTruncated&gt;
+&lt;/ListBucketResult&gt;</pre>
+  </div>
+  <aside class="notes">A resposta é XML. Ninguém lê XML à mão: o cliente S3 converte em objetos. IsTruncated=true indica que há mais páginas.</aside>
+</section>
+
+<section class="slide" id="padrao" data-title="S3: o padrão de fato">
+  <p class="kicker">4 · A API HTTP</p>
+  <h2>S3: a língua comum do armazenamento de objetos</h2>
+  <p class="lead frag">Em 2006, a Amazon lançou o S3 com essa API HTTP. Como muita gente passou a usar, outros serviços copiaram a mesma API.</p>
+  <div class="logos frag mt">
+    <span>Amazon S3</span><span>Cloudflare R2</span><span>Backblaze B2</span><span>DigitalOcean Spaces</span><span>Wasabi</span><span>Ceph RGW</span><span>Garage</span><span>SeaweedFS</span><span>MinIO</span><span class="me">RustFS</span>
+  </div>
+  <div class="frag mt">
+    <p class="xlabel">o mesmo código; só o endpoint muda</p>
+    <pre class="code nonum" data-lang="ts">new S3Client({ endpoint: "https://s3.us-east-1.amazonaws.com", … });       // Amazon S3
+new S3Client({ endpoint: "https://&lt;conta&gt;.r2.cloudflarestorage.com", … }); // Cloudflare R2
+new S3Client({ endpoint: "http://localhost:9100", … });                    // o RustFS local</pre>
+  </div>
+  <p class="callout green mt frag">Aprender S3 com o RustFS na sua máquina vale para a nuvem também.</p>
+  <aside class="notes">Este é o argumento prático: o que a turma aprender hoje com o RustFS local serve para AWS, R2 e companhia. A compatibilidade de cada serviço é ampla, não total; o básico (PUT, GET, HEAD, DELETE, LIST, URLs assinadas) é igual em todos.</aside>
+</section>
+
+
+
+<section class="slide" id="chaves" data-title="Privado por padrão: as duas chaves" data-part="5 · Segurança">
+  <p class="kicker">5 · Segurança</p>
+  <h2>Privado por padrão: toda requisição prova quem é</h2>
+  <div class="grid2">
+    <div class="card blue frag">
+      <h3>Access key: quem é você</h3>
+      <p>Funciona como um nome de usuário. Viaja em toda requisição e pode aparecer em logs.</p>
+      <p class="mono mt" style="font-size:24px">exemplo</p>
+    </div>
+    <div class="card amber frag">
+      <h3>Secret key: a prova</h3>
+      <p>Funciona como uma senha, mas <b>nunca viaja</b>. Serve só para assinar a requisição.</p>
+      <p class="mono mt" style="font-size:24px">exemplo-secreto</p>
+    </div>
+  </div>
+  <p class="xlabel mt frag" data-f="3">o cabeçalho de uma requisição de verdade</p>
+  <div class="auth frag" data-f="3">Authorization: AWS4-HMAC-SHA256 Credential=<span class="ak">exemplo</span>/20261112/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=<span class="sg">25d0ac9d2a4990dbd4445470dc417f984be58cb60d327d6264fe0aa844912354</span></div>
+  <p class="small mt frag" data-f="4">A access key está ali, e a secret não. No lugar dela vai uma <b>assinatura</b> calculada com ela. Sem assinatura válida, a resposta é <b>403</b>.</p>
+  <aside class="notes">Mostre que a secret key não aparece no cabeçalho. O nome AWS4-HMAC-SHA256 é o algoritmo de assinatura do S3 (SigV4), que todos os compatíveis implementam.</aside>
+</section>
+
+<section class="slide" id="carimbo" data-title="A assinatura é um carimbo">
+  <p class="kicker">5 · Segurança</p>
+  <h2>A assinatura funciona como um carimbo</h2>
+  <svg viewBox="0 0 1136 430" style="width:1136px;height:430px">
+    <defs><marker id="arK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f2430"/></marker></defs>
+    <!-- cliente -->
+    <text x="170" y="24" text-anchor="middle" font-size="18" font-weight="700" fill="#4f5763">NO CLIENTE</text>
+    <rect x="10" y="40" width="320" height="130" rx="14" class="box"/>
+    <text x="28" y="76" class="t-mono" font-size="17">PUT /biblioteca/livros/7/capa</text>
+    <text x="28" y="106" class="t-mono" font-size="17">data: 2026-11-12 15:54:17</text>
+    <text x="28" y="136" class="t-mono" font-size="17">hash do corpo: 9f2c…</text>
+    <g transform="translate(60 200)"><rect width="220" height="50" rx="10" fill="#fcefd6" stroke="#d99a3e" stroke-width="2.5"/><text x="110" y="32" text-anchor="middle" class="t-mono" font-size="18" font-weight="700" fill="#5b2a03">🔑 secret key</text></g>
+    <g class="frag" data-f="1">
+      <path d="M330 105 H392" class="wire" marker-end="url(#arK)"/><path d="M280 225 Q370 225 400 160" class="wire" marker-end="url(#arK)"/>
+      <circle cx="460" cy="130" r="62" fill="#14161c"/><text x="460" y="124" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">HMAC</text><text x="460" y="146" text-anchor="middle" fill="#ffd28a" font-size="15" class="t-mono">SHA-256</text>
+      <path d="M460 192 V262" class="wire" marker-end="url(#arK)"/>
+      <g transform="translate(360 268) rotate(-4)"><rect width="200" height="58" rx="10" fill="#fff" stroke="#a64b07" stroke-width="4" stroke-dasharray="4 3"/><text x="100" y="37" text-anchor="middle" class="t-mono" font-size="22" font-weight="800" fill="#a64b07">25d0ac9d…</text></g>
+    </g>
+    <!-- viagem -->
+    <g class="frag mv" data-f="2" style="--tx:300px">
+      <rect x="560" y="80" width="230" height="64" rx="10" fill="#1d4ed8"/>
+      <text x="675" y="108" text-anchor="middle" fill="#fff" class="t-mono" font-size="15" font-weight="700">requisição</text>
+      <text x="675" y="130" text-anchor="middle" fill="#ffd28a" class="t-mono" font-size="15" font-weight="700">+ carimbo 25d0ac9d…</text>
+    </g>
+    <!-- servidor -->
+    <text x="1010" y="24" text-anchor="middle" font-size="18" font-weight="700" fill="#4f5763">NO RUSTFS</text>
+    <rect x="884" y="160" width="252" height="150" rx="14" class="box frag" data-f="3"/>
+    <g class="frag" data-f="3">
+      <text x="1010" y="196" text-anchor="middle" font-size="17">recalcula com a</text>
+      <text x="1010" y="220" text-anchor="middle" font-size="17">sua cópia da secret</text>
+      <text x="1010" y="262" text-anchor="middle" class="t-mono" font-size="20" font-weight="800" fill="#a64b07">25d0ac9d…</text>
+      <text x="1010" y="294" text-anchor="middle" font-size="20" font-weight="800" fill="#047857">= igual ✓ aceita</text>
+    </g>
+    <g class="frag" data-f="4">
+      <rect x="10" y="352" width="1126" height="70" rx="14" fill="#fde3e3" stroke="#b91c1c" stroke-width="2.5"/>
+      <text x="30" y="395" font-size="21">Alguém trocou <tspan class="t-mono" font-weight="700">7</tspan> por <tspan class="t-mono" font-weight="700">8</tspan> no caminho → o carimbo recalculado sai diferente → <tspan font-weight="800" fill="#b91c1c">403 SignatureDoesNotMatch</tspan></text>
+    </g>
+  </svg>
+  <aside class="notes">Intuição, sem matemática: o carimbo depende do conteúdo da requisição E do segredo. Quem não tem o segredo não consegue produzir o carimbo certo. Mudou uma vírgula, o carimbo não bate. A data entra no cálculo, então uma requisição capturada não serve para sempre. (Tecnicamente: SigV4, HMAC-SHA256 com uma chave derivada da secret, da data, da região e do serviço.)</aside>
+</section>
+
+<section class="slide" id="presign" data-title="URLs pré-assinadas">
+  <p class="kicker">5 · Segurança</p>
+  <h2>URL pré-assinada: o carimbo vai dentro da URL</h2>
+  <div class="urlb">http://localhost:9000/biblioteca/livros/7/capa
+  ?X-Amz-Algorithm=AWS4-HMAC-SHA256
+  &amp;<span class="p-cred">X-Amz-Credential=exemplo/20261112/auto/s3/aws4_request</span>
+  &amp;<span class="p-time">X-Amz-Date=20261112T155417Z</span>
+  &amp;<span class="p-time">X-Amz-Expires=900</span>
+  &amp;X-Amz-SignedHeaders=host
+  &amp;<span class="p-sig">X-Amz-Signature=25d0ac9d2a4990dbd4445470dc417f98…</span></div>
+  <ul class="clean mt">
+    <li class="frag"><b>Credential</b>: a access key. A secret continua no servidor.</li>
+    <li class="frag"><b>Date + Expires</b>: vale 900 segundos (15 minutos) a partir daquele instante.</li>
+    <li class="frag"><b>Signature</b>: o carimbo. Mudou qualquer parâmetro, ele deixa de valer.</li>
+    <li class="frag arrow">Quem tem a URL, tem o acesso, até ela expirar. O navegador abre direto, sem senha.</li>
+  </ul>
+  <aside class="notes">O servidor que tem a secret gera a URL (em Bun: s3.presign). Ele entrega a URL a quem deve acessar. O formato foi copiado de uma URL que o Bun gerou no nosso teste contra o RustFS (só troquei o host pelo padrão 9000).</aside>
+</section>
+
+<section class="slide" id="caminhos" data-title="Dois caminhos para servir uma imagem">
+  <p class="kicker">5 · Segurança</p>
+  <h2>Dois caminhos para mostrar uma imagem</h2>
+  <div class="grid2">
+    <div class="card frag" data-f="1">
+      <h3>A · pelo backend</h3>
+      <svg viewBox="0 0 520 150" style="width:100%;height:150px">
+        <defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f2430"/></marker></defs>
+        <rect x="0" y="45" width="130" height="60" rx="10" class="box"/><text x="65" y="81" text-anchor="middle" font-size="17" font-weight="700">Navegador</text>
+        <rect x="195" y="45" width="130" height="60" rx="10" class="box"/><text x="260" y="81" text-anchor="middle" font-size="17" font-weight="700">Bun</text>
+        <rect x="390" y="45" width="130" height="60" rx="10" class="box"/><text x="455" y="81" text-anchor="middle" font-size="17" font-weight="700">RustFS</text>
+        <path d="M130 65 H190" class="wire" marker-end="url(#arC)"/><path d="M325 65 H385" class="wire" marker-end="url(#arC)"/>
+        <path d="M390 92 H330" stroke="#047857" stroke-width="5" marker-end="url(#arC)"/><path d="M195 92 H135" stroke="#047857" stroke-width="5" marker-end="url(#arC)"/>
+        <text x="260" y="138" text-anchor="middle" font-size="15" fill="#047857" font-weight="700">os bytes passam pelo Bun</text>
+      </svg>
+      <ul class="clean small"><li class="ok">O RustFS fica escondido na rede interna.</li><li class="ok">Validação e permissão no mesmo lugar.</li><li class="bad">Cada imagem ocupa o servidor da aplicação.</li></ul>
+    </div>
+    <div class="card frag" data-f="2">
+      <h3>B · URL assinada</h3>
+      <svg viewBox="0 0 520 150" style="width:100%;height:150px">
+        <rect x="0" y="45" width="130" height="60" rx="10" class="box"/><text x="65" y="81" text-anchor="middle" font-size="17" font-weight="700">Navegador</text>
+        <rect x="195" y="0" width="130" height="50" rx="10" class="box"/><text x="260" y="31" text-anchor="middle" font-size="17" font-weight="700">Bun</text>
+        <rect x="390" y="90" width="130" height="56" rx="10" class="box"/><text x="455" y="124" text-anchor="middle" font-size="17" font-weight="700">RustFS</text>
+        <path d="M130 58 L190 32" class="wire" marker-end="url(#arC)"/><text x="148" y="30" font-size="13" class="t-mono">1 URL?</text>
+        <path d="M195 42 L136 66" stroke="#a64b07" stroke-width="3" fill="none" marker-end="url(#arC)"/><text x="210" y="72" font-size="13" class="t-mono" fill="#a64b07">2 URL assinada</text>
+        <path d="M130 96 H384" stroke="#047857" stroke-width="5" marker-end="url(#arC)"/><text x="190" y="120" font-size="13" class="t-mono" fill="#047857" font-weight="700">3 bytes direto</text>
+      </svg>
+      <ul class="clean small"><li class="ok">O servidor nem toca nos bytes.</li><li class="ok">Combina com CDN.</li><li class="bad">O armazenamento precisa ser alcançável pelo navegador.</li></ul>
+    </div>
+  </div>
+  <p class="callout blue mt frag" data-f="3"><b>Hoje, na biblioteca, vamos de A</b>: o RustFS fica só na rede interna do compose e o backend valida tudo. É o caminho mais simples para aprender.</p>
+  <aside class="notes">Os dois caminhos são corretos. A é mais simples e esconde o armazenamento; B tira peso do servidor e escala melhor. A próxima tela mostra o que fazer em produção.</aside>
+</section>
+
+<section class="slide" id="prod" data-title="Em produção: subdomínio de mídia">
+  <p class="kicker">5 · Segurança · em produção</p>
+  <h2>Em produção: um subdomínio só para mídia, com URLs de validade curta</h2>
+  <span class="stamp">importante</span>
+  <svg viewBox="0 0 1136 200" style="width:1136px;height:200px">
+    <defs><marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f2430"/></marker></defs>
+    <rect x="0" y="70" width="170" height="70" rx="12" class="box"/><text x="85" y="112" text-anchor="middle" font-size="19" font-weight="700">Navegador</text>
+    <rect x="300" y="0" width="290" height="70" rx="12" class="box"/><text x="445" y="32" text-anchor="middle" font-size="19" font-weight="700">app.biblioteca.com</text><text x="445" y="56" text-anchor="middle" font-size="15" class="t-mono" fill="#4f5763">API</text>
+    <rect x="300" y="128" width="290" height="70" rx="12" fill="#fcefd6" stroke="#a64b07" stroke-width="2.5"/><text x="445" y="160" text-anchor="middle" font-size="19" font-weight="700">midia.biblioteca.com</text><text x="445" y="184" text-anchor="middle" font-size="15" class="t-mono" fill="#5b2a03">CDN</text>
+    <rect x="740" y="128" width="210" height="70" rx="12" class="box"/><text x="845" y="168" text-anchor="middle" font-size="19" font-weight="700">bucket</text>
+    <path d="M170 92 L294 40" class="wire" marker-end="url(#arP)"/>
+    <path d="M170 118 L294 160" stroke="#a64b07" stroke-width="4" fill="none" marker-end="url(#arP)"/>
+    <path d="M590 163 H734" class="wire" marker-end="url(#arP)"/>
+    <text x="620" y="26" font-size="15" class="t-mono">{"capaUrl": "https://midia.biblioteca.com/livros/7/capa</text><text x="640" y="48" font-size="15" class="t-mono">?X-Amz-Expires=300&amp;X-Amz-Signature=…"}</text>
+    <text x="960" y="168" font-size="14" fill="#4f5763">só na 1ª vez;</text><text x="960" y="186" font-size="14" fill="#4f5763">depois, cache</text>
+  </svg>
+  <ul class="clean why">
+    <li class="ok frag">O servidor da aplicação não carrega bytes de imagem e fica livre para a API.</li>
+    <li class="ok frag">A CDN guarda cópias perto do usuário: a imagem chega mais rápido e o bucket recebe menos acessos.</li>
+    <li class="ok frag">Os cookies de sessão de <code>app.</code> não viajam em cada imagem, porque é outro host.</li>
+    <li class="ok frag">O que os usuários enviam fica numa origem separada: um arquivo malicioso não roda com os privilégios da aplicação.</li>
+    <li class="ok frag">Validade curta (minutos): um link vazado expira logo.</li>
+  </ul>
+  <aside class="notes">Este é o recado de arquitetura para levar para a vida. Na aula fazemos pelo backend porque é mais simples e mantém o RustFS escondido. Em produção, o ideal é um subdomínio próprio servindo as imagens direto, com URLs assinadas de validade curta e uma CDN na frente. Detalhe dos cookies: eles só deixam de ir junto se forem "host-only" (sem Domain=biblioteca.com).</aside>
+</section>
+
+<section class="slide" id="usar" data-title="Quando usar, quando não usar" data-part="6 · Quando usar">
+  <p class="kicker">6 · Quando usar</p>
+  <h2>Quando usar, e quando não usar</h2>
+  <div class="grid2">
+    <div class="card green frag">
+      <h3>Use para</h3>
+      <ul class="clean">
+        <li class="ok">Imagens, vídeos, áudio e PDFs enviados por usuários</li>
+        <li class="ok">Backups e exportações</li>
+        <li class="ok">Logs e arquivos de dados para análise</li>
+        <li class="ok">Arquivos estáticos de sites e resultados de build</li>
+      </ul>
+    </div>
+    <div class="card red frag">
+      <h3>Não use para</h3>
+      <ul class="clean">
+        <li class="bad">Dados que você filtra e consulta: isso é tarefa do banco</li>
+        <li class="bad">Editar um pedaço do arquivo: o objeto se substitui inteiro</li>
+        <li class="bad">Muitas escritas por segundo no mesmo objeto</li>
+        <li class="bad">Transações que envolvem vários objetos</li>
+      </ul>
+    </div>
+  </div>
+  <p class="banner frag mt2">No banco, a <em>referência</em>. No armazenamento de objetos, os <em>bytes</em>.</p>
+  <aside class="notes">A frase do banner é a regra de ouro da aula. Na biblioteca, a tabela livros vai guardar só a informação de que existe uma capa (uma data); os bytes ficam no RustFS.</aside>
+</section>
+
+<section class="slide" id="rustfs" data-title="O que é o RustFS" data-part="7 · O RustFS">
+  <p class="kicker">7 · O RustFS</p>
+  <h2>RustFS: um servidor S3 que roda na sua máquina</h2>
+  <div class="facts">
+    <div class="fact frag"><b>Armazenamento de objetos</b><span>Um servidor que guarda buckets e objetos no disco onde roda.</span></div>
+    <div class="fact frag"><b>API S3</b><span>Compatibilidade ampla com o S3, com uma matriz pública do que é suportado.</span></div>
+    <div class="fact frag"><b>Escrito em Rust</b><span>Linguagem compilada, com segurança de memória.</span></div>
+    <div class="fact frag"><b>Licença Apache 2.0</b><span>Aberto e permissivo, inclusive para uso comercial.</span></div>
+    <div class="fact frag"><b>Console web</b><span>Uma interface para ver buckets, objetos e usuários.</span></div>
+    <div class="fact frag"><b>Um contêiner ou um cluster</b><span>Imagem <code>rustfs/rustfs</code>. Em aula: a versão 1.0.5, de novembro de 2026.</span></div>
+  </div>
+  <aside class="notes">Fatos conferidos no README do projeto (github.com/rustfs/rustfs): S3-compatível, escrito em Rust, Apache 2.0. A versão 1.0.5 é a imagem que testamos (rustfs --version: 1.0.5, build de 10/11/2026). O projeto não promete compatibilidade total: mantém uma matriz do que suporta.</aside>
+</section>
+
+<section class="slide" id="porque" data-title="Por que o RustFS existe">
+  <p class="kicker">7 · O RustFS</p>
+  <h2>Por que ele existe: o que aconteceu com o MinIO</h2>
+  <p class="lead">Durante anos, o MinIO foi o servidor S3 aberto mais usado para rodar localmente e em servidores próprios. Entre 2025 e 2026, isso mudou:</p>
+  <div class="tl mt">
+    <div class="ev frag"><time>mai 2025</time><p>O console administrativo sai da edição comunitária.</p></div>
+    <div class="ev frag"><time>out 2025</time><p>Param de sair binários e imagens Docker: só código-fonte.</p></div>
+    <div class="ev frag"><time>dez 2025</time><p>O projeto entra em modo de manutenção.</p></div>
+    <div class="ev frag"><time>fev 2026</time><p>O repositório é arquivado.</p></div>
+  </div>
+  <p class="callout green mt2 frag">Alternativas abertas ganharam espaço: <b>RustFS</b>, Garage, SeaweedFS, Ceph. O RustFS tem licença Apache 2.0 (o MinIO usava AGPL v3) e console próprio.</p>
+  <aside class="notes">Fontes: anúncio de modo de manutenção no GitHub do MinIO (3/12/2025), cobertura da Linuxiac (5/12/2025) e linha do tempo do blog de Vonng (pigsty). A empresa direciona os clientes para o produto pago AIStor. Não é preciso decorar as datas: a ideia é que a ferramenta mais famosa deixou de ser uma opção aberta, e por isso usamos o RustFS.</aside>
+</section>
+
+<section class="slide" id="topologia" data-title="Nó único e distribuído">
+  <p class="kicker">7 · O RustFS</p>
+  <h2>Um nó para aprender, vários nós para produção</h2>
+  <svg viewBox="0 0 1136 340" style="width:1136px;height:340px">
+    <text x="200" y="26" text-anchor="middle" font-size="21" font-weight="700">em aula: 1 nó, 1 disco</text>
+    <rect x="60" y="60" width="280" height="200" rx="16" class="box"/>
+    <text x="200" y="100" text-anchor="middle" font-size="20" font-weight="700">rustfs</text>
+    <g transform="translate(140 125)"><ellipse cx="60" cy="12" rx="60" ry="12" fill="#ece6d8" stroke="#1f2430" stroke-width="2.5"/><path d="M0 12 V86 Q60 110 120 86 V12" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><ellipse cx="60" cy="12" rx="60" ry="12" fill="#ece6d8" stroke="#1f2430" stroke-width="2.5"/><text x="60" y="64" text-anchor="middle" class="t-mono" font-size="16">/data</text></g>
+    <text x="200" y="300" text-anchor="middle" font-size="18" fill="#4f5763">volume do Docker</text>
+    <g class="frag">
+      <text x="790" y="26" text-anchor="middle" font-size="21" font-weight="700">produção: vários nós, vários discos</text>
+      <rect x="470" y="50" width="640" height="56" rx="12" fill="#14161c"/><text x="790" y="85" text-anchor="middle" fill="#fff" font-size="18" font-weight="700">mesmo endpoint S3 (balanceador)</text>
+      <g font-size="16">
+        <g transform="translate(470 130)"><rect width="145" height="170" rx="12" class="box"/><text x="72" y="28" text-anchor="middle" font-weight="700">nó 1</text><g fill="#ece6d8" stroke="#1f2430" stroke-width="2"><rect x="18" y="44" width="50" height="50" rx="6"/><rect x="78" y="44" width="50" height="50" rx="6"/><rect x="18" y="104" width="50" height="50" rx="6"/><rect x="78" y="104" width="50" height="50" rx="6"/></g></g>
+        <g transform="translate(635 130)"><rect width="145" height="170" rx="12" class="box"/><text x="72" y="28" text-anchor="middle" font-weight="700">nó 2</text><g fill="#ece6d8" stroke="#1f2430" stroke-width="2"><rect x="18" y="44" width="50" height="50" rx="6"/><rect x="78" y="44" width="50" height="50" rx="6"/><rect x="18" y="104" width="50" height="50" rx="6"/><rect x="78" y="104" width="50" height="50" rx="6"/></g></g>
+        <g transform="translate(800 130)"><rect width="145" height="170" rx="12" class="box"/><text x="72" y="28" text-anchor="middle" font-weight="700">nó 3</text><g fill="#ece6d8" stroke="#1f2430" stroke-width="2"><rect x="18" y="44" width="50" height="50" rx="6"/><rect x="78" y="44" width="50" height="50" rx="6"/><rect x="18" y="104" width="50" height="50" rx="6"/><rect x="78" y="104" width="50" height="50" rx="6"/></g></g>
+        <g transform="translate(965 130)"><rect width="145" height="170" rx="12" class="box"/><text x="72" y="28" text-anchor="middle" font-weight="700">nó 4</text><g fill="#ece6d8" stroke="#1f2430" stroke-width="2"><rect x="18" y="44" width="50" height="50" rx="6"/><rect x="78" y="44" width="50" height="50" rx="6"/><rect x="18" y="104" width="50" height="50" rx="6"/><rect x="78" y="104" width="50" height="50" rx="6"/></g></g>
+      </g>
+    </g>
+  </svg>
+  <p class="callout blue frag">Para a aplicação, nada muda: o mesmo endpoint e as mesmas chamadas S3. O que muda é quantas falhas o armazenamento aguenta.</p>
+  <aside class="notes">No compose usamos um nó com um disco (um volume do Docker). Em produção, vários nós com vários discos cada. Como os dados se espalham entre os discos é o assunto das duas próximas telas.</aside>
+</section>
+
+<section class="slide" id="ec" data-title="Erasure coding: fatiar e espalhar">
+  <p class="kicker">7 · O RustFS</p>
+  <h2>Erasure coding: fatiar o objeto e espalhar pelos discos</h2>
+  <svg viewBox="0 0 1136 440" style="width:1136px;height:440px">
+    <!-- objeto -->
+    <g class="blk"><rect x="268" y="10" width="600" height="64" rx="12" fill="#fff" stroke="#1f2430" stroke-width="2.5"/><text x="568" y="51" text-anchor="middle" font-size="22" font-weight="700">capa.jpg · um objeto de 6 MB</text></g>
+    <!-- fatias de dados -->
+    <g class="frag" data-f="1" data-off="3">
+      <rect x="268" y="110" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="338" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D1</text>
+      <rect x="421" y="110" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="491" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D2</text>
+      <rect x="574" y="110" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="644" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D3</text>
+      <rect x="727" y="110" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="797" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D4</text>
+    </g>
+    <text x="900" y="145" font-size="18" fill="#1d4ed8" font-weight="700" class="frag" data-f="1" data-off="3">4 fatias de dados</text>
+    <!-- paridade -->
+    <g class="frag" data-f="2" data-off="3">
+      <rect x="421" y="190" width="140" height="56" rx="10" fill="#f59e0b"/><text x="491" y="225" text-anchor="middle" font-size="20" font-weight="700">P1</text>
+      <rect x="574" y="190" width="140" height="56" rx="10" fill="#f59e0b"/><text x="644" y="225" text-anchor="middle" font-size="20" font-weight="700">P2</text>
+    </g>
+    <text x="727" y="225" font-size="18" fill="#a64b07" font-weight="700" class="frag" data-f="2" data-off="3">2 de paridade, calculadas a partir de D1..D4</text>
+    <!-- discos -->
+    <g font-size="17" font-weight="700">
+      <g transform="translate(60 300)"><rect width="150" height="120" rx="14" class="box"/><text x="75" y="110" text-anchor="middle">disco 1</text></g>
+      <g transform="translate(232 300)"><rect width="150" height="120" rx="14" class="box"/><text x="75" y="110" text-anchor="middle">disco 2</text></g>
+      <g transform="translate(404 300)"><rect width="150" height="120" rx="14" class="box"/><text x="75" y="110" text-anchor="middle">disco 3</text></g>
+      <g transform="translate(576 300)"><rect width="150" height="120" rx="14" class="box"/><text x="75" y="110" text-anchor="middle">disco 4</text></g>
+      <g transform="translate(748 300)"><rect width="150" height="120" rx="14" class="box"/><text x="75" y="110" text-anchor="middle">disco 5</text></g>
+      <g transform="translate(920 300)"><rect width="150" height="120" rx="14" class="box"/><text x="75" y="110" text-anchor="middle">disco 6</text></g>
+    </g>
+    <!-- cada fatia desce para um disco -->
+    <g class="frag mv" data-f="3" style="--tx:-203px;--ty:204px"><rect x="268" y="110" width="140" height="56" rx="10" fill="#1d4ed8" stroke="#fff" stroke-width="3"/><text x="338" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D1</text></g>
+    <g class="frag mv" data-f="3" style="--tx:-184px;--ty:204px"><rect x="421" y="110" width="140" height="56" rx="10" fill="#1d4ed8" stroke="#fff" stroke-width="3"/><text x="491" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D2</text></g>
+    <g class="frag mv" data-f="3" style="--tx:-165px;--ty:204px"><rect x="574" y="110" width="140" height="56" rx="10" fill="#1d4ed8" stroke="#fff" stroke-width="3"/><text x="644" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D3</text></g>
+    <g class="frag mv" data-f="3" style="--tx:-146px;--ty:204px"><rect x="727" y="110" width="140" height="56" rx="10" fill="#1d4ed8" stroke="#fff" stroke-width="3"/><text x="797" y="145" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">D4</text></g>
+    <g class="frag mv" data-f="3" style="--tx:332px;--ty:124px"><rect x="421" y="190" width="140" height="56" rx="10" fill="#f59e0b" stroke="#fff" stroke-width="3"/><text x="491" y="225" text-anchor="middle" font-size="20" font-weight="700">P1</text></g>
+    <g class="frag mv" data-f="3" style="--tx:351px;--ty:124px"><rect x="574" y="190" width="140" height="56" rx="10" fill="#f59e0b" stroke="#fff" stroke-width="3"/><text x="644" y="225" text-anchor="middle" font-size="20" font-weight="700">P2</text></g>
+    <text x="568" y="190" text-anchor="middle" font-size="22" font-weight="700" fill="#047857" class="frag" data-f="3" style="transition-delay:.8s">cada fatia vai para um disco diferente</text>
+  </svg>
+  <aside class="notes">(1) O objeto é fatiado em 4 pedaços de dados. (2) A partir deles, calculam-se 2 pedaços de paridade: informação extra que permite reconstruir o que faltar. (3) Cada pedaço vai para um disco diferente. A proporção 4+2 é só um exemplo; ela é configurável.</aside>
+</section>
+
+<section class="slide" id="ec2" data-title="Erasure coding: um disco cai">
+  <p class="kicker">7 · O RustFS</p>
+  <h2>Dois discos caem, e o objeto continua inteiro</h2>
+  <svg viewBox="0 0 1136 300" style="width:1136px;height:300px">
+    <defs><marker id="arE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#047857"/></marker></defs>
+    <g font-size="17" font-weight="700">
+      <g transform="translate(60 150)"><rect width="150" height="120" rx="14" class="box"/><rect x="5" y="14" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="75" y="49" text-anchor="middle" fill="#fff" font-size="20">D1</text><text x="75" y="106" text-anchor="middle">disco 1</text></g>
+      <g transform="translate(232 150)"><rect width="150" height="120" rx="14" class="box"/><rect x="5" y="14" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="75" y="49" text-anchor="middle" fill="#fff" font-size="20">D2</text><text x="75" y="106" text-anchor="middle">disco 2</text></g>
+      <g transform="translate(404 150)"><rect width="150" height="120" rx="14" class="box"/><rect x="5" y="14" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="75" y="49" text-anchor="middle" fill="#fff" font-size="20">D3</text><text x="75" y="106" text-anchor="middle">disco 3</text></g>
+      <g transform="translate(576 150)"><rect width="150" height="120" rx="14" class="box"/><rect x="5" y="14" width="140" height="56" rx="10" fill="#1d4ed8"/><text x="75" y="49" text-anchor="middle" fill="#fff" font-size="20">D4</text><text x="75" y="106" text-anchor="middle">disco 4</text></g>
+      <g transform="translate(748 150)"><rect width="150" height="120" rx="14" class="box"/><rect x="5" y="14" width="140" height="56" rx="10" fill="#f59e0b"/><text x="75" y="49" text-anchor="middle" font-size="20">P1</text><text x="75" y="106" text-anchor="middle">disco 5</text></g>
+      <g transform="translate(920 150)"><rect width="150" height="120" rx="14" class="box"/><rect x="5" y="14" width="140" height="56" rx="10" fill="#f59e0b"/><text x="75" y="49" text-anchor="middle" font-size="20">P2</text><text x="75" y="106" text-anchor="middle">disco 6</text></g>
+    </g>
+    <g class="frag" data-f="1">
+      <rect x="232" y="150" width="150" height="120" rx="14" fill="rgba(185,28,28,.82)"/><path d="M262 170 L352 250 M352 170 L262 250" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+      <rect x="748" y="150" width="150" height="120" rx="14" fill="rgba(185,28,28,.82)"/><path d="M778 170 L868 250 M868 170 L778 250" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <g class="frag" data-f="2">
+      <path d="M135 150 L500 82" fill="none" stroke="#047857" stroke-width="3" marker-end="url(#arE)"/>
+      <path d="M479 150 L540 84" fill="none" stroke="#047857" stroke-width="3" marker-end="url(#arE)"/>
+      <path d="M651 150 L600 84" fill="none" stroke="#047857" stroke-width="3" marker-end="url(#arE)"/>
+      <path d="M995 150 L640 82" fill="none" stroke="#047857" stroke-width="3" marker-end="url(#arE)"/>
+      <rect x="370" y="10" width="400" height="66" rx="14" fill="#d9f3e7" stroke="#047857" stroke-width="2.5"/>
+      <text x="570" y="51" text-anchor="middle" font-size="21" font-weight="700" fill="#047857">capa.jpg reconstruída ✓</text>
+    </g>
+  </svg>
+  <p class="callout green frag" data-f="3">Com 4 fatias de dados e 2 de paridade, quaisquer 4 das 6 bastam: até 2 discos podem falhar.</p>
+  <p class="callout red mt frag" data-f="4">Em aula, com 1 nó e 1 disco, não existe essa proteção: o volume é a única cópia. Fora da aula, isso se resolve com backup ou com vários discos.</p>
+  <aside class="notes">Ponto-chave: a paridade troca espaço por tolerância a falhas, sem precisar guardar cópias inteiras. Termine com o alerta: o nosso RustFS de aula não tem redundância nenhuma.</aside>
+</section>
+
+
+
+<section class="slide codeslide" id="compose1" data-title="O serviço rustfs no compose" data-part="8 · RustFS no Docker">
+  <p class="kicker">8 · RustFS no Docker · compose.yaml</p>
+  <h2>O serviço <code style="font-size:.85em">rustfs</code></h2>
+  <div class="codewrap">
+    <pre class="code" style="font-size:15px" data-lang="yaml" data-file="compose.yaml" data-lines="5-24" data-start="5">services:
+  rustfs:
+    image: rustfs/rustfs:1.0.5
+    environment:
+      # o "usuário" e a "senha" do S3: access key e secret key
+      RUSTFS_ACCESS_KEY: exemplo
+      RUSTFS_SECRET_KEY: exemplo-secreto
+    ports:
+      # API S3: o index.ts roda no seu computador e fala com o RustFS por aqui
+      - "127.0.0.1:9100:9000"
+      # console web: http://localhost:9101/rustfs/console/
+      - "127.0.0.1:9101:9001"
+    volumes:
+      # os objetos são a fonte da verdade: precisam sobreviver ao contêiner
+      - dados:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/health/ready &gt;/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 30</pre>
+    <div class="explain">
+      <i class="frag hl" data-f="1" data-hl="7"></i><i class="frag hl" data-f="2" data-hl="8-11"></i><i class="frag hl" data-f="3" data-hl="12-16"></i><i class="frag hl" data-f="4" data-hl="17-19"></i><i class="frag hl" data-f="5" data-hl="20-24"></i>
+      <div class="frag card amber" data-f="1" data-off="2"><b class="t">imagem fixa</b><p>A versão vai escrita: <code>1.0.5</code>. Com <code>latest</code>, cada pessoa da turma poderia ter uma versão diferente.</p></div>
+      <div class="frag card amber" data-f="2" data-off="3"><b class="t">credenciais</b><p>A access key e a secret key do servidor. Em aula ficam no arquivo; em produção vêm de segredos.</p></div>
+      <div class="frag card amber" data-f="3" data-off="4"><b class="t">duas portas</b><p><b>9000</b>: a API S3. <b>9001</b>: o console web. Aqui elas aparecem como 9100 e 9101 no seu computador.</p></div>
+      <div class="frag card amber" data-f="4" data-off="5"><b class="t">volume</b><p>Diferente de um cache, os objetos são a fonte da verdade: precisam sobreviver ao contêiner.</p></div>
+      <div class="frag card amber" data-f="5"><b class="t">healthcheck</b><p>Pergunta se o servidor está <b>pronto</b>, não só se está vivo. A próxima tela mostra por quê.</p></div>
+    </div>
+  </div>
+  <aside class="notes">Percorra linha a linha. As portas 9100 e 9101 foram escolhidas para não colidir com outro MinIO ou RustFS que alguém já tenha rodando na 9000 e na 9001. Dentro da rede do compose, o serviço continua atendendo na 9000.</aside>
+</section>
+
+<section class="slide" id="ready" data-title="Vivo não é o mesmo que pronto">
+  <p class="kicker">8 · RustFS no Docker</p>
+  <h2>“Vivo” não é o mesmo que “pronto”</h2>
+  <svg viewBox="0 0 1136 300" style="width:1136px;height:300px">
+    <g font-size="15" fill="#4f5763" class="t-mono">
+      <text x="250" y="290" text-anchor="middle">0 s</text><text x="410" y="290" text-anchor="middle">2 s</text><text x="570" y="290" text-anchor="middle">4 s</text><text x="730" y="290" text-anchor="middle">6 s</text><text x="890" y="290" text-anchor="middle">8 s</text><text x="1050" y="290" text-anchor="middle">10 s</text>
+    </g>
+    <path d="M250 270 H1110" stroke="#8b8f98" stroke-width="2"/>
+    <g class="frag" data-f="1"><text x="0" y="40" class="lbl">processo</text><rect x="250" y="20" width="860" height="30" rx="8" fill="#d9f3e7" stroke="#047857" stroke-width="2"/><text x="270" y="41" font-size="16" fill="#047857" font-weight="700">rodando</text></g>
+    <g class="frag" data-f="2"><text x="0" y="100" class="lbl t-mono">/health</text><rect x="250" y="80" width="40" height="30" rx="8" fill="#ece6d8"/><rect x="292" y="80" width="818" height="30" rx="8" fill="#d9f3e7" stroke="#047857" stroke-width="2"/><text x="310" y="101" font-size="16" fill="#047857" font-weight="700">200 OK, quase na hora</text></g>
+    <g class="frag" data-f="3"><text x="0" y="160" class="lbl">API S3 (PUT, GET)</text><rect x="250" y="140" width="790" height="30" rx="8" fill="#fde3e3" stroke="#b91c1c" stroke-width="2"/><text x="270" y="161" font-size="16" fill="#b91c1c" font-weight="700">503 Service Unavailable (Retry-After: 5)</text><rect x="1042" y="140" width="68" height="30" rx="8" fill="#d9f3e7" stroke="#047857" stroke-width="2"/><text x="1076" y="161" text-anchor="middle" font-size="16" fill="#047857" font-weight="700">200</text></g>
+    <g class="frag" data-f="4"><text x="0" y="220" class="lbl t-mono">/health/ready</text><rect x="250" y="200" width="790" height="30" rx="8" fill="#fde3e3" stroke="#b91c1c" stroke-width="2"/><text x="270" y="221" font-size="16" fill="#b91c1c" font-weight="700">503: ainda não</text><rect x="1042" y="200" width="68" height="30" rx="8" fill="#d9f3e7" stroke="#047857" stroke-width="2"/><text x="1076" y="221" text-anchor="middle" font-size="16" fill="#047857" font-weight="700">200</text>
+      <path d="M1042 10 V262" stroke="#1d4ed8" stroke-width="3" stroke-dasharray="6 5"/></g>
+  </svg>
+  <div class="grid2">
+    <p class="callout red frag" data-f="5">Na primeira versão do exemplo, o healthcheck usava <code>/health</code>. O compose deu o RustFS como saudável, o <code>rc</code> tentou criar o bucket e levou <b>503</b>.</p>
+    <p class="callout green frag" data-f="6">Com <code>/health/ready</code>, quem depende do RustFS só começa quando a API S3 aceita requisições. <b>Liveness</b>: está vivo? <b>Readiness</b>: já atende?</p>
+  </div>
+  <aside class="notes">História real, do teste que fizemos para preparar esta aula: o init falhou com "Network error: Service error: unhandled error (status: 503)". A documentação do RustFS explica: as rotas de saúde respondem antes de a inicialização terminar, e a API S3 devolve 503 até o servidor ficar "FullReady". Os tempos do gráfico são aproximados (cerca de 10 s numa máquina comum).</aside>
+</section>
+
+<section class="slide codeslide" id="compose2" data-title="O serviço criar-bucket">
+  <p class="kicker">8 · RustFS no Docker · compose.yaml</p>
+  <h2>Quem cria o bucket: uma tarefa que roda uma vez</h2>
+  <pre class="code" style="font-size:17px" data-lang="yaml" data-file="compose.yaml" data-lines="26-37" data-start="26">  # Tarefa única: cria o bucket com o rc, o cliente de linha de comando que já
+  # vem dentro da imagem do RustFS. Rodar de novo não dá erro (--ignore-existing).
+  criar-bucket:
+    image: rustfs/rustfs:1.0.5
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        rc alias set local http://rustfs:9000 exemplo exemplo-secreto
+        rc bucket create --ignore-existing local/fotos</pre>
+  <i class="frag hl" data-f="1" data-hl="29,33"></i><i class="frag hl" data-f="2" data-hl="34-37"></i><i class="frag hl" data-f="3" data-hl="30-32"></i>
+  <div class="grid3 mt">
+    <p class="callout frag small" data-f="1">Usa a <b>mesma imagem</b> do RustFS, que já traz o <code>rc</code>, o cliente de linha de comando, e troca o comando de entrada por um shell.</p>
+    <p class="callout frag small" data-f="2"><code>rc alias set</code> guarda o endereço e as chaves. <code>rc bucket create --ignore-existing</code> cria o bucket, e rodar de novo não dá erro.</p>
+    <p class="callout frag small" data-f="3">Só começa quando o <code>rustfs</code> está <b>pronto</b>, graças ao healthcheck da tela anterior.</p>
+  </div>
+  <aside class="notes">Por que um serviço só para isso? O cliente S3 do Bun lê e grava objetos, mas não cria buckets. Deixar o bucket no compose torna o ambiente reprodutível: docker compose down -v e up recriam tudo sozinhos.</aside>
+</section>
+
+<section class="slide" id="subir" data-title="Subir e conferir">
+  <p class="kicker">8 · RustFS no Docker</p>
+  <h2>Subir e conferir</h2>
+  <div class="term frag"><span class="p">$</span> docker compose -f .docs/aulas/rustfs/exemplo-rustfs/compose.yaml up -d --wait
+<span class="o"> Container exemplo-rustfs-rustfs-1 </span><span class="g">Healthy</span>
+<span class="o"> container exemplo-rustfs-criar-bucket-1 </span><span class="g">exited (0)</span>
+
+<span class="p">$</span> docker compose -f .docs/aulas/rustfs/exemplo-rustfs/compose.yaml logs criar-bucket
+<span class="o">criar-bucket-1  | </span><span class="g">✓ Alias 'local' configured successfully.</span>
+<span class="o">criar-bucket-1  | </span><span class="g">✓ Bucket 'local/fotos' created successfully.</span></div>
+  <div class="grid2 mt">
+    <p class="callout green frag"><code>--wait</code> só devolve o terminal quando tudo está saudável ou terminou. Leva uns 10 segundos.</p>
+    <p class="callout frag">Subiu de novo? O <code>rc</code> responde <span class="mono small">Bucket 'local/fotos' already exists and matches the request.</span></p>
+  </div>
+  <aside class="notes">As saídas são reais, copiadas do teste do exemplo. "exited (0)" no criar-bucket é o esperado: é uma tarefa que roda e termina. Se aparecer exited (5), o RustFS não estava pronto: confira o healthcheck.</aside>
+</section>
+
+<section class="slide" id="console" data-title="O console web">
+  <p class="kicker">8 · RustFS no Docker</p>
+  <h2>O console: ver os objetos com os próprios olhos</h2>
+  <div class="split">
+    <div class="browser">
+      <div class="bar"><i style="background:#ef4444"></i><i style="background:#f59e0b"></i><i style="background:#10b981"></i><span class="addr">localhost:9101/rustfs/console/</span></div>
+      <div class="screen s-l">
+        <div class="login"><p class="ctitle" style="text-align:center">RustFS</p><label>access key</label><div>exemplo</div><label>secret key</label><div>•••••••••••••••</div><button>Entrar</button></div>
+      </div>
+      <div class="screen s-b frag" data-f="2" data-off="3"><p class="ctitle">Buckets</p><div class="crow"><span>fotos</span><small>3 objetos · 9 KB</small></div></div>
+      <div class="screen s-o frag" data-f="3"><p class="ctitle">fotos / fotos/</p>
+        <div class="crow"><span>77404102-a598-4b7f….jpg</span><small>1,3 KB · image/jpeg</small></div>
+        <div class="crow"><span>b888edc9-16e8-43ba….png</span><small>7,7 KB · image/png</small></div>
+        <div class="crow"><span>f7c48351-0553-4a0f….webp</span><small>30 B · image/webp</small></div></div>
+    </div>
+    <ul class="clean">
+      <li class="frag" data-f="1">Abra <b class="mono small">http://localhost:9101/rustfs/console/</b>. A raiz <code>/</code> responde 403.</li>
+      <li class="frag" data-f="1">Entre com a access key e a secret key do compose.</li>
+      <li class="frag" data-f="2">O bucket <code>fotos</code> foi criado pelo <code>criar-bucket</code>.</li>
+      <li class="frag" data-f="3">Cada upload do mini-app aparece aqui, com tipo e tamanho.</li>
+    </ul>
+  </div>
+  <aside class="notes">A tela é um esboço do console, não um print. Os nomes dos objetos são os do nosso teste. Vale abrir o console de verdade durante a demonstração: ver o objeto aparecer depois do upload convence mais que qualquer slide.</aside>
+</section>
+
+<section class="slide" id="client" data-title="O cliente S3 do Bun" data-part="9 · O cliente S3 do Bun">
+  <p class="kicker">9 · O cliente S3 do Bun</p>
+  <h2>O Bun já traz um cliente S3</h2>
+  <div class="split" style="grid-template-columns:1.2fr .8fr">
+    <pre class="code nonum" data-lang="ts">import { S3Client } from "bun"; // já vem no Bun
+
+// com as opções no código…
+const s3 = new S3Client({
+  endpoint: "http://localhost:9100",
+  accessKeyId: "exemplo",
+  secretAccessKey: "exemplo-secreto",
+  bucket: "fotos",
+});
+
+// …ou sem nada: lê do ambiente
+const s3FromEnv = new S3Client();</pre>
+    <div class="stack">
+      <table class="tbl frag">
+        <thead><tr><th>Opção</th><th>Variável lida</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">endpoint</td><td class="mono">S3_ENDPOINT</td></tr>
+          <tr><td class="mono">accessKeyId</td><td class="mono">S3_ACCESS_KEY_ID</td></tr>
+          <tr><td class="mono">secretAccessKey</td><td class="mono">S3_SECRET_ACCESS_KEY</td></tr>
+          <tr><td class="mono">bucket</td><td class="mono">S3_BUCKET</td></tr>
+        </tbody>
+      </table>
+      <p class="callout red frag small">Ele lê e grava <b>objetos</b>. Criar o bucket não é com ele: por isso o <code>rc</code> no compose.</p>
+    </div>
+  </div>
+  <aside class="notes">Sem a variável S3_*, o Bun tenta a AWS_* equivalente (AWS_ACCESS_KEY_ID e assim por diante). No projeto da biblioteca vamos usar as variáveis de ambiente, definidas no compose.</aside>
+</section>
+
+<section class="slide" id="write" data-title="write: gravar">
+  <p class="kicker">9 · O cliente S3 do Bun</p>
+  <h2><code style="font-size:.85em">write</code>: gravar um objeto</h2>
+  <pre class="code nonum big" data-lang="ts">const png = await Bun.file("capa.png").bytes();
+
+const written = await s3.write("livros/7/capa", png, { type: "image/png" });
+console.log(written); // 7853: quantos bytes foram gravados</pre>
+  <ul class="clean mt">
+    <li class="frag">É um <b>PUT</b>. O <code>type</code> vira o <code>Content-Type</code> do objeto.</li>
+    <li class="frag">Aceita texto, <code>Uint8Array</code>, <code>Blob</code> ou <code>File</code> (o que chega num formulário) e até um <code>Response</code>.</li>
+    <li class="frag">A mesma chave de novo substitui o objeto inteiro, com tipo e tudo.</li>
+  </ul>
+  <aside class="notes">No teste, gravamos um PNG e depois um JPEG na mesma chave: o stat mostrou o tipo novo. Sem o type, o objeto fica com um tipo genérico e o navegador não sabe exibir.</aside>
+</section>
+
+<section class="slide" id="stat" data-title="file, stat e exists">
+  <p class="kicker">9 · O cliente S3 do Bun</p>
+  <h2><code style="font-size:.85em">file</code> não busca nada; <code style="font-size:.85em">stat</code> e <code style="font-size:.85em">exists</code> perguntam</h2>
+  <pre class="code nonum" style="font-size:20px" data-lang="ts">const file = s3.file("livros/7/capa"); // só uma referência: nenhuma requisição ainda
+
+await file.stat(); // HEAD
+// S3Stat {
+//   etag: "\"36bbd90a8f515b48cafb94118844ed8f\"",
+//   lastModified: 2026-11-12T15:54:16.000Z,
+//   size: 12,
+//   type: "image/png",
+// }
+
+await s3.exists("livros/7/capa");   // true
+await s3.exists("livros/999/capa"); // false</pre>
+  <p class="callout blue mt frag"><code>stat()</code> numa chave que não existe <b>lança erro</b> (<code>NoSuchKey</code>). Já <code>exists()</code> responde <code>false</code>.</p>
+  <aside class="notes">A saída do stat é real (o objeto de teste tinha 12 bytes). O s3.file é "preguiçoso": é só um ponteiro, e a rede só é usada quando você chama stat, bytes ou stream.</aside>
+</section>
+
+<section class="slide" id="ler" data-title="Ler: bytes e stream">
+  <p class="kicker">9 · O cliente S3 do Bun</p>
+  <h2>Ler o conteúdo: tudo de uma vez ou em pedaços</h2>
+  <div class="grid2">
+    <div class="stack frag">
+      <h3 class="serif" style="font-size:28px;margin:0">bytes(): tudo na memória</h3>
+      <pre class="code nonum" data-lang="ts">const bytes = await file.bytes();
+bytes.length; // 7853</pre>
+      <p class="small">Simples. Mas um vídeo de 2 GB ocuparia 2 GB de memória.</p>
+    </div>
+    <div class="stack frag">
+      <h3 class="serif" style="font-size:28px;margin:0">stream(): em pedaços</h3>
+      <pre class="code nonum" data-lang="ts">const { type } = await file.stat();
+return new Response(file.stream(), {
+  headers: { "Content-Type": type },
+});</pre>
+      <p class="small">Os pedaços chegam do RustFS e saem para o navegador. O servidor nunca segura o arquivo inteiro. A resposta vai em <code>chunked</code>, sem Content-Length.</p>
+    </div>
+  </div>
+  <p class="callout green mt frag">Para devolver uma imagem numa rota HTTP, use <b>stream</b>.</p>
+  <aside class="notes">Ler uma chave inexistente com bytes() também lança S3Error com code NoSuchKey (testado). Por isso, no mini-app, o stat vem antes: ele dá o Content-Type e já descobre se o objeto existe.</aside>
+</section>
+
+<section class="slide" id="listdel" data-title="list, delete e presign">
+  <p class="kicker">9 · O cliente S3 do Bun</p>
+  <h2><code style="font-size:.85em">list</code>, <code style="font-size:.85em">delete</code> e <code style="font-size:.85em">presign</code></h2>
+  <pre class="code nonum" style="font-size:20px" data-lang="ts">const { contents } = await s3.list({ prefix: "fotos/" });
+// [{ key: "fotos/b888edc9-….png", size: 7853, … }]   até 1.000 por chamada
+
+await s3.delete("fotos/b888edc9-….png");
+await s3.delete("fotos/nao-existe.png"); // também não dá erro
+
+const download = s3.presign("fotos/b888edc9-….png", { expiresIn: 300 });
+const upload = s3.presign("fotos/nova.png", { method: "PUT", expiresIn: 300 });</pre>
+  <ul class="clean mt">
+    <li class="frag"><code>list</code> é o LIST por prefixo; para mais de 1.000 chaves, pede-se a próxima página.</li>
+    <li class="frag"><code>presign</code> não faz requisição: só calcula a URL assinada. <b>Sempre</b> passe <code>expiresIn</code>, porque o padrão é 24 horas.</li>
+  </ul>
+  <aside class="notes">O presign gera URLs de GET por padrão; com method: "PUT" o navegador pode enviar um arquivo direto ao armazenamento. Hoje não vamos usar, mas é o caminho B (e o de produção) da parte de segurança.</aside>
+</section>
+
+<section class="slide" id="errs" data-title="Quando dá errado: S3Error">
+  <p class="kicker">9 · O cliente S3 do Bun</p>
+  <h2>Quando dá errado: o <code style="font-size:.85em">code</code> do <code style="font-size:.85em">S3Error</code></h2>
+  <table class="tbl">
+    <thead><tr><th>code</th><th>quando acontece</th><th>o que fazer</th></tr></thead>
+    <tbody>
+      <tr class="frag"><td class="k mono">NoSuchKey</td><td>a chave não existe (stat, bytes, stream)</td><td>responder <b>404</b></td></tr>
+      <tr class="frag"><td class="k mono">NoSuchBucket</td><td>o bucket não foi criado</td><td>rodar o <code>criar-bucket</code></td></tr>
+      <tr class="frag"><td class="k mono">SignatureDoesNotMatch</td><td>a secret key está errada</td><td>conferir as credenciais</td></tr>
+      <tr class="frag"><td class="k mono">ConnectionRefused</td><td>o RustFS está fora do ar ou o endpoint está errado</td><td>responder <b>503</b></td></tr>
+    </tbody>
+  </table>
+  <pre class="code nonum mt frag" data-lang="ts">try {
+  await s3.file(key).stat();
+} catch (error) {
+  if ((error as { code?: string }).code === "NoSuchKey") return new Response("Não encontrada", { status: 404 });
+  throw error; // o resto é problema de verdade
+}</pre>
+  <aside class="notes">Os quatro códigos foram provocados de propósito no nosso teste: chave inexistente, bucket inexistente, secret errada e servidor desligado. O ConnectionRefused chega na hora, sem esperar timeout.</aside>
+</section>
+
+<section class="slide" id="trap" data-title="A armadilha do 302">
+  <p class="kicker">9 · O cliente S3 do Bun · cuidado</p>
+  <h2>A armadilha: <code style="font-size:.8em">new Response(s3.file(key))</code></h2>
+  <svg viewBox="0 0 1136 250" style="width:1136px;height:250px">
+    <defs><marker id="arT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f2430"/></marker><marker id="arTr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b91c1c"/></marker></defs>
+    <rect x="0" y="80" width="190" height="80" rx="14" class="box"/><text x="95" y="127" text-anchor="middle" font-size="21" font-weight="700">Navegador</text>
+    <rect x="520" y="0" width="616" height="250" rx="18" fill="rgba(29,78,216,.06)" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="828" y="236" text-anchor="middle" font-size="16" fill="#1d4ed8" font-weight="700">rede interna do compose</text>
+    <rect x="570" y="30" width="220" height="80" rx="14" class="box"/><text x="680" y="78" text-anchor="middle" font-size="21" font-weight="700">Bun</text>
+    <rect x="880" y="120" width="220" height="80" rx="14" class="box"/><text x="990" y="160" text-anchor="middle" font-size="19" font-weight="700">RustFS</text><text x="990" y="184" text-anchor="middle" class="t-mono" font-size="15" fill="#4f5763">rustfs:9000</text>
+    <path d="M190 100 L562 66" pathLength="1" class="frag draw wire" data-f="1" marker-end="url(#arT)"/>
+    <text x="300" y="66" class="t-mono frag" data-f="1" font-size="16">GET /fotos/b888….png</text>
+    <path d="M570 92 L198 128" pathLength="1" class="frag draw" data-f="2" fill="none" stroke="#a64b07" stroke-width="3" marker-end="url(#arT)"/>
+    <text x="232" y="160" class="t-mono frag" data-f="2" font-size="15" fill="#a64b07" font-weight="700">302 Location: http://rustfs:9000/fotos/…?X-Amz-Signature=…</text>
+    <path d="M190 150 Q520 260 868 172" pathLength="1" class="frag draw" data-f="3" fill="none" stroke="#b91c1c" stroke-width="3" stroke-dasharray="1" marker-end="url(#arTr)"/>
+    <g class="frag" data-f="3"><circle cx="520" cy="206" r="22" fill="#b91c1c"/><text x="520" y="214" text-anchor="middle" fill="#fff" font-size="24" font-weight="800">✕</text><text x="490" y="236" text-anchor="end" font-size="16" fill="#b91c1c" font-weight="700">esse nome não existe fora do compose</text></g>
+  </svg>
+  <div class="fixes">
+    <pre class="code nonum frag" data-f="4" data-lang="ts">// ✗ responde 302 para uma URL assinada
+//   no endereço interno do RustFS
+return new Response(s3.file(key));</pre>
+    <pre class="code nonum frag" data-f="5" data-lang="ts">// ✓ os bytes passam pelo servidor
+const file = s3.file(key);
+const { type } = await file.stat();
+return new Response(file.stream(), {
+  headers: { "Content-Type": type },
+});</pre>
+  </div>
+  <aside class="notes">Comportamento real do Bun 1.4.4: um Response com um S3File vira um redirecionamento 302 para uma URL pré-assinada (com validade de 900 s) no host do endpoint. Fora do Docker até funcionaria (localhost:9100); dentro do compose, o endpoint é rustfs:9000 e o navegador não resolve esse nome. Por isso a rota faz stat + stream.</aside>
+</section>
+
+
+
+<section class="slide" id="app" data-title="O mini-app que vamos ler" data-part="10 · Mini-app de fotos">
+  <p class="kicker">10 · Mini-app de fotos</p>
+  <h2>Um mini-app de fotos: três arquivos, cinco rotas</h2>
+  <div class="split">
+    <div class="mock frag">
+      <div class="bar">localhost:3200</div>
+      <div class="in">
+        <h4>Fotos no RustFS</h4>
+        <div class="drop"><span>Escolher arquivo</span> capa.png <b>Enviar</b></div>
+        <div class="thumbs">
+          <div><i style="background:linear-gradient(135deg,#1d4ed8,#93c5fd)"></i>fotos/77404102….jpg<br>1346 bytes</div>
+          <div><i style="background:linear-gradient(135deg,#f59e0b,#fde68a)"></i>fotos/b888edc9….png<br>7853 bytes</div>
+          <div><i style="background:linear-gradient(135deg,#047857,#a7f3d0)"></i>fotos/f7c48351….webp<br>30 bytes</div>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <table class="tbl frag">
+        <thead><tr><th>rota</th><th>faz</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">GET /</td><td>a página</td></tr>
+          <tr><td class="mono">GET /fotos</td><td>LIST no bucket</td></tr>
+          <tr><td class="mono">POST /fotos</td><td>valida e faz PUT</td></tr>
+          <tr><td class="mono">GET /fotos/:nome</td><td>stat + stream</td></tr>
+          <tr><td class="mono">DELETE /fotos/:nome</td><td>DELETE</td></tr>
+        </tbody>
+      </table>
+      <p class="small frag">Em <code>.docs/aulas/rustfs/exemplo-rustfs/</code>: <code>compose.yaml</code>, <code>index.ts</code> e <code>index.html</code>.</p>
+    </div>
+  </div>
+  <aside class="notes">O código das próximas telas é exatamente o do repositório, com os números de linha reais. O mini-app não depende do projeto da biblioteca: roda sozinho.</aside>
+</section>
+
+<section class="slide" id="sequp" data-title="Sequência do upload">
+  <p class="kicker">10 · Mini-app de fotos</p>
+  <h2>O caminho de um upload</h2>
+  <svg viewBox="0 0 1136 470" style="width:1136px;height:470px">
+    <defs>
+      <marker id="sB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1d4ed8"/></marker>
+      <marker id="sG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#047857"/></marker>
+    </defs>
+    <rect x="40" y="0" width="220" height="56" rx="12" class="box"/><text x="150" y="36" text-anchor="middle" font-size="21" font-weight="700">Navegador</text>
+    <rect x="458" y="0" width="220" height="56" rx="12" class="box"/><text x="568" y="36" text-anchor="middle" font-size="21" font-weight="700">Bun · index.ts</text>
+    <rect x="876" y="0" width="220" height="56" rx="12" class="box"/><text x="986" y="36" text-anchor="middle" font-size="21" font-weight="700">RustFS</text>
+    <path d="M150 56 V460 M568 56 V460 M986 56 V460" class="dash"/>
+    <path d="M152 106 H562" pathLength="1" class="frag draw" data-f="1" fill="none" stroke="#1d4ed8" stroke-width="4" marker-end="url(#sB)"/>
+    <text x="356" y="94" text-anchor="middle" class="t-mono frag" data-f="1" font-size="17" font-weight="700" fill="#1d4ed8">POST /fotos · multipart, campo foto</text>
+    <g class="frag" data-f="2">
+      <rect x="556" y="130" width="24" height="96" rx="4" fill="#fcefd6" stroke="#a64b07" stroke-width="2"/>
+      <text x="596" y="160" font-size="17" font-weight="700">valida no servidor:</text>
+      <text x="596" y="184" font-size="16" class="t-mono">tamanho ≤ 2 MB · assinatura dos bytes</text>
+      <text x="596" y="210" font-size="16" fill="#b91c1c" font-weight="700">inválida? 400 ou 413, e para aqui</text>
+    </g>
+    <path d="M570 270 H980" pathLength="1" class="frag draw" data-f="3" fill="none" stroke="#1d4ed8" stroke-width="4" marker-end="url(#sB)"/>
+    <text x="776" y="258" text-anchor="middle" class="t-mono frag" data-f="3" font-size="17" font-weight="700" fill="#1d4ed8">PUT fotos/&lt;uuid&gt;.png (assinado)</text>
+    <path d="M984 330 H574" pathLength="1" class="frag draw" data-f="4" fill="none" stroke="#047857" stroke-width="4" stroke-dasharray="1" marker-end="url(#sG)"/>
+    <text x="776" y="318" text-anchor="middle" class="t-mono frag" data-f="4" font-size="17" font-weight="700" fill="#047857">200 OK · ETag</text>
+    <path d="M566 400 H156" pathLength="1" class="frag draw" data-f="5" fill="none" stroke="#047857" stroke-width="4" marker-end="url(#sG)"/>
+    <text x="360" y="388" text-anchor="middle" class="t-mono frag" data-f="5" font-size="17" font-weight="700" fill="#047857">201 {"chave": "fotos/&lt;uuid&gt;.png"}</text>
+  </svg>
+  <aside class="notes">Note que o navegador nunca fala com o RustFS: só o Bun tem as credenciais. A validação acontece antes de gastar uma escrita no armazenamento. A chave tem um UUID gerado pelo servidor.</aside>
+</section>
+
+<section class="slide codeslide" id="c1" data-title="Código: o cliente">
+  <p class="kicker">10 · Mini-app · index.ts</p>
+  <h2>Passo 1: o cliente aponta para o RustFS do compose</h2>
+  <pre class="code big" data-lang="ts" data-file="index.ts" data-lines="1-10" data-start="1">import { S3Client } from "bun";
+
+// 1. O cliente S3 do próprio Bun: nenhum pacote para instalar.
+//    Aponta para o RustFS do compose.yaml desta pasta.
+const s3 = new S3Client({
+  endpoint: "http://localhost:9100",
+  accessKeyId: "exemplo",
+  secretAccessKey: "exemplo-secreto",
+  bucket: "fotos",
+});</pre>
+  <i class="frag hl" data-f="1" data-hl="1"></i><i class="frag hl" data-f="2" data-hl="6"></i><i class="frag hl" data-f="3" data-hl="7-9"></i>
+  <div class="stepnotes">
+    <p class="callout blue frag" data-f="1" data-off="2">Importado do próprio Bun: não há <code>npm install</code>.</p>
+    <p class="callout blue frag" data-f="2" data-off="3">A porta 9100 do seu computador leva à 9000 do contêiner, como está no <code>compose.yaml</code>.</p>
+    <p class="callout blue frag" data-f="3">As mesmas chaves do compose e o bucket que o <code>criar-bucket</code> criou.</p>
+  </div>
+  <aside class="notes">Em um projeto de verdade, esses valores viriam do ambiente (S3_ENDPOINT e companhia). Aqui ficam escritos para o exemplo ser lido de uma vez.</aside>
+</section>
+
+<section class="slide" id="sig" data-title="A assinatura dos bytes">
+  <p class="kicker">10 · Mini-app de fotos</p>
+  <h2>Não confie no nome do arquivo: leia os primeiros bytes</h2>
+  <div class="row3 frag"><b>JPEG</b><div class="hex"><b class="m">FF</b><b class="m">D8</b><b class="m">FF</b><b class="dim">E0</b><b class="dim">…</b></div><span class="ascii">ÿØÿ</span></div>
+  <div class="row3 frag"><b>PNG</b><div class="hex"><b class="m">89</b><b class="m">50</b><b class="m">4E</b><b class="m">47</b><b class="m">0D</b><b class="m">0A</b><b class="m">1A</b><b class="m">0A</b></div><span class="ascii">‰PNG␍␊␚␊</span></div>
+  <div class="row3 frag"><b>WebP</b><div class="hex"><b>52</b><b>49</b><b>46</b><b>46</b><b class="dim">··</b><b class="dim">··</b><b class="dim">··</b><b class="dim">··</b><b class="m">57</b><b class="m">45</b><b class="m">42</b><b class="m">50</b></div><span class="ascii">RIFF····WEBP</span></div>
+  <p class="callout red mt frag">Um programa renomeado para <code>foto.jpg</code> começa com <b class="mono">4D 5A</b> (“MZ”). Nenhuma assinatura bate, e a resposta é <b>400</b>, seja qual for a extensão ou o Content-Type que o navegador mandou.</p>
+  <aside class="notes">Esses bytes iniciais são chamados de "magic numbers". O nome do arquivo e o Content-Type do multipart são escolhidos por quem envia, e por isso podem mentir. No WebP, a parte que identifica o formato começa no byte 8, depois de RIFF e de 4 bytes de tamanho. No teste, um arquivo começando com MZ recebeu 400.</aside>
+</section>
+
+<section class="slide codeslide" id="c2" data-title="Código: a validação">
+  <p class="kicker">10 · Mini-app · index.ts</p>
+  <h2>Passo 2: a tabela de assinaturas e a função que detecta o tipo</h2>
+  <pre class="code" data-lang="ts" data-file="index.ts" data-lines="12-25" data-start="12">// 2. Validação: o tipo vem dos primeiros bytes do arquivo (a "assinatura"),
+//    nunca do nome nem do Content-Type que o navegador mandou.
+const MAX_BYTES = 2 * 1024 * 1024;
+
+const SIGNATURES = [
+  { type: "image/jpeg", ext: "jpg", offset: 0, bytes: [0xff, 0xd8, 0xff] },
+  { type: "image/png", ext: "png", offset: 0, bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
+  // WebP: "RIFF" no início e "WEBP" a partir do byte 8
+  { type: "image/webp", ext: "webp", offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] },
+];
+
+function detectImage(bytes: Uint8Array) {
+  return SIGNATURES.find((s) =&gt; s.bytes.every((b, i) =&gt; bytes[s.offset + i] === b)) ?? null;
+}</pre>
+  <i class="frag hl" data-f="1" data-hl="14"></i><i class="frag hl" data-f="2" data-hl="16-21"></i><i class="frag hl" data-f="3" data-hl="23-25"></i>
+  <div class="stepnotes">
+    <p class="callout blue frag" data-f="1" data-off="2">2 × 1024 × 1024 = 2 MB. O limite fica numa constante com nome.</p>
+    <p class="callout blue frag" data-f="2" data-off="3">Cada formato diz seu tipo, sua extensão, onde a assinatura começa (<code>offset</code>) e quais bytes esperar.</p>
+    <p class="callout blue frag" data-f="3"><code>find</code> procura a primeira assinatura cujos bytes batem. Se nenhuma bater, devolve <code>null</code>.</p>
+  </div>
+  <aside class="notes">Esta tabela é o "porteiro" do upload. Para aceitar um formato novo, basta uma linha a mais, sem mexer no resto.</aside>
+</section>
+
+<section class="slide codeslide" id="c3" data-title="Código: Bun.serve e o LIST">
+  <p class="kicker">10 · Mini-app · index.ts</p>
+  <h2>Passo 3: as rotas, a página e o LIST</h2>
+  <pre class="code" style="font-size:18px" data-lang="ts" data-file="index.ts" data-lines="27-39" data-start="27">Bun.serve({
+  port: 3200,
+  routes: {
+    // a página de upload
+    "/": () =&gt; new Response(Bun.file(new URL("./index.html", import.meta.url))),
+
+    "/fotos": {
+      // LIST: as chaves que começam com "fotos/"
+      GET: async () =&gt; {
+        const result = await s3.list({ prefix: "fotos/" });
+        const photos = (result.contents ?? []).map((o) =&gt; ({ chave: o.key, bytes: o.size }));
+        return Response.json(photos);
+      },</pre>
+  <i class="frag hl" data-f="1" data-hl="27-29"></i><i class="frag hl" data-f="2" data-hl="31"></i><i class="frag hl" data-f="3" data-hl="35-38"></i>
+  <div class="stepnotes">
+    <p class="callout blue frag" data-f="1" data-off="2"><code>Bun.serve</code> com <code>routes</code>: cada caminho tem um handler por método HTTP.</p>
+    <p class="callout blue frag" data-f="2" data-off="3"><code>Bun.file</code> lê um arquivo <b>local</b> (a página HTML), sem ligação com o S3.</p>
+    <p class="callout blue frag" data-f="3"><code>s3.list</code> com <code>prefix</code>, e o resultado vira JSON com a chave e o tamanho de cada foto.</p>
+  </div>
+  <aside class="notes">Cuidado com a confusão: Bun.file (arquivo local) e s3.file (objeto remoto) têm nomes parecidos e devolvem objetos parecidos.</aside>
+</section>
+
+<section class="slide codeslide" id="c4" data-title="Código: o upload">
+  <p class="kicker">10 · Mini-app · index.ts</p>
+  <h2>Passo 4: o upload, uma verificação por linha</h2>
+  <pre class="code" data-lang="ts" data-file="index.ts" data-lines="41-56" data-start="41">      // POST: recebe o multipart, valida e grava o objeto
+      POST: async (req) =&gt; {
+        const form = await req.formData();
+        const file = form.get("foto");
+        if (!(file instanceof File)) return Response.json({ error: "Envie o campo foto" }, { status: 400 });
+        if (file.size &gt; MAX_BYTES) return Response.json({ error: "A foto passa de 2 MB" }, { status: 413 });
+
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const image = detectImage(bytes);
+        if (!image) return Response.json({ error: "Envie JPEG, PNG ou WebP" }, { status: 400 });
+
+        // a chave é escolhida pelo servidor: nada do nome original entra nela
+        const key = `fotos/${crypto.randomUUID()}.${image.ext}`;
+        await s3.write(key, bytes, { type: image.type });
+        return Response.json({ chave: key }, { status: 201 });
+      },</pre>
+  <i class="frag hl" data-f="1" data-hl="43-45"></i><i class="frag hl" data-f="2" data-hl="46"></i><i class="frag hl" data-f="3" data-hl="48-50"></i><i class="frag hl" data-f="4" data-hl="52-53"></i><i class="frag hl" data-f="5" data-hl="54-55"></i>
+  <div class="stepnotes">
+    <p class="callout blue frag" data-f="1" data-off="2"><code>formData()</code> lê o multipart. Sem o campo <code>foto</code>, ou se não for arquivo: <b>400</b>.</p>
+    <p class="callout blue frag" data-f="2" data-off="3">Maior que 2 MB: <b>413 Payload Too Large</b>, antes de ler os bytes.</p>
+    <p class="callout blue frag" data-f="3" data-off="4">Lê os bytes e confere a assinatura. Não é JPEG, PNG nem WebP: <b>400</b>.</p>
+    <p class="callout blue frag" data-f="4" data-off="5">A chave é um UUID com a extensão <b>detectada</b>. Nada do nome original entra nela.</p>
+    <p class="callout green frag" data-f="5"><code>s3.write</code> com o tipo detectado (é o PUT), e a resposta é <b>201</b> com a chave.</p>
+  </div>
+  <aside class="notes">O comentário da linha 41 fala em PUT porque é o que acontece no RustFS; a rota HTTP do mini-app é POST. Peça à turma para apontar onde estaria uma falha de segurança se a chave usasse file.name.</aside>
+</section>
+
+<section class="slide" id="seqget" data-title="Sequência da leitura">
+  <p class="kicker">10 · Mini-app de fotos</p>
+  <h2>O caminho de uma leitura</h2>
+  <svg viewBox="0 0 1136 470" style="width:1136px;height:470px">
+    <defs>
+      <marker id="rB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1d4ed8"/></marker>
+      <marker id="rG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#047857"/></marker>
+    </defs>
+    <rect x="40" y="0" width="220" height="56" rx="12" class="box"/><text x="150" y="36" text-anchor="middle" font-size="21" font-weight="700">Navegador</text>
+    <rect x="458" y="0" width="220" height="56" rx="12" class="box"/><text x="568" y="36" text-anchor="middle" font-size="21" font-weight="700">Bun · index.ts</text>
+    <rect x="876" y="0" width="220" height="56" rx="12" class="box"/><text x="986" y="36" text-anchor="middle" font-size="21" font-weight="700">RustFS</text>
+    <path d="M150 56 V460 M568 56 V460 M986 56 V460" class="dash"/>
+    <path d="M152 106 H562" pathLength="1" class="frag draw" data-f="1" fill="none" stroke="#1d4ed8" stroke-width="4" marker-end="url(#rB)"/>
+    <text x="356" y="94" text-anchor="middle" class="t-mono frag" data-f="1" font-size="16" font-weight="700" fill="#1d4ed8">&lt;img src="/fotos/b888….png"&gt; → GET</text>
+    <path d="M570 166 H980" pathLength="1" class="frag draw" data-f="2" fill="none" stroke="#1d4ed8" stroke-width="4" marker-end="url(#rB)"/>
+    <text x="776" y="154" text-anchor="middle" class="t-mono frag" data-f="2" font-size="17" font-weight="700" fill="#1d4ed8">file.stat() → HEAD</text>
+    <path d="M984 216 H574" pathLength="1" class="frag draw" data-f="3" fill="none" stroke="#047857" stroke-width="4" marker-end="url(#rG)"/>
+    <text x="776" y="204" text-anchor="middle" class="t-mono frag" data-f="3" font-size="17" font-weight="700" fill="#047857">image/png · 7853 bytes</text>
+    <text x="776" y="240" text-anchor="middle" class="frag" data-f="3" font-size="15" fill="#b91c1c" font-weight="700">não existe? NoSuchKey → 404</text>
+    <path d="M570 290 H980" pathLength="1" class="frag draw" data-f="4" fill="none" stroke="#1d4ed8" stroke-width="4" marker-end="url(#rB)"/>
+    <text x="776" y="278" text-anchor="middle" class="t-mono frag" data-f="4" font-size="17" font-weight="700" fill="#1d4ed8">file.stream() → GET</text>
+    <g class="frag" data-f="5">
+      <path d="M984 350 H574" fill="none" stroke="#047857" stroke-width="4" stroke-dasharray="14 10" marker-end="url(#rG)"><animate attributeName="stroke-dashoffset" from="48" to="0" dur=".8s" repeatCount="indefinite"/></path>
+      <path d="M566 410 H156" fill="none" stroke="#047857" stroke-width="4" stroke-dasharray="14 10" marker-end="url(#rG)"><animate attributeName="stroke-dashoffset" from="48" to="0" dur=".8s" repeatCount="indefinite"/></path>
+      <text x="776" y="338" text-anchor="middle" class="t-mono" font-size="17" font-weight="700" fill="#047857">pedaços de bytes</text>
+      <text x="360" y="398" text-anchor="middle" class="t-mono" font-size="17" font-weight="700" fill="#047857">200 · Content-Type: image/png</text>
+    </g>
+  </svg>
+  <aside class="notes">Duas idas ao RustFS: o stat (HEAD) traz o tipo e confirma que existe, e o stream (GET) traz os bytes. Os pedaços passam pelo Bun sem que ele monte o arquivo inteiro na memória.</aside>
+</section>
+
+<section class="slide codeslide" id="c5" data-title="Código: a leitura">
+  <p class="kicker">10 · Mini-app · index.ts</p>
+  <h2>Passo 5: ler e devolver os bytes</h2>
+  <pre class="code" style="font-size:17px" data-lang="ts" data-file="index.ts" data-lines="59-73" data-start="59">    "/fotos/:nome": {
+      // GET: lê do RustFS e devolve os bytes, com o Content-Type gravado no upload
+      GET: async (req) =&gt; {
+        const key = `fotos/${req.params.nome}`;
+        const file = s3.file(key);
+        try {
+          const { type } = await file.stat();
+          // Atenção: new Response(file) responderia 302 para uma URL assinada
+          // do RustFS. Aqui queremos que os bytes passem pelo servidor.
+          return new Response(file.stream(), { headers: { "Content-Type": type } });
+        } catch (error) {
+          if ((error as { code?: string }).code === "NoSuchKey") return new Response("Não encontrada", { status: 404 });
+          throw error;
+        }
+      },</pre>
+  <i class="frag hl" data-f="1" data-hl="62-63"></i><i class="frag hl" data-f="2" data-hl="65"></i><i class="frag hl" data-f="3" data-hl="66-68"></i><i class="frag hl" data-f="4" data-hl="69-71"></i>
+  <div class="stepnotes">
+    <p class="callout blue frag" data-f="1" data-off="2">Monta a chave a partir do parâmetro da rota. O <code>s3.file</code> ainda não fez nenhuma requisição.</p>
+    <p class="callout blue frag" data-f="2" data-off="3"><code>stat()</code>: o tipo gravado no upload. De quebra, descobre se o objeto existe.</p>
+    <p class="callout green frag" data-f="3" data-off="4"><code>stream()</code> com o Content-Type certo, e não <code>new Response(file)</code>, que viraria um 302.</p>
+    <p class="callout red frag" data-f="4"><code>NoSuchKey</code> vira <b>404</b>. Qualquer outro erro sobe: é um problema de verdade.</p>
+  </div>
+  <aside class="notes">Aqui aparece a armadilha do 302 na prática: o comentário das linhas 66 e 67 está no código de propósito. Por que não há Content-Length? No Bun 1.4.4, o stream de um arquivo do S3Client sai sempre com Transfer-Encoding: chunked, e o Bun descarta um Content-Length escrito à mão. O navegador exibe a imagem do mesmo jeito.</aside>
+</section>
+
+<section class="slide codeslide" id="c6" data-title="Código: apagar e enviar">
+  <p class="kicker">10 · Mini-app · index.ts e index.html</p>
+  <h2>Passo 6: apagar, e o lado do navegador</h2>
+  <p class="codecap">index.ts</p>
+  <pre class="code" style="font-size:15px" data-lang="ts" data-file="index.ts" data-lines="75-79" data-start="75">      // DELETE: apagar uma chave que não existe também dá certo
+      DELETE: async (req) =&gt; {
+        await s3.delete(`fotos/${req.params.nome}`);
+        return new Response(null, { status: 204 });
+      },</pre>
+  <p class="codecap" style="margin-top:12px">index.html</p>
+  <pre class="code" style="font-size:15px" data-lang="ts" data-file="index.html" data-lines="41-49" data-start="41" data-id="html">  document.querySelector("#envio").onsubmit = async (event) =&gt; {
+    event.preventDefault();
+    error.textContent = "";
+    // FormData monta o corpo multipart/form-data; o navegador escolhe a fronteira
+    const response = await fetch("/fotos", { method: "POST", body: new FormData(event.target) });
+    if (!response.ok) error.textContent = (await response.json()).error;
+    event.target.reset();
+    load();
+  };</pre>
+  <i class="frag hl" data-f="1" data-hl="76-78"></i><i class="frag hl" data-f="2" data-target="html" data-hl="45"></i><i class="frag hl" data-f="3" data-target="html" data-hl="46-48"></i>
+  <div class="stepnotes">
+    <p class="callout blue frag" data-f="1" data-off="2">DELETE e 204. Como apagar é idempotente, não precisa checar antes.</p>
+    <p class="callout blue frag" data-f="2" data-off="3"><code>new FormData(form)</code> monta o multipart a partir do <code>&lt;input type="file" name="foto"&gt;</code>.</p>
+    <p class="callout blue frag" data-f="3">Se a resposta não for 2xx, mostra o <code>error</code> do JSON (400 ou 413). Depois, recarrega a lista.</p>
+  </div>
+  <aside class="notes">No HTML não definimos o Content-Type do fetch de propósito: com FormData, o navegador monta o cabeçalho multipart/form-data com a "fronteira" (boundary) certa.</aside>
+</section>
+
+<section class="slide" id="run" data-title="Rodando o exemplo">
+  <p class="kicker">10 · Mini-app de fotos</p>
+  <h2>Rodando, e o que esperar</h2>
+  <div class="split">
+    <div class="stack">
+      <div class="term"><span class="p">$</span> docker compose -f .docs/aulas/rustfs/exemplo-rustfs/compose.yaml up -d --wait
+<span class="p">$</span> bun .docs/aulas/rustfs/exemplo-rustfs/index.ts
+<span class="g">Exemplo em http://localhost:3200</span></div>
+      <p class="callout green small frag">Abra <b>localhost:3200</b>, envie uma imagem e veja o objeto no console: <b>localhost:9101/rustfs/console/</b>.</p>
+      <p class="callout small frag">Para parar: <code>Ctrl+C</code> no Bun, e <code>docker compose … down</code> (com <code>-v</code>, apaga também os objetos).</p>
+    </div>
+    <table class="tbl frag">
+      <thead><tr><th>teste</th><th>resultado</th></tr></thead>
+      <tbody>
+        <tr><td>enviar PNG, JPEG ou WebP</td><td class="mono" style="color:var(--green)">201 {"chave": …}</td></tr>
+        <tr><td>enviar um .jpg falso</td><td class="mono" style="color:var(--red)">400 Envie JPEG, PNG ou WebP</td></tr>
+        <tr><td>enviar 3 MB</td><td class="mono" style="color:var(--red)">413 A foto passa de 2 MB</td></tr>
+        <tr><td>ler uma foto</td><td class="mono" style="color:var(--green)">200 image/png, bytes iguais</td></tr>
+        <tr><td>ler uma chave inexistente</td><td class="mono" style="color:var(--red)">404</td></tr>
+        <tr><td>apagar, duas vezes</td><td class="mono" style="color:var(--green)">204 e 204</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <aside class="notes">A tabela reproduz o teste feito antes da aula com curl contra o exemplo: todos os resultados conferem. Os bytes lidos foram comparados com o arquivo original (cmp) e eram idênticos.</aside>
+</section>
+
+
+
+<section class="slide" id="recap" data-title="Recapitulação" data-part="11 · Fechamento">
+  <p class="kicker">11 · Fechamento</p>
+  <h2>O que levar desta aula</h2>
+  <div class="grid3">
+    <div class="card frag"><span class="n">01</span><h3>Objeto</h3><p>Uma chave aponta para bytes e metadados, dentro de um bucket. Não tem pastas de verdade e não se edita: substitui-se.</p></div>
+    <div class="card frag"><span class="n">02</span><h3>HTTP + S3</h3><p>PUT, GET, HEAD, DELETE e LIST. A API do S3 é a língua comum: só o endpoint muda.</p></div>
+    <div class="card frag"><span class="n">03</span><h3>Assinatura</h3><p>Privado por padrão. A secret nunca viaja, só assina. A URL assinada dá acesso temporário.</p></div>
+    <div class="card frag"><span class="n">04</span><h3>Referência × bytes</h3><p>O banco guarda a referência; o armazenamento de objetos guarda os bytes.</p></div>
+    <div class="card frag"><span class="n">05</span><h3>RustFS</h3><p>Um S3 aberto (Apache 2.0) em contêiner. O healthcheck usa <code>/health/ready</code> e o bucket nasce pelo <code>rc</code>.</p></div>
+    <div class="card frag"><span class="n">06</span><h3>Bun.S3Client</h3><p>write, file, stat, stream, list, delete e presign. Cuidado com o 302 do <code>new Response(file)</code>.</p></div>
+  </div>
+  <aside class="notes">Peça para cada pessoa escolher um dos seis cartões e explicá-lo com as próprias palavras em uma frase. Depois, o quiz.</aside>
+</section>
+
+<section class="slide" id="quiz1" data-title="Quiz (1/3)">
+  <p class="kicker">11 · Quiz · clique numa alternativa</p>
+  <h2>Quiz, parte 1 de 3</h2>
+  <div class="quiz">
+    <div class="qq"><p>1. A API roda em 3 instâncias atrás de um balanceador. Onde guardar as capas?</p>
+      <div class="opts"><button>No disco de cada instância</button><button>Numa coluna BYTEA do banco</button><button data-ok>Num bucket S3 que todas acessam</button><button>No localStorage do navegador</button></div>
+      <p class="why">O bucket é compartilhado por todas as instâncias e cresce sem planejar disco. O disco local vira ilha, e o BYTEA incha o banco.</p></div>
+    <div class="qq"><p>2. O que identifica um objeto dentro do bucket?</p>
+      <div class="opts"><button>O nome original do arquivo</button><button data-ok>A chave</button><button>A pasta onde ele está</button><button>A ETag</button></div>
+      <p class="why">A chave, escolhida pelo servidor. A ETag é uma impressão digital do conteúdo: muda quando os bytes mudam, então não serve de nome.</p></div>
+  </div>
+  <aside class="notes">Deixe a turma votar antes de clicar. O clique revela a resposta certa e a explicação. A tecla R limpa as respostas deste slide.</aside>
+</section>
+
+<section class="slide" id="quiz2" data-title="Quiz (2/3)">
+  <p class="kicker">11 · Quiz · clique numa alternativa</p>
+  <h2>Quiz, parte 2 de 3</h2>
+  <div class="quiz">
+    <div class="qq"><p>3. O console mostra a “pasta” <code>livros/7/</code>. O que existe de fato?</p>
+      <div class="opts"><button>Uma pasta criada com mkdir</button><button data-ok>Objetos cuja chave começa com livros/7/</button><button>Um bucket chamado livros</button><button>Um diretório no volume</button></div>
+      <p class="why">O namespace é plano. A barra é só um caractere, e o console desenha pastas a partir dos prefixos.</p></div>
+    <div class="qq"><p>4. Por que o backend lê os primeiros bytes do arquivo enviado?</p>
+      <div class="opts"><button data-ok>Para descobrir o tipo real sem confiar no cliente</button><button>Para compactar a imagem</button><button>Para calcular a ETag</button><button>Porque o S3 exige</button></div>
+      <p class="why">A extensão e o Content-Type são escolhidos por quem envia e podem mentir. A assinatura dos bytes não mente.</p></div>
+  </div>
+  <aside class="notes">Uma pergunta sobre prefixos e outra sobre a validação do mini-app. A armadilha do 302 vem na parte 3.</aside>
+</section>
+
+<section class="slide" id="quiz3" data-title="Quiz (3/3)">
+  <p class="kicker">11 · Quiz · clique numa alternativa</p>
+  <h2>Quiz, parte 3 de 3</h2>
+  <div class="quiz">
+    <div class="qq"><p>5. Dentro do compose, a rota faz <code>return new Response(s3.file(key))</code>. O que o navegador recebe?</p>
+      <div class="opts"><button>A imagem</button><button data-ok>Um 302 para rustfs:9000, que ele não alcança</button><button>Um 404</button><button>Um 500</button></div>
+      <p class="why">O Bun responde com um redirecionamento para uma URL assinada no host do endpoint, e esse nome só existe na rede interna. Use stat + stream.</p></div>
+    <div class="qq"><p>6. Em produção, com milhares de acessos, como servir as imagens?</p>
+      <div class="opts"><button>Sempre pelo backend</button><button data-ok>Por um subdomínio de mídia, com URLs assinadas curtas e CDN</button><button>Bucket público com escrita liberada</button><button>Em base64 dentro do JSON</button></div>
+      <p class="why">O servidor fica livre dos bytes, a CDN aproxima a imagem do usuário e a validade curta limita o estrago de um link vazado.</p></div>
+  </div>
+  <aside class="notes">A pergunta 6 retoma o destaque da parte de segurança. Na aula de hoje ficamos com o backend; o subdomínio de mídia é o próximo passo natural.</aside>
+</section>
+
+<section class="slide" id="ponte" data-title="Agora: as capas da biblioteca">
+  <p class="kicker">Agora, mãos à obra</p>
+  <h2>Agora vamos guardar as capas dos livros da biblioteca</h2>
+  <ol class="steps">
+    <li class="frag">O RustFS entra no compose do projeto, com um serviço que cria os buckets.</li>
+    <li class="frag">O backend recebe a capa, confere a assinatura dos bytes e grava no RustFS.</li>
+    <li class="frag">O livro guarda só a referência de que existe uma capa; os bytes ficam no RustFS.</li>
+    <li class="frag">Uma página nova para enviar, ver e remover a capa, e miniaturas na busca.</li>
+  </ol>
+  <p class="callout mt2 frag">Depois, na atividade, você repete o caminho para as <b>fotos dos autores</b>.</p>
+  <aside class="notes">Daqui seguimos para o tutorial da fase 03 (saas-fase03.html), passo a passo, no projeto da biblioteca.</aside>
+</section>
+
+<section class="slide" id="refs" data-title="Referências">
+  <p class="kicker">Referências</p>
+  <h2>Para ir além</h2>
+  <ul class="clean">
+    <li>RustFS: código, README e matriz de compatibilidade S3. <span class="mono">github.com/rustfs/rustfs</span></li>
+    <li>Documentação do RustFS. <span class="mono">docs.rustfs.com</span></li>
+    <li>Bun: o cliente S3 (<code>S3Client</code>, <code>presign</code>, variáveis de ambiente). <span class="mono">bun.com/docs/runtime/s3</span></li>
+    <li>Amazon S3: guia do usuário e a assinatura Signature Version 4. <span class="mono">docs.aws.amazon.com/s3</span></li>
+    <li>MinIO em modo de manutenção. <span class="mono">linuxiac.com/minio-ends-active-development</span> · <span class="mono">blog.vonng.com/en/db/minio-resurrect</span></li>
+    <li>O exemplo desta aula. <span class="mono">.docs/aulas/rustfs/exemplo-rustfs/</span></li>
+  </ul>
+  <p class="lead mt2 serif" style="font-size:34px!important">Obrigado. Dúvidas?</p>
+  <aside class="notes">Os endereços também ficam nesta tela para quem quiser revisar. O exemplo roda sem o projeto da biblioteca.</aside>
+</section>
+
+  <div id="chrome"><span class="part"></span><span class="count"></span></div>
+  <div id="progress"></div>
+</div>
+<div id="nav" aria-label="Navegação">
+  <button type="button" data-a="prev" title="Voltar (←)">‹</button>
+  <button type="button" data-a="overview" title="Índice (O)">Índice</button>
+  <button type="button" data-a="notes" title="Notas (N)">Notas</button>
+  <button type="button" data-a="full" title="Tela cheia (F)">⛶</button>
+  <button type="button" data-a="next" title="Avançar (→)">›</button>
+</div>
+<div id="overview" role="dialog" aria-label="Índice dos slides"></div>
+<div id="notes" aria-live="polite"></div>
+<script>
+(() => {
+  "use strict";
+  const stage = document.getElementById("stage");
+  const slides = Array.from(stage.querySelectorAll(".slide"));
+  const chrome = document.getElementById("chrome");
+  const chromePart = chrome.querySelector(".part");
+  const chromeCount = chrome.querySelector(".count");
+  const progress = document.getElementById("progress");
+  const overview = document.getElementById("overview");
+  const panel = document.getElementById("notes");
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  /* ---------- 1. realce de sintaxe, escrito à mão ---------- */
+  const TS_KW = new Set("import from export default const let var function return if else for of in await async new try catch finally throw typeof instanceof class extends null undefined true false this as type interface".split(" "));
+  function tokTS(src) {
+    const out = [];
+    const re = /(\/\/[^\n]*)|(`(?:\\[\s\S]|[^`\\])*`|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(\b0x[0-9a-fA-F]+\b|\b\d[\d_]*(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+|\/|[^\sA-Za-z_$\d"'`\/]+)/g;
+    let m;
+    while ((m = re.exec(src))) {
+      if (m[1]) out.push(["c", m[1]]);
+      else if (m[2]) out.push(["s", m[2]]);
+      else if (m[3]) out.push(["n", m[3]]);
+      else if (m[4]) {
+        const w = m[4], rest = src.slice(re.lastIndex, re.lastIndex + 3), before = src.slice(Math.max(0, m.index - 30), m.index);
+        let c = "";
+        if (TS_KW.has(w)) c = "k";
+        else if (/^\s*\(/.test(rest)) c = "f";
+        else if (/^[A-Z]/.test(w)) c = "t";
+        else if (/^\??:/.test(rest) && /[{,]\s*$/.test(before)) c = "a";
+        out.push([c, w]);
+      } else out.push(["", m[0]]);
+    }
+    return out;
+  }
+  function tokYAML(src) {
+    const out = [];
+    src.split("\n").forEach((line, i) => {
+      if (i) out.push(["", "\n"]);
+      let m = line.match(/^(\s*)(#.*)$/);
+      if (m) { out.push(["", m[1]], ["c", m[2]]); return; }
+      let rest = line;
+      m = line.match(/^(\s*-?\s*)([\w.-]+)(:)(.*)$/);
+      if (m) { out.push(["", m[1]], ["a", m[2]], ["", m[3]]); rest = m[4]; }
+      else if ((m = line.match(/^(\s*)(rc)(\s.*)$/))) { out.push(["", m[1]], ["f", m[2]]); rest = m[3]; }
+      const re = /(\s#.*$)|("(?:\\.|[^"\\])*")|(\b\d+(?:\.\d+)?s?\b)|([^"#\d]+|.)/g;
+      let t;
+      while ((t = re.exec(rest))) {
+        if (t[1]) out.push(["c", t[1]]);
+        else if (t[2]) out.push(["s", t[2]]);
+        else if (t[3]) out.push(["n", t[3]]);
+        else out.push(["", t[0]]);
+      }
+    });
+    return out;
+  }
+  function tokHTML(src) {
+    const out = [];
+    const re = /(<!--[\s\S]*?-->)|(<\/?)([\w:-]+)([^>]*)(>)|([^<]+)/g;
+    let m;
+    while ((m = re.exec(src))) {
+      if (m[1]) out.push(["c", m[1]]);
+      else if (m[2]) {
+        out.push(["", m[2]], ["k", m[3]]);
+        const attrs = m[4], ar = /("[^"]*")|([\w-]+)|([^"\w]+)/g;
+        let a;
+        while ((a = ar.exec(attrs))) out.push([a[1] ? "s" : a[2] ? "a" : "", a[0]]);
+        out.push(["", m[5]]);
+      } else out.push(["", m[0]]);
+    }
+    return out;
+  }
+  const SQL_KW = new Set("ALTER TABLE ADD COLUMN UPDATE SET WHERE SELECT FROM INSERT INTO VALUES BYTEA TEXT INTEGER NULL NOT".split(" "));
+  function tokSQL(src) {
+    const out = [];
+    const re = /(--[^\n]*)|('(?:[^'])*')|(\$\d+|\b\d+\b)|([A-Za-z_]\w*)|(\s+|.)/g;
+    let m;
+    while ((m = re.exec(src))) {
+      if (m[1]) out.push(["c", m[1]]);
+      else if (m[2]) out.push(["s", m[2]]);
+      else if (m[3]) out.push(["n", m[3]]);
+      else if (m[4]) out.push([SQL_KW.has(m[4]) ? "k" : "", m[4]]);
+      else out.push(["", m[0]]);
+    }
+    return out;
+  }
+  const TOKENIZERS = { ts: tokTS, yaml: tokYAML, html: tokHTML, sql: tokSQL };
+  function highlight(pre) {
+    const text = pre.textContent.replace(/^\n/, "").replace(/\s+$/, "");
+    const tokens = (TOKENIZERS[pre.dataset.lang] || tokTS)(text);
+    const start = Number(pre.dataset.start || 1);
+    const lines = [[]];
+    for (const [c, t] of tokens) {
+      t.split("\n").forEach((part, i) => {
+        if (i) lines.push([]);
+        if (part) lines[lines.length - 1].push(c ? `<span class="tk-${c}">${esc(part)}</span>` : esc(part));
+      });
+    }
+    pre.innerHTML = lines.map((l, i) => `<span class="l" data-n="${start + i}">${l.join("") || " "}</span>`).join("");
+  }
+  // linha longa demais? diminui a fonte do bloco até caber na largura
+  function fitCode(pre) {
+    let size = parseFloat(getComputedStyle(pre).fontSize);
+    while (pre.scrollWidth > pre.clientWidth + 1 && size > 12) {
+      size -= 0.5;
+      pre.style.fontSize = size + "px";
+    }
+  }
+  const pres = Array.from(document.querySelectorAll("pre.code"));
+  pres.forEach(highlight);
+
+  /* ---------- 2. fragmentos e partes ---------- */
+  let part = "";
+  slides.forEach((s) => {
+    const frags = Array.from(s.querySelectorAll(".frag"));
+    let auto = 0;
+    frags.forEach((f) => {
+      if (f.dataset.f) auto = Math.max(auto, Number(f.dataset.f));
+      else f.dataset.f = String(++auto);
+    });
+    s._frags = frags;
+    s._steps = frags.reduce((max, f) => Math.max(max, Number(f.dataset.f)), 0);
+    if (s.dataset.part) part = s.dataset.part;
+    s._part = part;
+  });
+
+  const ranges = (spec) => {
+    const set = new Set();
+    String(spec || "").split(",").forEach((r) => {
+      const [a, b] = r.split("-").map(Number);
+      for (let n = a; n <= (b || a); n++) set.add(n);
+    });
+    return set;
+  };
+
+  let cur = 0, step = 0;
+  function show() {
+    slides.forEach((s, i) => s.classList.toggle("active", i === cur));
+    const s = slides[cur];
+    s._frags.forEach((f) => {
+      const n = Number(f.dataset.f), off = Number(f.dataset.off || 0);
+      f.classList.toggle("on", n <= step);
+      f.classList.toggle("gone", off > 0 && step >= off);
+    });
+    for (let k = 1; k <= s._steps; k++) s.classList.toggle("s" + k, k <= step);
+    // destaque de linhas no código
+    const codes = Array.from(s.querySelectorAll("pre.code"));
+    codes.forEach((p) => { p.classList.remove("focus"); p.querySelectorAll(".l.on").forEach((l) => l.classList.remove("on")); });
+    const marks = s._frags.filter((f) => f.classList.contains("hl") && Number(f.dataset.f) <= step);
+    if (marks.length) {
+      const mark = marks.reduce((a, b) => (Number(b.dataset.f) >= Number(a.dataset.f) ? b : a));
+      const pre = mark.dataset.target ? s.querySelector(`pre.code[data-id="${mark.dataset.target}"]`) : (codes.find((p) => !p.dataset.id) || codes[0]);
+      if (pre) {
+        const set = ranges(mark.dataset.hl);
+        pre.classList.add("focus");
+        pre.querySelectorAll(".l").forEach((l) => { if (set.has(Number(l.dataset.n))) l.classList.add("on"); });
+      }
+    }
+    chromePart.textContent = s._part;
+    chromeCount.textContent = `${cur + 1} / ${slides.length}`;
+    chrome.style.visibility = cur === 0 ? "hidden" : "visible";
+    progress.style.width = (slides.length > 1 ? (cur / (slides.length - 1)) * 100 : 100) + "%";
+    const hash = "#" + (cur + 1);
+    if (location.hash !== hash) history.replaceState(null, "", hash);
+    overview.querySelectorAll("a").forEach((a, i) => a.classList.toggle("cur", i === cur));
+    updateNotes();
+  }
+  function next() {
+    if (step < slides[cur]._steps) step++;
+    else if (cur < slides.length - 1) { cur++; step = 0; }
+    show();
+  }
+  function prev() {
+    if (step > 0) step--;
+    else if (cur > 0) { cur--; step = slides[cur]._steps; }
+    show();
+  }
+  function go(i, atEnd = false) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    step = atEnd ? slides[cur]._steps : 0;
+    show();
+  }
+
+  /* ---------- 3. escala do palco ---------- */
+  function scale() {
+    const k = Math.min(innerWidth / 1280, innerHeight / 720);
+    stage.style.transform = `scale(${k})`;
+  }
+  addEventListener("resize", scale);
+
+  /* ---------- 4. índice (tecla O) ---------- */
+  overview.innerHTML = `<h1>Índice</h1><p>Clique num slide para ir até ele. <b>Esc</b> ou <b>O</b> fecha.</p><div class="grid">${
+    slides.map((s, i) => `<a href="#${i + 1}" data-i="${i}"><small>${esc(s._part)}</small><span><i>${i + 1}</i>${esc(s.dataset.title || "")}</span></a>`).join("")
+  }</div>`;
+  function toggleOverview(force) {
+    const open = typeof force === "boolean" ? force : !overview.classList.contains("open");
+    overview.classList.toggle("open", open);
+    if (open) overview.querySelector("a.cur")?.scrollIntoView({ block: "center" });
+  }
+  overview.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-i]");
+    if (!a) return;
+    e.preventDefault();
+    toggleOverview(false);
+    go(Number(a.dataset.i));
+  });
+
+  /* ---------- 5. notas (N abre uma janela; Shift+N mostra aqui) ---------- */
+  let notesWin = null, notesStart = 0;
+  function notesData() {
+    const s = slides[cur], n = s.querySelector("aside.notes"), nx = slides[cur + 1];
+    return {
+      title: s.dataset.title || "", html: n ? n.innerHTML : "(sem notas)", next: nx ? nx.dataset.title : "fim",
+      pos: `${cur + 1} / ${slides.length}`, step: s._steps ? `passo ${step} de ${s._steps}` : "sem passos",
+    };
+  }
+  function updateNotes() {
+    const d = notesData();
+    panel.innerHTML = `<h4>Notas · ${d.pos} · ${esc(d.title)} · ${d.step}</h4><div>${d.html}</div>`;
+    if (notesWin && !notesWin.closed) {
+      try {
+        const doc = notesWin.document;
+        doc.getElementById("pos").textContent = `${d.pos} · ${d.step}`;
+        doc.getElementById("t").textContent = d.title;
+        doc.getElementById("n").innerHTML = d.html;
+        doc.getElementById("nx").textContent = d.next;
+      } catch { /* a janela foi fechada no meio */ }
+    }
+  }
+  function togglePanel(force) {
+    panel.classList.toggle("open", typeof force === "boolean" ? force : !panel.classList.contains("open"));
+  }
+  function openNotes() {
+    if (notesWin && !notesWin.closed) { notesWin.focus(); return; }
+    try {
+      notesWin = window.open("", "notas-rustfs", "width=980,height=660");
+      if (!notesWin) throw new Error("janela bloqueada");
+      const doc = notesWin.document;
+      doc.open();
+      doc.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Notas — RustFS</title><style>
+        body{margin:0;font:22px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#14161c;color:#f1eee6}
+        header{display:flex;justify-content:space-between;padding:14px 26px;background:#20232a;font:600 17px/1 ui-monospace,Menlo,monospace;color:#9fb0c8}
+        #clock{color:#ffd28a;font-size:24px}
+        h1{font:700 34px/1.2 Georgia,serif;margin:22px 26px 8px}
+        #n{padding:0 26px 120px;max-width:70ch}
+        footer{position:fixed;left:0;right:0;bottom:0;padding:14px 26px;background:#20232a;color:#9fb0c8;font-size:18px}
+        footer b{color:#fff}
+      </style></head><body><header><span id="pos"></span><span id="clock">00:00</span></header><h1 id="t"></h1><div id="n"></div><footer>A seguir: <b id="nx"></b> · ←/→ também funcionam aqui</footer></body></html>`);
+      doc.close();
+      doc.addEventListener("keydown", onKey);
+      notesStart = Date.now();
+      updateNotes();
+    } catch {
+      notesWin = null;
+      togglePanel(true);
+    }
+  }
+  setInterval(() => {
+    if (!notesWin || notesWin.closed) return;
+    try {
+      const s = Math.floor((Date.now() - notesStart) / 1000);
+      notesWin.document.getElementById("clock").textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+    } catch { /* ignora */ }
+  }, 1000);
+
+  /* ---------- 6. teclado, toque e botões ---------- */
+  function toggleFull() {
+    // o navegador pode recusar (sem gesto do usuário, iframe sem permissão): ignora em silêncio
+    if (document.fullscreenElement) document.exitFullscreen?.()?.catch(() => {});
+    else document.documentElement.requestFullscreen?.()?.catch(() => {});
+  }
+  function resetQuiz() {
+    slides[cur].querySelectorAll(".qq").forEach((q) => {
+      q.classList.remove("done");
+      q.querySelectorAll("button").forEach((b) => b.classList.remove("right", "wrong"));
+    });
+  }
+  function onKey(e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (overview.classList.contains("open")) {
+      if (e.key === "Escape" || e.key === "o" || e.key === "O") { toggleOverview(false); e.preventDefault(); }
+      return;
+    }
+    switch (e.key) {
+      case "ArrowRight": case "ArrowDown": case "PageDown": case " ": case "Enter": next(); break;
+      case "ArrowLeft": case "ArrowUp": case "PageUp": case "Backspace": prev(); break;
+      case "Home": go(0); break;
+      case "End": go(slides.length - 1, true); break;
+      case "f": case "F": toggleFull(); break;
+      case "o": case "O": toggleOverview(); break;
+      case "n": openNotes(); break;
+      case "N": togglePanel(); break;
+      case "r": case "R": resetQuiz(); break;
+      case "Escape": togglePanel(false); break;
+      default: return;
+    }
+    e.preventDefault();
+  }
+  document.addEventListener("keydown", onKey);
+  let touch = null;
+  addEventListener("touchstart", (e) => { const t = e.changedTouches[0]; touch = [t.clientX, t.clientY]; }, { passive: true });
+  addEventListener("touchend", (e) => {
+    if (!touch) return;
+    const t = e.changedTouches[0], dx = t.clientX - touch[0], dy = t.clientY - touch[1];
+    touch = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
+  }, { passive: true });
+  document.getElementById("nav").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-a]");
+    if (!b) return;
+    b.blur();
+    ({ prev, next, overview: () => toggleOverview(), notes: openNotes, full: toggleFull })[b.dataset.a]();
+  });
+  document.querySelectorAll(".qq").forEach((q) => q.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || q.classList.contains("done")) return;
+    q.classList.add("done");
+    q.querySelectorAll("button[data-ok]").forEach((x) => x.classList.add("right"));
+    if (!b.hasAttribute("data-ok")) b.classList.add("wrong");
+    b.blur();
+  }));
+  addEventListener("hashchange", () => {
+    const m = location.hash.match(/^#(\d+)$/);
+    if (m && Number(m[1]) - 1 !== cur) go(Number(m[1]) - 1);
+  });
+
+  /* ---------- 7. início ---------- */
+  scale();
+  const initial = location.hash.match(/^#(\d+)$/);
+  cur = initial ? Math.max(0, Math.min(slides.length - 1, Number(initial[1]) - 1)) : 0;
+  pres.forEach(fitCode);
+  show();
+  window.deck = { next, prev, go, get index() { return cur; }, get step() { return step; }, slides };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Biblioteca — Atividade: a foto dos autores no RustFS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#111827; --muted:#5b6472; --line:#e3e7ed;
+  --accent:#1d4ed8; --accent-soft:#eef3ff; --ok:#047857; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --prof:#6d28d9; --prof-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e6edf7;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",SFMono-Regular,ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.87em;background:#eef1f5;border:1px solid #e0e5ec;border-radius:4px;padding:.08em .34em;white-space:nowrap}
+.ref{color:var(--muted);font-style:italic}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:264px minmax(0,1fr);gap:0;max-width:1400px;margin:0 auto}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--card);padding:20px 12px 60px}
+.side h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+.side a{display:block;padding:5px 9px;border-radius:7px;text-decoration:none;color:#374151;font-size:13.5px;line-height:1.35}
+.side a:hover{background:var(--accent-soft);color:var(--accent)}
+.side a.mk{font-weight:700}
+.side .num{display:inline-block;min-width:26px;color:#94a3b8;font-family:var(--mono);font-size:11.5px}
+main{padding:0 44px 120px;min-width:0}
+
+/* hero */
+.hero{margin:0 -44px 44px;padding:56px 44px 44px;background:linear-gradient(160deg,#0f172a 0%,#1e3a8a 100%);color:#fff}
+.hero .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;margin:0 0 12px}
+.hero h1{font-family:var(--serif);font-size:40px;line-height:1.15;margin:0 0 14px;font-weight:700}
+.hero p{margin:0;max-width:70ch;opacity:.9;font-size:17px}
+.hero .chips{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 13px;font-size:12.5px}
+
+/* seções */
+section.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px 34px;margin:0 0 26px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+h2.sec{font-family:var(--serif);font-size:27px;margin:0 0 6px;line-height:1.25}
+h3{font-family:var(--serif);font-size:20px;margin:26px 0 8px}
+h4{font-size:15px;margin:20px 0 6px}
+h5,h6{font-size:14px;margin:16px 0 6px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:0 0 5px}
+blockquote{margin:0 0 16px;padding:2px 0 2px 16px;border-left:3px solid #cbd5e1;color:var(--muted)}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+
+/* fase */
+article.fase{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 0 30px;margin:0 0 30px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.fase-head{padding:22px 34px 18px;border-bottom:1px solid var(--line);background:#fbfcfe;display:flex;gap:18px;align-items:flex-start}
+.fase-n{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:19px;font-weight:700}
+.fase.mk .fase-n{background:#b91c1c}
+.fase-t{min-width:0}
+.fase-t h2{font-family:var(--serif);font-size:24px;margin:0 0 4px;line-height:1.25}
+.fase-t .req{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.fase-body{padding:0 34px}
+.lead{margin:22px 0 4px;padding:16px 18px;background:var(--accent-soft);border:1px solid #d7e3ff;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;font-size:16.5px}
+.lead p{margin:0}
+
+.step{margin-top:26px}
+.step > h3{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.step.test > h3{color:var(--ok)}
+.step.commit > h3{color:var(--warn)}
+
+/* código */
+.cb{margin:0 0 16px;border:1px solid #1e293b;border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 14px;background:#111c31;border-bottom:1px solid #1e293b}
+.cb-lang{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8ba0c4}
+.cb-actions{display:flex;gap:6px}
+.cb button{font:inherit;font-size:11.5px;font-family:var(--sans);background:#1e293b;color:#cbd5e1;border:1px solid #33415a;border-radius:6px;padding:3px 10px;cursor:pointer}
+.cb button:hover{background:#2a3a52;color:#fff}
+.cb button.done{background:#065f46;border-color:#047857;color:#d1fae5}
+.cb-body{margin:0;padding:14px 16px;overflow-x:auto;background:var(--code-bg)}
+.cb-body code{background:none;border:0;padding:0;white-space:pre;color:var(--code-ink);font-size:13px;line-height:1.6;font-family:var(--mono)}
+.cb-out{border-color:#cbd5e1;background:#f8fafc}
+.cb-out .cb-bar{background:#eef2f7;border-bottom-color:#dde3ec}
+.cb-out .cb-lang{color:#64748b}
+.cb-fig{border-style:dashed}
+.cb-fig .cb-bar{background:#0d1626}
+.cb-note{align-self:center;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:#8ba0c4;opacity:.8}
+.ln-new{font-weight:700;color:#fde047}
+.cb-out .cb-body{background:#f8fafc}
+.cb-out .cb-body code{color:#0f172a}
+.cb-diff code{white-space:pre}
+.dl{display:block}
+.dl.add{background:rgba(16,185,129,.14);color:#a7f3d0}
+.dl.del{background:rgba(239,68,68,.14);color:#fecaca}
+
+/* tabelas */
+.tw{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f4f6f9;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:0}
+
+/* diagramas */
+figure.diagram{margin:0 0 20px;padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.diagram-scroll{overflow-x:auto}
+svg.dg{display:block;width:100%;height:auto;max-width:100%;min-width:520px}
+figure.diagram figcaption{margin-top:10px;font-size:13px;color:var(--muted);text-align:center}
+.diagram.missing{color:#b91c1c;font-size:13px}
+
+/* professor */
+aside.prof{margin:18px 0;padding:16px 20px;background:var(--prof-soft);border:1px solid #ddd6fe;border-left:4px solid var(--prof);border-radius:0 10px 10px 0}
+aside.prof h4{margin:0 0 8px;color:var(--prof);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+aside.prof p:last-child{margin-bottom:0}
+.conc{margin:0 0 18px;padding:0;list-style:none}
+.conc li{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin:0 0 7px;font-size:15px}
+.conc li::before{content:"◆";color:var(--accent);flex:0 0 auto;font-size:11px;line-height:1.7}
+.refl{padding:18px 20px;background:#fffdf5;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:0 10px 10px 0}
+.refl p:last-child{margin-bottom:0}
+
+.callout{padding:16px 20px;border-radius:10px;border:1px solid var(--line);background:#f8fafc;margin:0 0 18px}
+.callout.good{background:var(--ok-soft);border-color:#a7f3d0}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}
+.entrevista{font-family:var(--serif);font-size:17.5px;line-height:1.75;background:#fffdf7;border:1px solid #e8e0cc;border-radius:12px;padding:26px 30px;position:relative}
+.entrevista::before{content:"\201C";position:absolute;top:-6px;left:14px;font-size:72px;color:#e0d5b8;font-family:var(--serif);line-height:1}
+.entrevista p{margin:0 0 12px;padding-left:26px}
+.entrevista .quem{padding-left:26px;font-family:var(--sans);font-size:13px;color:var(--muted);font-style:normal}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 18px}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-family:var(--serif);font-size:30px;line-height:1.1;color:var(--accent)}
+.stat span{font-size:13px;color:var(--muted)}
+
+footer{padding:40px 44px 60px;color:var(--muted);font-size:13.5px;text-align:center}
+.top{position:fixed;right:22px;bottom:22px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-size:13px;cursor:pointer;opacity:.85;font-family:var(--sans)}
+.top:hover{opacity:1}
+
+@media (max-width:1020px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);max-height:280px}
+  main{padding:0 18px 80px}
+  .hero{margin:0 -18px 28px;padding:36px 18px 30px}
+  .hero h1{font-size:29px}
+  section.doc,.fase-head,.fase-body{padding-left:18px;padding-right:18px}
+}
+@media print{
+  .side,.top,.cb button{display:none}
+  .wrap{display:block}
+  body{background:#fff;font-size:11pt}
+  .hero{background:#fff;color:#000;margin:0;padding:0 0 20px;border-bottom:2px solid #000}
+  .hero .chip{border-color:#999;background:#f2f2f2;color:#000}
+  article.fase,section.doc{break-inside:avoid-page;box-shadow:none;border-color:#ccc}
+  .cb{border-color:#ccc}
+  .cb-bar{background:#eee}.cb-lang{color:#333}
+  .cb-note{color:#555}
+  .ln-new{font-weight:700;color:#000}
+  .cb-body,.cb-body code{background:#f7f7f7;color:#000}
+  .dl.add{background:#e6f7ee;color:#065f46}.dl.del{background:#fdeaea;color:#991b1b}
+}
+/* gerar-fases:inicio */
+/* tokens de código, pré-renderizados pelo gerador */
+.cb-body i{font-style:normal}
+.cb-body{--t-com:#64748b;--t-str:#86efac;--t-num:#fca5a5;--t-kw:#c4b5fd;
+  --t-typ:#7dd3fc;--t-fn:#fdba74;--t-pun:#94a3b8;--t-key:#93c5fd;
+  --t-cmd:#fdba74;--t-flag:#c4b5fd}
+.cb-out .cb-body{--t-com:#64748b;--t-str:#15803d;--t-num:#b91c1c;--t-kw:#6d28d9;
+  --t-typ:#0369a1;--t-fn:#b45309;--t-pun:#64748b;--t-key:#1d4ed8;
+  --t-cmd:#b45309;--t-flag:#6d28d9}
+.t-com{color:var(--t-com);font-style:italic}
+.t-str{color:var(--t-str)}
+.t-num{color:var(--t-num)}
+.t-kw{color:var(--t-kw)}
+.t-typ{color:var(--t-typ)}
+.t-fn{color:var(--t-fn)}
+.t-pun{color:var(--t-pun)}
+.t-key{color:var(--t-key)}
+.t-cmd{color:var(--t-cmd);font-weight:600}
+.t-flag{color:var(--t-flag)}
+
+/* linha que a fase acrescenta: negrito e fundo, por cima dos tokens.
+   inline-block com min-width leva o fundo até a margem direita do bloco, para a
+   marcação virar uma faixa e não um borrão do tamanho do texto */
+.ln-new{display:inline-block;min-width:100%;font-weight:700;color:inherit;
+  background:rgba(253,224,71,.13);box-shadow:inset 3px 0 0 #fde047}
+.cb-out .ln-new{background:rgba(180,83,9,.11);box-shadow:inset 3px 0 0 #b45309}
+
+/* objetivo, no lugar do lead curto da versão de sala */
+.step.objetivo > h3{color:var(--accent)}
+.step.objetivo p{margin:0 0 12px}
+.step.objetivo p:last-child{margin-bottom:0}
+/* gerar-fases:fim */.dl.ctx{color:#cbd5e1}
+kbd{font-family:var(--mono);font-size:.82em;background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:4px;padding:.05em .4em}
+.cb-bar .cb-note{margin-left:12px;margin-right:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side">
+<h2>Atividade</h2>
+<a href="#topo"><span class="num">•</span>Visão geral</a>
+<h2>Preparação</h2>
+<a href="#passo-00"><span class="num">00</span>Uma branch sua, no seu fork</a>
+<h2>O trabalho</h2>
+<a href="#passo-01"><span class="num">01</span>O que fazer</a>
+<a href="#passo-02"><span class="num">02</span>O que está pronto e o que é seu</a>
+<a href="#passo-03"><span class="num">03</span>Código de referência</a>
+<a href="#passo-04"><span class="num">04</span>Onde Autoria é diferente de Acervo</a>
+<a href="#passo-05"><span class="num">05</span>Critérios de aceite</a>
+<a href="#passo-06"><span class="num">06</span>Veja a foto funcionando</a>
+<h2>Fechamento</h2>
+<a href="#passo-07"><span class="num">07</span>Para discutir</a>
+<a href="#passo-08"><span class="num">08</span>Entrega</a>
+</nav>
+<main>
+<div class="hero">
+  <p class="kicker">Tópicos Especiais em Engenharia de Software II · IFES</p>
+  <h1>Atividade — a foto dos autores no RustFS</h1>
+  <p>No roteiro da fase 03, a capa do livro (UC25) passou a morar no RustFS: os bytes num bucket, e no Postgres só a informação de quando ela mudou. Agora é a sua vez: leve o mesmo desenho para a <strong>foto do autor (UC26)</strong>. Desta vez a tela, as rotas e o esqueleto já estão prontos; o núcleo, que decide o que acontece com os bytes e com o banco, é seu.</p>
+  <div class="chips"><span class="chip">UC26</span><span class="chip">RustFS</span><span class="chip">S3Client</span><span class="chip">Chave com dono</span><span class="chip">Objeto antes da coluna</span><span class="chip">Depois do COMMIT</span><span class="chip">Cache da busca</span><span class="chip">test.todo</span></div>
+</div>
+
+<div class="fase-body" id="topo">
+<div class="callout warn"><strong>Este enunciado não traz o código da solução.</strong> A tela do UC26, as rotas e as assinaturas das funções já estão no projeto, e cada função que falta tem um comentário <code>TODO (atividade)</code> com os passos em ordem. O <em>como</em> está na capa do livro, a sua referência. As diferenças entre Acervo e Autoria são exatamente o que a atividade quer que você perceba.</div>
+<div class="tw"><table>
+<tr><th>Passo</th><th>O que acontece</th><th>Como saber que deu certo</th></tr>
+<tr><td>00</td><td>fork, branch nova e linha de base</td><td>120 testes passando e 8 em <code>todo</code></td></tr>
+<tr><td>01–04</td><td>ler o enunciado, o esqueleto, a referência e as armadilhas</td><td>você sabe dizer por que <code>photoKey</code> mora fora da fatia e onde fica o COMMIT em cada função</td></tr>
+<tr><td>05</td><td>implementar e ligar os testes de aceite</td><td>128 testes passando, nenhum em <code>todo</code>; fronteiras e tipos verdes</td></tr>
+<tr><td>06</td><td>ver a foto no navegador e no RustFS</td><td>a miniatura na lista de autores e o objeto no console</td></tr>
+<tr><td>08</td><td>entregar</td><td>a branch no seu fork, no GitHub</td></tr>
+</table></div>
+</div>
+
+<div class="fase-head" id="passo-00"><div class="fase-n">00</div><div class="fase-t"><h2>Uma branch sua, no seu fork</h2></div></div>
+<div class="fase-body">
+<p>A atividade é sua, então o código vai para o <strong>seu</strong> fork, numa branch nova, criada a partir da branch da aula no repositório do professor. Quem fala com o GitHub em seu nome é o GitHub CLI (<code>gh</code>), autenticado na <strong>sua</strong> conta.</p>
+
+<div class="step "><h3>Confira quem está autenticado</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c1">copiar</button></div></div><pre class="cb-body" id="c1"><code>gh auth status</code></pre></div>
+<p>A saída mostra <em>Logged in to github.com account <strong>seu-usuario</strong></em>. Se não estiver autenticado, ou se o usuário mostrado não for o seu (computador do laboratório, conta de um colega), entre com a sua:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c2">copiar</button></div></div><pre class="cb-body" id="c2"><code>gh auth login</code></pre></div>
+<p>Escolha <em>GitHub.com</em>, <em>HTTPS</em> e <em>Login with a web browser</em>. Depois, faça o <code>git</code> usar essa mesma conta no <code>push</code>:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c3">copiar</button></div></div><pre class="cb-body" id="c3"><code>gh auth setup-git</code></pre></div>
+<div class="callout"><strong>Por que o <code>setup-git</code>?</strong> Sem ele, o <code>git push</code> pode usar outra credencial guardada no Windows (no Gerenciador de Credenciais) e enviar o código com a conta errada, ou ser recusado.</div>
+</div>
+
+<div class="step "><h3>O seu fork e os remotos</h3>
+<p>Se você <strong>ainda não tem o projeto</strong> no computador, o <code>gh</code> cria o fork na sua conta e clona numa tacada só. Ele já deixa <code>origin</code> apontando para o seu fork e <code>upstream</code> para o do professor:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c4">copiar</button></div></div><pre class="cb-body" id="c4"><code>gh repo fork maroquio/biblioteca-tutorial --clone
+cd biblioteca-tutorial</code></pre></div>
+<p>Se <strong>já tem</strong>, abra a pasta do projeto e confira os remotos:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c5">copiar</button></div></div><pre class="cb-body" id="c5"><code>git remote -v</code></pre></div>
+<div class="tw"><table>
+<tr><th>O que aparece</th><th>O que fazer</th></tr>
+<tr><td><code>origin</code> no <strong>seu</strong> usuário e <code>upstream</code> em <code>maroquio</code></td><td>Nada. Está certo.</td></tr>
+<tr><td><code>origin</code> em <code>maroquio</code> (você clonou o repositório do professor)</td><td>Rode <code>gh repo fork --remote</code>. Ele cria o seu fork, passa a chamá-lo de <code>origin</code> e guarda o do professor como <code>upstream</code>.</td></tr>
+<tr><td><code>origin</code> no seu usuário, mas <strong>sem</strong> <code>upstream</code></td><td>Rode <code>git remote add upstream https://github.com/maroquio/biblioteca-tutorial.git</code>.</td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>A branch da atividade</h3>
+<p>Antes de trocar de branch, o <code>git status</code> precisa estar limpo. Se você tem alterações da aula sem commit, faça o commit delas na branch em que estão (a branch em que você seguiu o roteiro da fase 03, por exemplo): elas continuam lá, intactas.</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c6">copiar</button></div></div><pre class="cb-body" id="c6"><code>git status
+git fetch upstream
+git switch -c atividade-rustfs-autores upstream/saas-evolution/fase03</code></pre></div>
+<p>A branch nasce de <code>upstream/saas-evolution/fase03</code>, e não da sua branch da aula, por dois motivos. Primeiro, todo mundo parte do mesmo ponto, com a capa do livro (UC25) pronta e igual à do roteiro, que é a referência desta atividade. Segundo, o <strong>último commit</strong> da <code>fase03</code> é justamente o esqueleto da atividade: a tela do UC26, as rotas, a coluna nova e os testes de aceite. A sua branch da aula não tem nada disso. A branch <code>saas-evolution/fase03</code> não existe no seu fork (ele foi criado antes dela), por isso o ponto de partida vem do <code>upstream</code>.</p>
+</div>
+
+<div class="step test"><h3>Confira a linha de base</h3>
+<p>Com o Docker Desktop aberto:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c7">copiar</button></div></div><pre class="cb-body" id="c7"><code>docker compose -f infra/compose.yaml up -d db redis rustfs
+docker compose -f infra/compose.yaml run --rm --build test</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c8"><code> 120 pass
+ 8 todo
+ 0 fail</code></pre></div>
+<p>Os <strong>8 em <code>todo</code></strong> são os testes de aceite da atividade, em <code>manage-author-photo.test.ts</code>. Eles estão marcados com <code>test.todo</code>: o <code>bun test</code> lista, mas não executa. O passo 05 explica como ligá-los. Antes dos testes rodarem, o serviço <code>storage-init</code> do compose cria os buckets <code>biblioteca</code> e <code>biblioteca-test</code>; você não precisa criar nada no RustFS.</p>
+<p>Se o banco de testes não existir (primeira vez neste computador), crie com <code>docker compose -f infra/compose.yaml exec db createdb -U biblioteca biblioteca_test</code> e rode a suíte de novo.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-01"><div class="fase-n">01</div><div class="fase-t"><h2>O que fazer</h2></div></div>
+<div class="fase-body">
+<div class="lead"><p>Implemente o <strong>UC26</strong>: enviar, mostrar e remover a foto de um autor. Os bytes ficam no <strong>RustFS</strong>, numa chave fixa por autor; o Postgres guarda só <strong>quando a foto mudou</strong>, na coluna <code>foto_atualizada_em</code>. É o mesmo desenho da capa do livro, com as diferenças do passo 04.</p></div>
+
+<div class="step "><h3>Dentro do escopo</h3>
+<ul class="conc">
+<li><span><code>photoKey(id)</code> devolve a chave fixa da foto de um autor, com o módulo Autoria como dono.</span></li>
+<li><span><code>PUT /api/autores/:id/foto</code> grava o objeto no bucket e, depois, a data na coluna; responde o autor com a <code>fotoUrl</code> nova.</span></li>
+<li><span><code>GET /api/autores/:id/foto</code> devolve os bytes da foto; responde 404 se o autor não existe ou não tem foto.</span></li>
+<li><span><code>DELETE /api/autores/:id/foto</code> zera a coluna e, depois, apaga o objeto; responde 204.</span></li>
+<li><span>Enviar e remover a foto invalidam o cache da busca de autores, <strong>depois do COMMIT</strong>.</span></li>
+<li><span>Excluir o autor (UC08) apaga a foto dele do bucket, <strong>depois do COMMIT</strong>.</span></li>
+<li><span>Sem RustFS, envio e remoção respondem 503, e o autor continua exatamente como estava.</span></li>
+<li><span>Os 8 testes de aceite saem de <code>test.todo</code>, viram <code>test</code> e passam.</span></li>
+</ul>
+</div>
+
+<div class="step "><h3>Fora do escopo</h3>
+<ul>
+<li><strong>O frontend</strong> está pronto: a página <em>Foto do autor</em> (UC26), a coluna de miniaturas e o link <em>Foto</em> na consulta de autores. Você não precisa mexer em nada dentro de <code>frontend/</code>.</li>
+<li><strong>As rotas, a validação da imagem e a <code>fotoUrl</code></strong> estão prontas. O tipo da imagem (JPEG, PNG ou WebP, pela assinatura dos bytes) e o limite de 2 MB são conferidos por <code>readImageUpload</code> antes de a sua função ser chamada.</li>
+<li><strong>URLs assinadas e um subdomínio só para imagens</strong>, o que se faria em produção, são assunto do passo 07, não de código.</li>
+<li><strong>Varrer o bucket atrás de objetos órfãos</strong> também fica para a discussão.</li>
+<li><strong>Redimensionar a foto</strong> ou gerar miniaturas no servidor não faz parte da atividade: a miniatura é a mesma imagem, reduzida pelo CSS.</li>
+</ul>
+</div>
+</div>
+
+<div class="fase-head" id="passo-02"><div class="fase-n">02</div><div class="fase-t"><h2>O que está pronto e o que é seu</h2></div></div>
+<div class="fase-body">
+<p>O último commit da <code>fase03</code> deixou o UC26 montado de ponta a ponta, menos o núcleo. A tela chama a API, a API chama as suas funções, e as suas funções, por enquanto, só lançam <code>NotImplemented</code>, que o servidor transforma em <strong>501</strong> com a mensagem <em>"UC26 ainda não implementado: …"</em>. Abra a tela antes de começar e veja esse erro: ele some à medida que você implementa.</p>
+
+<div class="step "><h3>Pronto: leia, mas não mude</h3>
+<div class="tw"><table>
+<tr><th>Arquivo</th><th>O que já faz</th></tr>
+<tr><td><code>backend/src/shared/errors.ts</code><br><code>backend/src/server.ts</code></td><td>O erro <code>NotImplemented</code> e o 501 que ele vira. É a marca do esqueleto: quando a atividade acabar, ninguém mais lança esse erro em Autoria.</td></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/schema.ts</code></td><td>A coluna <code>foto_atualizada_em</code> em <code>autores</code>, nula para quem não tem foto.</td></tr>
+<tr><td><code>backend/src/modules/authorship/domain/Author.ts</code></td><td>O campo <code>photoVersion</code> da <code>AuthorView</code>. Leia o comentário: por que um <strong>número</strong>, e não um <code>Date</code> como o <code>coverUpdatedAt</code> do livro?</td></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/authors.ts</code></td><td><code>findAuthor</code>, o tipo <code>AuthorRow</code> e o <code>toAuthorView</code>, que já lê a coluna nova.</td></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/json.ts</code></td><td>A <code>fotoUrl</code>, com <code>?v=</code> e a versão da foto, ou <code>null</code>.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/manage-author-photo/route.ts</code></td><td>As três rotas: o <code>PUT</code> lê a imagem do campo <code>foto</code>, o <code>GET</code> devolve os bytes com <code>Cache-Control</code> e <code>X-Content-Type-Options</code>, o <code>DELETE</code> responde 204.</td></tr>
+<tr><td><code>frontend/src/modules/authorship/…</code></td><td>O campo <code>fotoUrl</code> em <code>types.ts</code>, a miniatura e o link <em>Foto</em> em <code>search-authors/page.tsx</code> e a página <code>manage-author-photo/page.tsx</code>.</td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>Seu: o núcleo</h3>
+<div class="tw"><table>
+<tr><th>Arquivo</th><th>O que falta</th></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/photos.ts</code></td><td><code>photoKey(authorId)</code>: a chave da foto no bucket.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/manage-author-photo/uploadAuthorPhoto.ts</code></td><td>Enviar ou trocar a foto.</td></tr>
+<tr><td><code>…/manage-author-photo/getAuthorPhoto.ts</code></td><td>Ler a foto para a rota devolver.</td></tr>
+<tr><td><code>…/manage-author-photo/removeAuthorPhoto.ts</code></td><td>Remover a foto.</td></tr>
+<tr><td><code>backend/src/modules/authorship/features/delete-author/deleteAuthor.ts</code></td><td>O <code>TODO</code> no fim: a foto sai do bucket quando o autor é excluído.</td></tr>
+<tr><td><code>…/manage-author-photo/manage-author-photo.test.ts</code></td><td>Trocar cada <code>test.todo</code> por <code>test</code>, à medida que implementa. Só isso: os testes já estão escritos.</td></tr>
+</table></div>
+<div class="callout warn"><strong>As assinaturas são contrato.</strong> As rotas e os testes chamam essas funções exatamente como estão declaradas. Não mude nomes, parâmetros nem tipos de retorno, e não mude o que os testes esperam. Os parâmetros <code>client</code> e <code>now</code> existem para os testes: <code>client: null</code> simula o RustFS fora do ar, e por isso <code>client</code> precisa chegar a <strong>toda</strong> chamada ao armazenamento dentro da função.</div>
+</div>
+</div>
+
+<div class="fase-head" id="passo-03"><div class="fase-n">03</div><div class="fase-t"><h2>Código de referência</h2></div></div>
+<div class="fase-body">
+<p>Leia estes arquivos <strong>antes</strong> de escrever qualquer linha. Para cada um, a pergunta não é "o que eu copio?", e sim "que decisão este arquivo toma, e ela vale igual para Autoria?".</p>
+
+<div class="step "><h3>A capa do livro, a referência</h3>
+<div class="tw"><table>
+<tr><th>Arquivo</th><th>O que observar</th></tr>
+<tr><td><code>backend/src/infrastructure/storage.ts</code></td><td>O cliente compartilhado e as funções que você vai usar: <code>objectKey</code>, <code>putObject</code>, <code>getObject</code> (que devolve <code>null</code> quando o objeto não existe), <code>discardObject</code> (que nunca lança erro) e <code>requireStorage</code>. Repare que toda outra falha do RustFS vira 503. Você <strong>usa</strong> este arquivo; não precisa mudá-lo.</td></tr>
+<tr><td><code>backend/src/shared/images.ts</code></td><td>O tipo <code>ImageUpload</code> que a sua função recebe, já validado.</td></tr>
+<tr><td><code>backend/src/modules/catalog/infrastructure/covers.ts</code></td><td>A chave da capa. Por que ela mora em <code>infrastructure</code>, e não dentro da fatia <code>manage-book-cover</code>?</td></tr>
+<tr><td><code>backend/src/modules/catalog/features/manage-book-cover/uploadBookCover.ts</code></td><td>A ordem de tudo: o 404 antes de mandar qualquer byte, o objeto antes da coluna, e o que acontece se o livro some no meio do caminho. Leia os comentários.</td></tr>
+<tr><td><code>…/manage-book-cover/getBookCover.ts</code></td><td>Quem decide se há capa é o Postgres; o RustFS só entrega os bytes.</td></tr>
+<tr><td><code>…/manage-book-cover/removeBookCover.ts</code></td><td>Por que o <code>requireStorage</code> vem antes de tocar no banco, e por que a coluna é zerada antes de o objeto sair.</td></tr>
+<tr><td><code>backend/src/modules/catalog/features/delete-book/deleteBook.ts</code></td><td>A última linha, e onde ela está em relação ao <code>inTransaction</code>.</td></tr>
+<tr><td><code>…/manage-book-cover/manage-book-cover.test.ts</code></td><td>Os testes da capa. Os seus, já escritos, seguem o mesmo roteiro.</td></tr>
+<tr><td><code>backend/scripts/check-boundaries.ts</code></td><td>A tabela <code>KEY_OWNERS</code>: o primeiro trecho de cada <code>objectKey(...)</code>, como o de cada <code>redisKey(...)</code>, tem um módulo dono.</td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>O módulo Autoria, onde você vai trabalhar</h3>
+<div class="tw"><table>
+<tr><th>Arquivo</th><th>O que observar</th></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/searchCache.ts</code></td><td>O cache da busca de autores, da fase 02: o que ele guarda, por quanto tempo, e o <code>invalidateAuthorSearch()</code>.</td></tr>
+<tr><td><code>…/features/create-author/createAuthor.ts</code><br><code>…/features/update-author/updateAuthor.ts</code><br><code>…/features/delete-author/deleteAuthor.ts</code></td><td>Em que linha a invalidação acontece, em relação ao <code>inTransaction</code>.</td></tr>
+<tr><td><code>backend/src/modules/authorship/infrastructure/authors.ts</code></td><td>O <code>SELECT</code> do <code>findAuthor</code> diz quais colunas formam um <code>AuthorRow</code>, e com que apelidos. O <code>toAuthorView</code> recebe um <code>db</code>: qual você vai passar?</td></tr>
+<tr><td><code>…/features/search-authors/search-authors-cache.test.ts</code></td><td>Como um teste enxerga o cache pelo cabeçalho <code>X-Cache</code>. O teste 7 da atividade faz o mesmo.</td></tr>
+</table></div>
+<p>A explicação de cada decisão está no <a href="../saas-evolution/saas-fase03.html">roteiro da fase 03</a> e nos <a href="../aulas/rustfs/slides-rustfs.html">slides sobre o RustFS</a>. Para o cache e o "depois do COMMIT", volte ao <a href="../saas-evolution/saas-fase02.html#passo-02">passo 02 do roteiro da fase 02</a>.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-04"><div class="fase-n">04</div><div class="fase-t"><h2>Onde Autoria é diferente de Acervo</h2></div></div>
+<div class="fase-body">
+<p>Copiar a capa do livro trocando "livro" por "autor" e "capa" por "foto" <strong>quase</strong> funciona. Os itens abaixo são o "quase": cada um muda alguma decisão.</p>
+
+<div class="step "><h3>1. A chave tem outro dono</h3>
+<p>O primeiro trecho de toda chave de objeto diz o módulo dono, como cada tabela e cada chave do Redis têm um. Copie a chave da capa e troque só o resto, e o verificador de fronteiras reclama. O dono de Autoria ele já conhece (é o mesmo das chaves do cache da busca), então aqui não há nada a mudar no <code>check-boundaries.ts</code>: o trecho certo é que precisa estar na sua chave. O teste 1 diz a chave completa que se espera.</p>
+<p>Repare também <strong>onde</strong> a <code>photoKey</code> mora: em <code>infrastructure/photos.ts</code>, fora da fatia. Duas fatias precisam dela, <code>manage-author-photo</code> e <code>delete-author</code>, e uma fatia não importa outra.</p>
+</div>
+
+<div class="step "><h3>2. A busca de autores tem cache</h3>
+<p>Enviar a capa de um livro não muda nada que esteja em cache. Já a busca de autores (UC06) guarda no Redis, por até 60 s, a lista com a <code>fotoUrl</code> de cada autor. Então enviar e remover a foto são <strong>escritas</strong> como cadastrar ou editar um autor, e precisam invalidar a busca. Onde? Do mesmo jeito que <code>createAuthor</code> e <code>updateAuthor</code> fazem: dentro da sua função, depois que a transação terminou.</p>
+<p>Isso também explica o <code>photoVersion</code> numérico: o autor volta do cache como JSON, e um <code>Date</code> viraria texto no caminho.</p>
+<div class="callout warn"><strong>O teste pega o esquecimento, não a posição.</strong> O teste 7 falha se você não invalidar. Mas, se invalidar <em>dentro</em> do <code>inTransaction</code>, antes do COMMIT, ele continua passando, porque a busca do teste só acontece depois que a resposta do envio chegou. Em produção, uma busca concorrente pode ler o autor antigo no Postgres, que ainda não viu o COMMIT, e gravá-lo na geração nova: a foto antiga fica no cache até o TTL vencer. Confira a posição da sua invalidação <strong>lendo o código</strong>.</div>
+<p>Na tela, o esquecimento aparece: a página <em>Foto do autor</em> recarrega a lista pela busca de autores depois de cada envio. Sem invalidação, a foto nova só aparece quando o cache expira.</p>
+</div>
+
+<div class="step "><h3>3. A visão do autor nasce de outro jeito</h3>
+<p>A capa monta o livro com <code>toBookView</code>; você vai montar o autor com <code>toAuthorView</code>, que pede outras coisas. Três detalhes:</p>
+<ul>
+<li>O <code>RETURNING</code> do seu <code>UPDATE</code> precisa entregar um <code>AuthorRow</code>: as mesmas colunas, com os mesmos apelidos, que o <code>findAuthor</code> lê.</li>
+<li>O <code>toAuthorView</code> faz o próprio <code>SELECT</code> de <code>foto_atualizada_em</code>. Dentro do <code>inTransaction</code>, passe a ele o <code>tx</code> da transação, e não o <code>sql</code>: com o <code>sql</code>, o <code>SELECT</code> sai por outra conexão, que ainda não enxerga o <code>UPDATE</code> não confirmado, e a resposta traz a <code>fotoUrl</code> antiga. O teste 2 pega esse erro.</li>
+<li>É por causa dele que <code>uploadAuthorPhoto</code> recebe o <code>integration</code>: o autor mostra quantos livros tem, e quem conta livros é o Acervo.</li>
+</ul>
+</div>
+
+<div class="step "><h3>4. Excluir o autor pode ser recusado</h3>
+<p>O <code>deleteAuthor</code> recusa com 409 o autor que ainda tem livros, e já invalida a busca depois do COMMIT. O <code>TODO</code> no fim dele é o seu: a foto sai do bucket <strong>só</strong> quando a exclusão foi confirmada, e com <code>discardObject</code>, que nunca lança erro. Pense no porquê das duas coisas: o que aconteceria com um autor recusado se a foto saísse antes da transação? E com um autor já excluído do Postgres, se uma falha do RustFS transformasse a exclusão num 503?</p>
+<div class="callout warn"><strong>Os testes não pegam este erro.</strong> O teste 8 exclui um autor <em>sem</em> livros. Se a foto sair antes do COMMIT, ele continua passando, e o autor com livros, que a regra manteve, perde a foto. Confira <strong>lendo o código</strong>.</div>
+</div>
+
+<div class="step "><h3>5. O que é igual a Acervo, e nenhum teste confere</h3>
+<p>Os 8 testes olham o estado final: a resposta, o autor, o bucket. A <strong>ordem</strong> das operações eles não veem, e foi ela que a capa do livro escolheu com cuidado. Para cada item, pergunte: "se o processo morrer entre uma linha e a outra, o que fica para trás?"</p>
+<ul>
+<li>No envio, o 404 de autor inexistente vem antes de qualquer byte chegar ao RustFS.</li>
+<li>No envio, o objeto é gravado antes da coluna. Na remoção, a coluna é zerada antes de o objeto sair.</li>
+<li>Se o autor for excluído enquanto a foto sobe, o <code>UPDATE</code> não encontra ninguém: o objeto recém-gravado é descartado e a resposta é 404.</li>
+<li>Na leitura, coluna nula responde 404 sem consultar o RustFS; e há duas mensagens diferentes, uma para autor inexistente e outra para autor sem foto.</li>
+</ul>
+</div>
+</div>
+
+<div class="fase-head" id="passo-05"><div class="fase-n">05</div><div class="fase-t"><h2>Critérios de aceite</h2></div></div>
+<div class="fase-body">
+<p>Desta vez os testes já existem: são os 8 de <code>manage-author-photo.test.ts</code>. A atividade está pronta quando todos deixaram de ser <code>test.todo</code>, viraram <code>test</code> e passam, sem que nenhuma expectativa tenha mudado.</p>
+
+<div class="step "><h3>Como funciona o <code>test.todo</code></h3>
+<div class="tw"><table>
+<tr><th>Comando</th><th>O que acontece com um <code>test.todo</code></th></tr>
+<tr><td><code>bun test</code></td><td>Aparece como <code>(todo)</code>, mas o corpo <strong>não roda</strong>. Conta na linha <code>todo</code> do resumo e nunca falha. Por isso a linha de base é 120 pass e 8 todo.</td></tr>
+<tr><td><code>bun test --todo</code>, e o teste falha</td><td>O corpo roda, o erro aparece na tela, e o teste continua marcado <code>(todo)</code>, sem contar como falha. Serve para ler o que ainda falta.</td></tr>
+<tr><td><code>bun test --todo</code>, e o teste passa</td><td>Aparece como <code>(fail)</code>, com o aviso <em>"this test is marked as todo but passes. Remove `.todo` if tested behavior now works"</em>, e o comando termina com erro. Não é defeito no seu código: é o sinal para trocar <code>test.todo</code> por <code>test</code>.</td></tr>
+</table></div>
+<p>Para rodar só os testes da atividade, com o corpo dos <code>todo</code> executando:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c9">copiar</button></div></div><pre class="cb-body" id="c9"><code>docker compose -f infra/compose.yaml run --rm --build test bun test --todo src/modules/authorship/features/manage-author-photo</code></pre></div>
+<p>No esqueleto, antes de você começar, a saída termina assim (o trecho é de um dos testes; cada um mostra o seu erro):</p>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span><span class="cb-note">trecho</span></div><pre class="cb-body" id="c10"><code>error: expect(received).toBe(expected)
+
+Expected: 204
+Received: 501
+…
+(todo) UC26: remover a foto zera fotoUrl e apaga o objeto do bucket
+…
+ 0 pass
+ 8 todo
+ 0 fail</code></pre></div>
+<p>O <code>--build</code> reconstrói a imagem de testes com o seu código; sem ele, os testes rodam a versão anterior.</p>
+</div>
+
+<div class="step "><h3>Uma ordem que funciona</h3>
+<div class="tw"><table>
+<tr><th>Teste</th><th>O que cobre</th><th>O que precisa estar pronto</th></tr>
+<tr><td>1</td><td>a chave pertence a Autoria</td><td><code>photoKey</code></td></tr>
+<tr><td>2 e 3</td><td>enviar, servir os mesmos bytes, trocar a foto</td><td><code>uploadAuthorPhoto</code> e <code>getAuthorPhoto</code></td></tr>
+<tr><td>4</td><td>400, 413 e 404, sem deixar nada para trás</td><td>os mesmos; nenhum erro pode deixar foto no autor</td></tr>
+<tr><td>5</td><td>remover a foto</td><td><code>removeAuthorPhoto</code></td></tr>
+<tr><td>6</td><td>sem RustFS, 503 e nada muda</td><td><code>client</code> em toda chamada; <code>requireStorage</code> na remoção</td></tr>
+<tr><td>7</td><td>o cache da busca é invalidado</td><td>a invalidação no envio e na remoção</td></tr>
+<tr><td>8</td><td>excluir o autor apaga a foto</td><td>o <code>TODO</code> do <code>deleteAuthor</code></td></tr>
+</table></div>
+</div>
+
+<div class="step "><h3>Comportamento</h3>
+<ul class="conc">
+<li><span>A chave da foto do autor 7 é exatamente a que o teste 1 espera.</span></li>
+<li><span>Enviar uma foto responde 200 com a <code>fotoUrl</code>; ela serve os mesmos bytes, com o <code>Content-Type</code> da imagem, e a consulta do autor devolve a mesma <code>fotoUrl</code>.</span></li>
+<li><span>Trocar a foto substitui o objeto (a chave é a mesma) e muda a <code>fotoUrl</code>.</span></li>
+<li><span>Um arquivo que não é imagem responde 400; uma imagem acima de 2 MB, 413; um autor inexistente, 404. Nenhum dos três deixa foto no autor nem objeto no bucket.</span></li>
+<li><span>Remover a foto responde 204, zera a <code>fotoUrl</code> e apaga o objeto; remover a de um autor inexistente responde 404.</span></li>
+<li><span>Sem RustFS, envio e remoção respondem 503, e o autor fica como estava: sem foto, se não tinha; com a foto, se tinha.</span></li>
+<li><span>Depois de enviar ou remover a foto, a próxima busca de autores é <code>MISS</code> e já mostra a <code>fotoUrl</code> nova.</span></li>
+<li><span>Excluir um autor com foto apaga o objeto do bucket.</span></li>
+</ul>
+</div>
+
+<div class="step "><h3>Arquitetura</h3>
+<ul class="conc">
+<li><span>A invalidação da busca acontece <strong>depois</strong> do COMMIT, no envio e na remoção (confira lendo o código: os testes não pegam isso).</span></li>
+<li><span>No <code>deleteAuthor</code>, a foto só sai do bucket depois do COMMIT (idem).</span></li>
+<li><span>A ordem das escritas é a da capa: objeto antes da coluna no envio, coluna antes do objeto na remoção (idem).</span></li>
+<li><span>A chave começa pelo trecho do módulo Autoria, e o verificador de fronteiras aceita.</span></li>
+<li><span>Nada mudou fora de Autoria, além do arquivo de testes; em Autoria, nada fora dos arquivos do passo 02 marcados como seus.</span></li>
+<li><span>Nenhuma função de Autoria lança mais <code>NotImplemented</code>.</span></li>
+</ul>
+</div>
+
+<div class="step test"><h3>Verifique</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c11">copiar</button></div></div><pre class="cb-body" id="c11"><code>cd backend
+bun run check-boundaries
+bun run typecheck
+cd ..
+docker compose -f infra/compose.yaml run --rm --build test</code></pre></div>
+<div class="cb cb-out"><div class="cb-bar"><span class="cb-lang">saída esperada</span></div><pre class="cb-body" id="c12"><code>Fronteiras de módulo respeitadas.
+...
+ 128 pass
+ 0 fail</code></pre></div>
+<p>Repare que a linha <code>todo</code> sumiu: com zero testes em <code>todo</code>, o <code>bun test</code> nem a mostra. Se ela ainda aparece, algum teste continua como <code>test.todo</code> e, portanto, <strong>não rodou</strong>: 120 pass e 8 todo depois de implementar não é atividade pronta. Os 120 testes da linha de base precisam continuar passando. Não avance com teste vermelho.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-06"><div class="fase-n">06</div><div class="fase-t"><h2>Veja a foto funcionando</h2></div></div>
+<div class="fase-body">
+<div class="step "><h3>No navegador</h3>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c13">copiar</button></div></div><pre class="cb-body" id="c13"><code>docker compose -f infra/compose.yaml up -d --build app</code></pre></div>
+<p>Abra <a href="http://localhost:3000/autores">localhost:3000/autores</a>. A primeira coluna é a miniatura da foto; na coluna de ações, o link <em>Foto</em> abre a página do UC26 com o autor já escolhido. Envie uma imagem JPEG, PNG ou WebP de até 2 MB: a prévia aparece, a mensagem de sucesso também, e, de volta à consulta, a miniatura está lá. Troque a foto e depois remova.</p>
+<p>Com o DevTools aberto (<kbd>F12</kbd>, aba <em>Network</em>), observe duas requisições:</p>
+<ul>
+<li><code>foto?v=…</code>: os cabeçalhos <code>Content-Type</code>, <code>Cache-Control: public, max-age=31536000, immutable</code> e <code>X-Content-Type-Options: nosniff</code>. Troque a foto e veja o número do <code>?v=</code> mudar: é ele que faz o navegador buscar a imagem nova, mesmo com o cache de um ano.</li>
+<li><code>autores</code>: o <code>X-Cache</code> logo depois de um envio é <code>MISS</code>.</li>
+</ul>
+</div>
+
+<div class="step "><h3>Dentro do RustFS</h3>
+<p>O console web do RustFS está em <a href="http://localhost:9011/rustfs/console/">localhost:9011/rustfs/console/</a> (a raiz, sem o caminho, responde 403). Entre com o usuário <code>biblioteca</code> e a senha <code>biblioteca-secreta</code>, abra o bucket <code>biblioteca</code> e procure a pasta do módulo Autoria, ao lado da <code>acervo</code> das capas.</p>
+<p>Pelo terminal, o <code>rc</code>, o cliente de linha de comando que vem na imagem do RustFS, lista o bucket inteiro:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c14">copiar</button></div></div><pre class="cb-body" id="c14"><code>docker compose -f infra/compose.yaml exec rustfs sh -c 'rc alias set local http://127.0.0.1:9000 biblioteca biblioteca-secreta &amp;&amp; rc object list --recursive local/biblioteca'</code></pre></div>
+<p>Remova a foto e liste de novo: o objeto sumiu. Exclua um autor sem livros que tenha foto: o objeto também some.</p>
+</div>
+
+<div class="step "><h3>Sem o RustFS</h3>
+<p>Pare o RustFS (<code>docker compose -f infra/compose.yaml stop rustfs</code>) e tente enviar uma foto: a página mostra <em>"O armazenamento de arquivos está indisponível no momento"</em> (o 503), e a consulta de autores continua funcionando. E se você <strong>remover</strong> uma foto com o RustFS parado? Leia <code>removeBookCover</code> e o <code>discardObject</code>, preveja o resultado, e só então tente. Depois suba o RustFS outra vez com <code>start rustfs</code>, liste o bucket e confira a sua previsão. A pergunta 2 do passo 07 começa aqui.</p>
+</div>
+
+<div class="step "><h3>Opcional: veja o cache atrapalhar</h3>
+<p>Comente, só por um momento, a invalidação no envio, reconstrua a aplicação e troque a foto de um autor. A página <em>Foto do autor</em> continua mostrando a antiga, e a busca responde <code>X-Cache: HIT</code>, até o termo expirar. Desfaça a mudança antes do commit.</p>
+</div>
+</div>
+
+<div class="fase-head" id="passo-07"><div class="fase-n">07</div><div class="fase-t"><h2>Para discutir</h2></div></div>
+<div class="fase-body">
+<div class="step "><h3>Responda no fim do arquivo de testes, em comentário, ou leve para a discussão em sala</h3>
+<div class="refl">
+<p><strong>1. A ordem das escritas.</strong> No envio, o objeto vem antes da coluna; na remoção, a coluna vem antes do objeto. Para cada caso, descreva o que sobra se o processo morrer entre as duas escritas, e o que sobraria na ordem inversa. Por que um dos dois estragos é aceitável e o outro não?</p>
+<p><strong>2. Objetos órfãos.</strong> Liste as situações em que um objeto fica no bucket sem nenhum autor apontando para ele. Como você encontraria e limparia esses objetos (pense no <code>list({ prefix })</code> do <code>S3Client</code> e na coluna <code>foto_atualizada_em</code>)? Que cuidado essa limpeza precisa ter para não apagar uma foto que está subindo naquele exato momento?</p>
+<p><strong>3. Tudo passa pelo backend.</strong> Cada miniatura da consulta de autores é uma requisição ao Bun, que lê do RustFS e repassa os bytes. Em produção, o ideal é um subdomínio só para mídia, que serve as imagens direto do armazenamento, com URLs assinadas de validade curta. O que mudaria na <code>fotoUrl</code>, no <code>Cache-Control</code> e no <code>?v=</code>? Quem passaria a decidir quem pode ver a foto, e por quanto tempo?</p>
+<p><strong>4. Chave fixa ou chave nova.</strong> A foto usa uma chave fixa por autor, e a versão vai no <code>?v=</code>. Outra opção seria uma chave nova a cada envio (com a data, ou um hash do conteúdo), guardada no Postgres. O que cada opção faz com a foto antiga, com o cache do navegador e com a corrida entre dois envios simultâneos do mesmo autor?</p>
+<p><strong>5. A foto é um dado pessoal.</strong> Pela LGPD, a foto de uma pessoa identifica essa pessoa. Excluir o autor apaga o objeto do bucket; que outras cópias da foto continuam existindo depois disso (pense no <code>immutable</code> de um ano, no volume <code>rustfsdata</code> e em backups)? O que um pedido de exclusão precisaria alcançar num sistema de verdade?</p>
+</div>
+</div>
+</div>
+
+<div class="fase-head" id="passo-08"><div class="fase-n">08</div><div class="fase-t"><h2>Entrega</h2></div></div>
+<div class="fase-body">
+<div class="step commit"><h3>Commit e push</h3>
+<p>Na raiz do projeto. Confira no <code>git status</code> que só entram os arquivos da atividade:</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c15">copiar</button></div></div><pre class="cb-body" id="c15"><code>git status
+git add -A
+git commit -m "feat: guardar a foto do autor no RustFS (UC26)"
+git push -u origin atividade-rustfs-autores</code></pre></div>
+<p>Se o <code>push</code> for negado, volte ao passo 00: provavelmente o <code>gh auth status</code> mostra outra conta, ou o <code>origin</code> ainda aponta para o repositório do professor.</p>
+</div>
+
+<div class="step "><h3>O link da entrega</h3>
+<p>Gere o endereço da branch no seu fork (troque <code>seu-usuario</code> pelo usuário que o <code>gh auth status</code> mostrou):</p>
+<div class="cb"><div class="cb-bar"><span class="cb-lang">terminal</span><span class="cb-note">PowerShell</span><div class="cb-actions"><button class="cp" data-code="c16">copiar</button></div></div><pre class="cb-body" id="c16"><code>gh browse --no-browser --repo seu-usuario/biblioteca-tutorial --branch atividade-rustfs-autores</code></pre></div>
+<p>Abra o link para conferir que o código está lá e envie-o ao professor.</p>
+</div>
+
+<div class="step "><h3>Problemas comuns</h3>
+<div class="tw"><table>
+<tr><th>Sintoma</th><th>Causa e solução</th></tr>
+<tr><td><code>fatal: 'upstream' does not appear to be a git repository</code></td><td>Falta o remoto <code>upstream</code>. Veja a tabela do passo 00.</td></tr>
+<tr><td><code>fatal: invalid reference: upstream/saas-evolution/fase03</code></td><td>Faltou o <code>git fetch upstream</code> antes do <code>git switch</code>.</td></tr>
+<tr><td><code>error: Your local changes … would be overwritten</code> no <code>git switch</code></td><td>Há alterações sem commit. Faça o commit delas na branch atual e tente de novo.</td></tr>
+<tr><td><code>toca o objeto "acervo/*", que pertence a catalog</code></td><td>A sua chave começa pelo trecho do Acervo, copiado da chave da capa. Releia o item 1 do passo 04.</td></tr>
+<tr><td><code>NotImplemented: UC26 ainda não implementado: …</code>, ou <code>Received: 501</code></td><td>A função citada ainda lança o erro do esqueleto. Troque o <code>throw</code> pela implementação.</td></tr>
+<tr><td><code>this test is marked as todo but passes</code></td><td>Com <code>--todo</code>, o teste já passa. Troque <code>test.todo</code> por <code>test</code>.</td></tr>
+<tr><td>120 pass e 8 todo depois de implementar</td><td>Os testes continuam como <code>test.todo</code>, e por isso não rodaram. Veja o passo 05.</td></tr>
+<tr><td>Todos os testes que tocam o bucket respondem 503, ou o <code>run</code> para em <code>storage-init</code></td><td>O RustFS não subiu, ou os buckets não foram criados. Confira com <code>docker compose -f infra/compose.yaml ps</code> e leia <code>docker compose -f infra/compose.yaml logs storage-init</code>.</td></tr>
+<tr><td>A resposta do envio traz <code>fotoUrl: null</code>, mas a consulta do autor, logo depois, mostra a foto</td><td>Dentro do <code>inTransaction</code>, o <code>toAuthorView</code> recebeu o <code>sql</code> em vez do <code>tx</code>. Releia o item 3 do passo 04.</td></tr>
+<tr><td>A foto nova só aparece na tela depois de um minuto</td><td>O envio ou a remoção não invalidam o cache da busca de autores. Releia o item 2 do passo 04.</td></tr>
+<tr><td>Testes de módulos que você não tocou falham com <code>[5000ms]</code> (tempo esgotado)</td><td>Outra execução da suíte usando o mesmo banco de testes ao mesmo tempo, ou o computador sobrecarregado (o primeiro <code>--build</code> pesa). Espere terminar e rode de novo, uma suíte por vez.</td></tr>
+<tr><td>O console do RustFS responde 403</td><td>Faltou o caminho: o endereço é <code>http://localhost:9011/rustfs/console/</code>.</td></tr>
+<tr><td><code>error during connect</code> / <code>Cannot connect to the Docker daemon</code></td><td>O Docker Desktop não está aberto.</td></tr>
+</table></div>
+</div>
+</div>
+</main>
+</div>
+<script>
+document.addEventListener("click", (e) => {
+  const cp = e.target.closest(".cp");
+  if (cp) {
+    const el = document.getElementById(cp.dataset.code);
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      const t = cp.textContent; cp.textContent = "copiado!"; cp.classList.add("done");
+      setTimeout(() => { cp.textContent = t; cp.classList.remove("done"); }, 1400);
+    });
+  }
+});
+</script>
+</body>
+</html>

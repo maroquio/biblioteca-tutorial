@@ -1,0 +1,40 @@
+# Exemplo mínimo dos slides: um RustFS e um bucket "fotos".
+# Suba com:  docker compose -f .docs/aulas/rustfs/exemplo-rustfs/compose.yaml up -d
+name: exemplo-rustfs
+
+services:
+  rustfs:
+    image: rustfs/rustfs:1.0.5
+    environment:
+      # o "usuário" e a "senha" do S3: access key e secret key
+      RUSTFS_ACCESS_KEY: exemplo
+      RUSTFS_SECRET_KEY: exemplo-secreto
+    ports:
+      # API S3: o index.ts roda no seu computador e fala com o RustFS por aqui
+      - "127.0.0.1:9100:9000"
+      # console web: http://localhost:9101/rustfs/console/
+      - "127.0.0.1:9101:9001"
+    volumes:
+      # os objetos são a fonte da verdade: precisam sobreviver ao contêiner
+      - dados:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/health/ready >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Tarefa única: cria o bucket com o rc, o cliente de linha de comando que já
+  # vem dentro da imagem do RustFS. Rodar de novo não dá erro (--ignore-existing).
+  criar-bucket:
+    image: rustfs/rustfs:1.0.5
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        rc alias set local http://rustfs:9000 exemplo exemplo-secreto
+        rc bucket create --ignore-existing local/fotos
+
+volumes:
+  dados:

@@ -1,7 +1,9 @@
+import { discardObject } from "../../../../infrastructure/storage";
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { RuleConflict } from "../../../../shared/errors";
 import type { AuthorshipIntegration } from "../../domain/AuthorshipIntegration";
 import { findAuthor } from "../../infrastructure/authors";
+import { photoKey } from "../../infrastructure/photos";
 import { invalidateAuthorSearch } from "../../infrastructure/searchCache";
 
 export async function deleteAuthor(id: number, integration: AuthorshipIntegration): Promise<void> {
@@ -13,4 +15,5 @@ export async function deleteAuthor(id: number, integration: AuthorshipIntegratio
   await invalidateAuthorSearch();
   // TODO (atividade, UC26): depois do COMMIT, descarte a foto do autor no bucket,
   // como deleteBook faz com a capa (discardObject e photoKey).
+  await discardObject(photoKey(id));
 }

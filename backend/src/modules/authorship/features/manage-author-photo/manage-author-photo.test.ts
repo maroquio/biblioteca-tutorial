@@ -20,11 +20,11 @@ const sendPhoto = (id: number, bytes: Uint8Array, name = "foto.png", type = "ima
 
 const authorById = async (id: number) => (await api("GET", `/autores/${id}`)).json();
 
-test.todo("UC26: a chave da foto pertence ao módulo Autoria", () => {
+test("UC26: a chave da foto pertence ao módulo Autoria", () => {
   expect(photoKey(7)).toBe("autoria/autores/7/foto");
 });
 
-test.todo("UC26: envia a foto, devolve fotoUrl e serve os mesmos bytes", async () => {
+test("UC26: envia a foto, devolve fotoUrl e serve os mesmos bytes", async () => {
   const author = await testAuthor();
   const response = await sendPhoto(author.id, PNG);
   expect(response.status).toBe(200);
@@ -39,7 +39,7 @@ test.todo("UC26: envia a foto, devolve fotoUrl e serve os mesmos bytes", async (
   expect(await getObject(photoKey(author.id))).not.toBeNull();
 });
 
-test.todo("UC26: trocar a foto substitui o objeto e muda a fotoUrl", async () => {
+test("UC26: trocar a foto substitui o objeto e muda a fotoUrl", async () => {
   const author = await testAuthor();
   const first = (await (await sendPhoto(author.id, PNG)).json()).fotoUrl;
   await Bun.sleep(5);
@@ -50,7 +50,7 @@ test.todo("UC26: trocar a foto substitui o objeto e muda a fotoUrl", async () =>
   expect(new Uint8Array(await photo.arrayBuffer())).toEqual(JPEG);
 });
 
-test.todo("UC26: recusa o que não é imagem (400), o que passa de 2 MB (413) e autor inexistente (404)", async () => {
+test("UC26: recusa o que não é imagem (400), o que passa de 2 MB (413) e autor inexistente (404)", async () => {
   const author = await testAuthor();
   expect((await sendPhoto(author.id, FAKE_JPEG, "foto.jpg", "image/jpeg")).status).toBe(400);
   const big = new Uint8Array(MAX_IMAGE_BYTES + 1);
@@ -64,7 +64,7 @@ test.todo("UC26: recusa o que não é imagem (400), o que passa de 2 MB (413) e 
   expect(await getObject(photoKey(author.id))).toBeNull();
 });
 
-test.todo("UC26: remover a foto zera fotoUrl e apaga o objeto do bucket", async () => {
+test("UC26: remover a foto zera fotoUrl e apaga o objeto do bucket", async () => {
   const author = await testAuthor();
   await sendPhoto(author.id, PNG);
   expect((await api("DELETE", `/autores/${author.id}/foto`)).status).toBe(204);
@@ -74,7 +74,7 @@ test.todo("UC26: remover a foto zera fotoUrl e apaga o objeto do bucket", async 
   expect((await api("DELETE", "/autores/2147483647/foto")).status).toBe(404);
 });
 
-test.todo("UC26: sem RustFS, 503 e o autor continua como estava", async () => {
+test("UC26: sem RustFS, 503 e o autor continua como estava", async () => {
   const author = await testAuthor();
   const image = { bytes: PNG, type: "image/png" as const };
   await expect(uploadAuthorPhoto(author.id, image, authorshipIntegration, { client: null })).rejects.toBeInstanceOf(ServiceUnavailable);
@@ -85,7 +85,7 @@ test.todo("UC26: sem RustFS, 503 e o autor continua como estava", async () => {
   expect((await authorById(author.id)).fotoUrl).not.toBeNull();
 });
 
-test.todo("UC26: enviar e remover a foto invalidam o cache da busca de autores", async () => {
+test("UC26: enviar e remover a foto invalidam o cache da busca de autores", async () => {
   const author = await testAuthor();
   const search = async () => {
     const response = await api("GET", `/autores?q=${encodeURIComponent(author.nome)}`);
@@ -106,10 +106,59 @@ test.todo("UC26: enviar e remover a foto invalidam o cache da busca de autores",
   expect(afterRemove.authors[0]!.fotoUrl).toBeNull();
 });
 
-test.todo("UC08: excluir o autor apaga a foto do bucket", async () => {
+test("UC08: excluir o autor apaga a foto do bucket", async () => {
   const author = await testAuthor();
   await sendPhoto(author.id, PNG);
   expect(await getObject(photoKey(author.id))).not.toBeNull();
   expect((await api("DELETE", `/autores/${author.id}`)).status).toBe(204);
   expect(await getObject(photoKey(author.id))).toBeNull();
 });
+
+/*
+ * Passo 07: para discutir.
+ *
+ * 1. A ordem das escritas.
+ *    Envio: morrer entre objeto e coluna deixa um objeto órfão no bucket (ou,
+ *    se o autor já tinha foto, bytes novos sob o ?v= antigo). Na ordem inversa,
+ *    a coluna apontaria para uma foto inexistente ou antiga, e a antiga seria
+ *    guardada como "immutable" sob o ?v= novo.
+ *    Remoção: morrer entre coluna e objeto deixa um órfão. Na ordem inversa, a
+ *    coluna aponta para um objeto apagado: miniatura quebrada.
+ *    O órfão é aceitável porque ninguém o vê e dá para limpar depois. O Postgres
+ *    apontar para bytes errados ou inexistentes não é: o erro chega ao usuário.
+ *
+ * 2. Objetos órfãos.
+ *    Surgem quando: o processo morre entre o putObject e o COMMIT; o autor é
+ *    excluído durante o envio e o discardObject falha; a remoção da foto ou a
+ *    exclusão do autor acontece com o RustFS fora (204, coluna zerada, objeto
+ *    fica); o processo morre entre o COMMIT e o discardObject.
+ *    Limpeza: percorrer s3.list({ prefix: "autoria/autores/" }) paginado e
+ *    apagar as chaves cujo autor não existe ou tem foto_atualizada_em nula.
+ *    Cuidado: no envio o objeto chega antes da coluna, então só apagar objetos
+ *    com lastModified mais velho que uma margem (ex.: 1 h) e reconferir a
+ *    coluna logo antes do delete.
+ *
+ * 3. Tudo passa pelo backend.
+ *    A fotoUrl vira uma URL assinada (presign) do subdomínio de mídia, que
+ *    expira; por isso não pode ficar em cache mais tempo do que vale. O
+ *    Cache-Control passa a ser do objeto ou da CDN, e o immutable de um ano
+ *    deixa de fazer sentido. O ?v= ainda serve para a CDN não entregar a foto
+ *    antiga. O backend só decide quem vê na hora de assinar; depois, qualquer
+ *    um com o link vê até expirar, e quem confere é o armazenamento/CDN.
+ *
+ * 4. Chave fixa ou chave nova.
+ *    Fixa: a foto antiga é sobrescrita (sem lixo), o cache depende do ?v=, e
+ *    dois envios simultâneos podem deixar os bytes de um com a versão do outro.
+ *    Nova a cada envio: a antiga precisa ser apagada depois (mais órfãos), a
+ *    URL muda com o conteúdo (immutable seguro, sem ?v=), e na corrida vence
+ *    quem confirma por último, com coluna e bytes sempre correspondendo.
+ *
+ * 5. A foto é um dado pessoal.
+ *    Cópias que sobram: caches de navegadores e CDNs (public, immutable, um
+ *    ano), objetos órfãos de discardObject que falhou, o disco e versões
+ *    antigas no volume rustfsdata, e os backups.
+ *    Um pedido de exclusão precisaria: apagar com nova tentativa garantida (não
+ *    só um aviso no log), apagar versões, purgar a CDN, usar max-age curto,
+ *    ter retenção definida nos backups (ou cifrar cada foto e destruir a
+ *    chave) e registrar o atendimento.
+ */

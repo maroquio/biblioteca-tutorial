@@ -6,7 +6,11 @@ await prepareDatabase();
 const app = createApp(await loadSlices());
 
 // O contrato JSON é verificado pelos expects de cada atividade.
-export interface TestResponse extends Response { json<T = any>(): Promise<T> }
+export interface TestResponse extends Response {
+  text(): any;
+  status(status: any): unknown;
+  headers: any; json<T = any>(): Promise<T>
+}
 export async function api(method: string, path: string, body?: unknown): Promise<TestResponse> {
   return app.request(`/api${path}`, {
     method,

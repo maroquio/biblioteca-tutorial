@@ -1,6 +1,6 @@
 # Roteiro de apresentação — foto dos autores no RustFS (UC26)
 
-**Duração estimada:** 8 a 12 minutos  
+**Duração estimada:** 8 a 12 minutos
 **Objetivo:** explicar o problema, as decisões de consistência e demonstrar o envio, a leitura e a remoção da foto de um autor.
 
 ## Preparação antes de apresentar

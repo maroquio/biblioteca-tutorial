@@ -6,7 +6,7 @@ import { photoKey } from "../../infrastructure/photos";
 /**
  * UC26: o Postgres diz se o autor tem foto; o RustFS guarda os bytes.
  *
- * TODO (atividade): siga getBookCover, em
+ * Segue o mesmo desenho de getBookCover, em
  * modules/catalog/features/manage-book-cover/getBookCover.ts:
  *   1. leia foto_atualizada_em do autor: 404 "Autor não encontrado" se ele não
  *      existe, 404 "Autor sem foto" se a coluna é nula, sem consultar o RustFS;

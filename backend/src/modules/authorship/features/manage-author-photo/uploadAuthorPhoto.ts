@@ -12,7 +12,7 @@ import { invalidateAuthorSearch } from "../../infrastructure/searchCache";
 /**
  * UC26: grava a foto do autor no RustFS e marca no Postgres quando ela mudou.
  *
- * TODO (atividade): siga uploadBookCover, em
+ * Segue o mesmo desenho de uploadBookCover, em
  * modules/catalog/features/manage-book-cover/uploadBookCover.ts:
  *   1. confira que o autor existe (findAuthor): 404 antes de gravar qualquer byte;
  *   2. grave o objeto em photoKey(id) com putObject, passando `client`;

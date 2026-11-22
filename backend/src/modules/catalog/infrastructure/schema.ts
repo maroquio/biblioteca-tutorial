@@ -63,7 +63,15 @@ async function prepareCopies(): Promise<void> {
 
 /** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await sql`CREATE EXTENSION IF NOT EXISTS vector`;
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();
+  await sql`
+    CREATE TABLE IF NOT EXISTS acervo_indice_modelo (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      modelo TEXT NOT NULL,
+      dimensoes INTEGER NOT NULL
+    )
+  `;
 }

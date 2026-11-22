@@ -5,7 +5,10 @@ import type { CatalogIntegration } from "../../domain/CatalogIntegration";
 import { syncBookIndex } from "../../infrastructure/bookIndex";
 import { checkBookRules, toBookView, type BookRow } from "../../infrastructure/books";
 
-export async function createBook(input: BookInput, integration: CatalogIntegration, now = new Date()): Promise<BookView> {
+export async function createBook(
+  input: BookInput, integration: CatalogIntegration, now = new Date(),
+  sync = syncBookIndex,
+): Promise<BookView> {
   const today = civilDate(now);
   const book = await inTransaction(async (tx) => {
     await checkBookRules(tx, input, integration);
@@ -19,6 +22,6 @@ export async function createBook(input: BookInput, integration: CatalogIntegrati
   });
   // efeitos derivados só depois do COMMIT: antes dele, ninguém mais vê o livro novo
   await integration.bookCountsChanged([input.authorId]);
-  await syncBookIndex([book.id], integration);
+  await sync([book.id], integration);
   return book;
 }

@@ -1,115 +1,124 @@
-import type { RedisClient } from "bun";
 import { embedder as defaultEmbedder } from "../../../infrastructure/embedder";
 import { sql } from "../../../infrastructure/postgres";
-import { ready, redis, redisKey } from "../../../infrastructure/redis";
 import type { Embedder } from "../../../shared/Embedder";
 import type { CatalogIntegration } from "../domain/CatalogIntegration";
 
-/**
- * Índice vetorial dos livros no Redis Query Engine. Cada livro é um hash com o
- * texto indexado e o vetor (FLOAT32 binário); o índice HNSW acha os vizinhos
- * mais próximos de uma consulta. Tudo aqui é derivado do Postgres: pode ser
- * apagado e reconstruído a qualquer momento.
- */
-const INDEX = redisKey("acervo", "livros");
-const INDEX_MODEL = redisKey("acervo", "livros", "modelo");
-const KEY_PREFIX = redisKey("acervo", "livro", "");
-
 export type IndexResult = { indexed: number; removed: number };
+export type KnnHit = { id: number; distance: number };
 
-export function bookIndexKey(id: number): string {
-  return redisKey("acervo", "livro", String(id));
-}
+type BookToIndex = { id: number; title: string; authorId: number };
+type StoredText = { livroId: number; text: string };
 
-function isUnknownIndex(error: unknown): boolean {
-  // Redis 8: "SEARCH_INDEX_NOT_FOUND Index not found"; versões anteriores: "Unknown index name"
-  return /index not found|unknown index|no such index/i.test((error as Error).message);
-}
-
-/**
- * Garante que o índice existe para este embedder e diz se precisou criá-lo.
- * Vetores de outro modelo não se comparam com os deste: trocar de modelo apaga o
- * índice junto com os documentos (DD) e começa de novo.
- */
-export async function ensureBookIndex(embedder: Embedder, client: RedisClient): Promise<boolean> {
-  try {
-    if (await client.get(INDEX_MODEL) === embedder.id) {
-      await client.send("FT.INFO", [INDEX]);
-      return false;
-    }
-    await client.send("FT.DROPINDEX", [INDEX, "DD"]);
-  } catch (error) {
-    if (!isUnknownIndex(error)) throw error;
-  }
-  try {
-    await client.send("FT.CREATE", [
-      INDEX, "ON", "HASH", "PREFIX", "1", KEY_PREFIX,
-      "SCHEMA", "embedding", "VECTOR", "HNSW", "6",
-      "TYPE", "FLOAT32", "DIM", String(embedder.dimensions), "DISTANCE_METRIC", "COSINE",
-    ]);
-  } catch (error) {
-    // outra requisição criou o índice ao mesmo tempo
-    if (/already exists/i.test((error as Error).message)) return false;
-    throw error;
-  }
-  await client.set(INDEX_MODEL, embedder.id);
-  return true;
-}
-
-/** O que o modelo lê de cada livro: o título e, para dar contexto, o autor. */
+/** O texto representado pelo vetor inclui o autor, para que renomeá-lo atualize a busca. */
 function indexText(title: string, authorName: string | undefined): string {
   return authorName ? `${title} — ${authorName}` : title;
 }
 
-async function syncIds(ids: number[], integration: CatalogIntegration, embedder: Embedder | null, client: RedisClient): Promise<IndexResult & { created: boolean }> {
-  const result = { indexed: 0, removed: 0, created: false };
+function vectorText(vector: Float32Array, dimensions: number): string {
+  if (vector.length !== dimensions || !vector.every(Number.isFinite)) {
+    throw new Error("Vetor inválido para o modelo selecionado");
+  }
+  return `[${Array.from(vector).join(",")}]`;
+}
+
+/** Cria a tabela e o índice HNSW; troca ambos quando o modelo ou a dimensão mudar. */
+export async function ensureBookIndex(embedder: Embedder): Promise<boolean> {
+  const dimensions = embedder.dimensions;
+  // O número faz parte do DDL, por isso é validado antes de entrar no SQL.
+  if (!Number.isInteger(dimensions) || dimensions < 1 || dimensions > 2000) {
+    throw new Error(`Dimensão inválida: ${dimensions}`);
+  }
+
+  return sql.begin(async (tx) => {
+    // Duas requisições não podem recriar o índice simultaneamente.
+    await tx`SELECT pg_advisory_xact_lock(22002)`;
+    const [state] = await tx`
+      SELECT modelo, dimensoes,
+             to_regclass('public.livros_vetores') IS NOT NULL AS "tableExists"
+      FROM acervo_indice_modelo WHERE id = 1
+    ` as { modelo: string; dimensoes: number; tableExists: boolean }[];
+
+    if (state?.modelo === embedder.id &&
+        state.dimensoes === dimensions && state.tableExists) return false;
+
+    await tx`DROP TABLE IF EXISTS livros_vetores`;
+    await tx.unsafe(`
+      CREATE TABLE livros_vetores (
+        livro_id INTEGER PRIMARY KEY REFERENCES livros(id) ON DELETE CASCADE,
+        texto TEXT NOT NULL,
+        vetor vector(${dimensions}) NOT NULL
+      )
+    `);
+    await tx`
+      CREATE INDEX livros_vetores_hnsw_idx
+      ON livros_vetores USING hnsw (vetor vector_cosine_ops)
+    `;
+    await tx`
+      INSERT INTO acervo_indice_modelo (id, modelo, dimensoes)
+      VALUES (1, ${embedder.id}, ${dimensions})
+      ON CONFLICT (id) DO UPDATE
+      SET modelo = EXCLUDED.modelo, dimensoes = EXCLUDED.dimensoes
+    `;
+    return true;
+  });
+}
+
+async function syncIds(
+  ids: number[], integration: CatalogIntegration, embedder: Embedder,
+): Promise<IndexResult & { created: boolean }> {
+  const created = await ensureBookIndex(embedder);
   const unique = [...new Set(ids)];
-  if (unique.length === 0) return result;
-  await ready(client);
-  const rows = await sql`SELECT id, titulo AS title, autor_id AS "authorId" FROM livros WHERE id IN ${sql(unique)}` as { id: number; title: string; authorId: number }[];
+  if (unique.length === 0) return { indexed: 0, removed: 0, created };
 
-  // remover não precisa de embedder: o livro saiu do Postgres, sai do índice
-  const existing = new Set(rows.map((row) => row.id));
-  for (const id of unique) {
-    if (!existing.has(id)) result.removed += await client.del(bookIndexKey(id));
-  }
-  if (!embedder || rows.length === 0) return result;
+  const rows = await sql`
+    SELECT id, titulo AS title, autor_id AS "authorId"
+    FROM livros WHERE id IN ${sql(unique)}
+  ` as BookToIndex[];
+  if (rows.length === 0) return { indexed: 0, removed: 0, created };
 
-  result.created = await ensureBookIndex(embedder, client);
+  const saved = await sql`
+    SELECT livro_id AS "livroId", texto AS text
+    FROM livros_vetores WHERE livro_id IN ${sql(unique)}
+  ` as StoredText[];
+  const savedText = new Map(saved.map((item) => [item.livroId, item.text]));
   const pending: { id: number; text: string }[] = [];
+
   for (const row of rows) {
-    const text = indexText(row.title, (await integration.author(sql, row.authorId))?.name);
-    // só paga o embedding quando o texto mudou ou quando o vetor gravado não tem o
-    // tamanho deste modelo: o índice recusa esse vetor em silêncio, e ele ficaria para sempre
-    const key = bookIndexKey(row.id);
-    const sameText = await client.hget(key, "texto") === text;
-    const rightSize = await client.send("HSTRLEN", [key, "embedding"]) === embedder.dimensions * 4;
-    if (!sameText || !rightSize) pending.push({ id: row.id, text });
+    const author = await integration.author(sql, row.authorId);
+    const text = indexText(row.title, author?.name);
+    if (savedText.get(row.id) !== text) pending.push({ id: row.id, text });
   }
-  if (pending.length === 0) return result;
+  if (pending.length === 0) return { indexed: 0, removed: 0, created };
 
+  // A chamada externa ao embedder ocorre fora de qualquer transação de escrita.
   const vectors = await embedder.embed(pending.map((item) => item.text), "document");
+  if (vectors.length !== pending.length) throw new Error("Embedder retornou quantidade incorreta de vetores");
+
+  let indexed = 0;
   for (const [i, item] of pending.entries()) {
-    const vector = vectors[i]!;
-    const blob = Buffer.from(vector.buffer, vector.byteOffset, vector.byteLength);
-    // send aceita Buffer em tempo de execução; os tipos do Bun só declaram string
-    await client.send("HSET", [bookIndexKey(item.id), "texto", item.text, "embedding", blob as unknown as string]);
+    const encoded = vectorText(vectors[i]!, embedder.dimensions);
+    // Se o livro foi excluído enquanto o vetor era calculado, não o recriamos.
+    const written = await sql`
+      INSERT INTO livros_vetores (livro_id, texto, vetor)
+      SELECT id, ${item.text}, ${encoded}::vector FROM livros WHERE id = ${item.id}
+      ON CONFLICT (livro_id) DO UPDATE
+      SET texto = EXCLUDED.texto, vetor = EXCLUDED.vetor
+      RETURNING livro_id
+    `;
+    indexed += written.length;
   }
-  result.indexed = pending.length;
-  return result;
+  return { indexed, removed: 0, created };
 }
 
-/**
- * Atualiza o índice para estes livros, depois do COMMIT. Nunca lança: sem Redis
- * ou sem Gemini o livro fica fora do índice até a próxima reconciliação, e a
- * escrita no Postgres, que é o que importa, já aconteceu.
- */
-export async function syncBookIndex(ids: number[], integration: CatalogIntegration, embedder: Embedder | null = defaultEmbedder, client: RedisClient | null = redis): Promise<IndexResult> {
-  if (!client) return { indexed: 0, removed: 0 };
+/** Atualiza após o COMMIT. Falha do embedder nunca desfaz a escrita do livro. */
+export async function syncBookIndex(
+  ids: number[], integration: CatalogIntegration,
+  embedder: Embedder | null = defaultEmbedder,
+): Promise<IndexResult> {
+  if (!embedder) return { indexed: 0, removed: 0 };
   try {
-    const { created, ...result } = await syncIds(ids, integration, embedder, client);
-    // índice novo (Redis reiniciado, modelo trocado): os outros livros também precisam entrar
-    if (created) void reconcileBookIndex(integration, embedder, client);
+    const { created, ...result } = await syncIds(ids, integration, embedder);
+    if (created) await reconcileBookIndex(integration, embedder);
     return result;
   } catch (error) {
     console.warn("Índice semântico indisponível:", (error as Error).message);
@@ -117,19 +126,17 @@ export async function syncBookIndex(ids: number[], integration: CatalogIntegrati
   }
 }
 
-/** Compara o índice inteiro com o Postgres: indexa o que falta e remove o que sobrou. */
-export async function reconcileBookIndex(integration: CatalogIntegration, embedder: Embedder | null = defaultEmbedder, client: RedisClient | null = redis): Promise<IndexResult> {
-  if (!client) return { indexed: 0, removed: 0 };
+/** Inclui livros do seed, textos desatualizados e vetores de modelos trocados. */
+export async function reconcileBookIndex(
+  integration: CatalogIntegration,
+  embedder: Embedder | null = defaultEmbedder,
+): Promise<IndexResult> {
+  if (!embedder) return { indexed: 0, removed: 0 };
   try {
-    await ready(client);
-    const ids = new Set((await sql`SELECT id FROM livros` as { id: number }[]).map((row) => row.id));
-    let cursor = "0";
-    do {
-      const [next, keys] = await client.scan(cursor, "MATCH", `${KEY_PREFIX}*`, "COUNT", 500);
-      cursor = next;
-      for (const key of keys) ids.add(Number(key.slice(KEY_PREFIX.length)));
-    } while (cursor !== "0");
-    const { created, ...result } = await syncIds([...ids], integration, embedder, client);
+    const ids = await sql`SELECT id FROM livros` as { id: number }[];
+    const { created: _created, ...result } = await syncIds(
+      ids.map((row) => row.id), integration, embedder,
+    );
     return result;
   } catch (error) {
     console.warn("Índice semântico indisponível:", (error as Error).message);
@@ -137,8 +144,10 @@ export async function reconcileBookIndex(integration: CatalogIntegration, embedd
   }
 }
 
-/** O nome do autor faz parte do texto indexado: renomeá-lo reindexa os livros dele. */
-export async function syncAuthorBookIndex(authorId: number, integration: CatalogIntegration): Promise<void> {
+/** Renomear um autor altera o texto semântico dos livros dele. */
+export async function syncAuthorBookIndex(
+  authorId: number, integration: CatalogIntegration,
+): Promise<void> {
   try {
     const rows = await sql`SELECT id FROM livros WHERE autor_id = ${authorId}` as { id: number }[];
     await syncBookIndex(rows.map((row) => row.id), integration);
@@ -147,35 +156,16 @@ export async function syncAuthorBookIndex(authorId: number, integration: Catalog
   }
 }
 
-export type KnnHit = { id: number; distance: number };
-
-/**
- * O Bun conversa em RESP3, e nele o FT.SEARCH responde um mapa
- * ({ results: [{ id, extra_attributes }] }). Em RESP2 a mesma resposta é uma
- * lista plana: [total, chave, [campo, valor], chave, [campo, valor], ...].
- */
-export function parseKnnReply(reply: unknown, keyPrefix: string): KnnHit[] {
-  const toHit = (key: string, distance: string) => ({ id: Number(key.slice(keyPrefix.length)), distance: Number(distance) });
-  if (Array.isArray(reply)) {
-    const hits: KnnHit[] = [];
-    for (let i = 1; i < reply.length; i += 2) {
-      const fields = reply[i + 1] as string[];
-      hits.push(toHit(reply[i] as string, fields[fields.indexOf("distancia") + 1]!));
-    }
-    return hits;
-  }
-  const { results } = reply as { results: { id: string; extra_attributes: { distancia: string } }[] };
-  return results.map((result) => toHit(result.id, result.extra_attributes.distancia));
-}
-
-/** Os `limit` livros mais próximos do vetor, do mais perto para o mais longe. */
-export async function knnSearch(vector: Float32Array, limit: number, client: RedisClient): Promise<KnnHit[]> {
-  const blob = Buffer.from(vector.buffer, vector.byteOffset, vector.byteLength);
-  const reply = await client.send("FT.SEARCH", [
-    INDEX, `*=>[KNN ${limit} @embedding $vetor AS distancia]`,
-    "PARAMS", "2", "vetor", blob as unknown as string,
-    "SORTBY", "distancia", "RETURN", "1", "distancia",
-    "LIMIT", "0", String(limit), "DIALECT", "2",
-  ]);
-  return parseKnnReply(reply, KEY_PREFIX);
+/** O operador cosseno, ORDER BY e LIMIT permitem usar o HNSW no PostgreSQL. */
+export async function knnSearch(
+  vector: Float32Array, limit: number, dimensions: number,
+): Promise<KnnHit[]> {
+  const encoded = vectorText(vector, dimensions);
+  const rows = await sql`
+    SELECT livro_id AS id, vetor <=> ${encoded}::vector AS distance
+    FROM livros_vetores
+    ORDER BY vetor <=> ${encoded}::vector
+    LIMIT ${limit}
+  ` as KnnHit[];
+  return rows.map((row) => ({ id: Number(row.id), distance: Number(row.distance) }));
 }

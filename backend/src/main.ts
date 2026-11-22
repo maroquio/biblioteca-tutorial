@@ -1,15 +1,16 @@
 import { loadSlices, prepareDatabase } from "./composition";
 import { ready, redis } from "./infrastructure/redis";
-import { refreshDerivedDataOnConnect } from "./integration/derivedData";
+import { refreshBookVectors, refreshRedisDerivedDataOnConnect } from "./integration/derivedData";
 import { createServer } from "./server";
 
 await prepareDatabase();
+// Os vetores agora vivem no Postgres e precisam estar em dia mesmo sem Redis.
+await refreshBookVectors();
 
 const server = createServer(await loadSlices());
 
 console.log(`Servidor executando em http://localhost:${server.port}`);
 
-// o banco pode ter mudado enquanto o servidor ou o Redis estavam parados:
-// cada conexão ao Redis recalcula os dados derivados, em segundo plano
-refreshDerivedDataOnConnect();
-if (redis) void ready(redis).catch(() => console.warn("Redis indisponível: seguindo sem cache e sem busca semântica"));
+// Quando o Redis volta, somente o cache de autores precisa ser invalidado.
+refreshRedisDerivedDataOnConnect();
+if (redis) void ready(redis).catch(() => console.warn("Redis indisponível: seguindo sem cache de autores"));

@@ -1,6 +1,11 @@
 import { sql } from "../../../infrastructure/postgres";
 import { inTransaction } from "../../../infrastructure/transaction";
 
+/** O tipo vector e os índices HNSW são instalados separadamente em cada banco. */
+async function prepareVectorExtension(): Promise<void> {
+  await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+}
+
 /**
  * A mesma tabela `livros` do SQLite, na sintaxe do Postgres. `autor_id`
  * continua sendo só um inteiro: nada de chave estrangeira entre módulos.
@@ -63,6 +68,7 @@ async function prepareCopies(): Promise<void> {
 
 /** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await prepareVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

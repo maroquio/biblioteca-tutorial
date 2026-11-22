@@ -1,8 +1,13 @@
-import { storage } from "../../../../infrastructure/storage";
-import { NotImplemented } from "../../../../shared/errors";
+import { sql } from "../../../../infrastructure/postgres";
+import { discardObject, putObject, storage } from "../../../../infrastructure/storage";
+import { inTransaction } from "../../../../infrastructure/transaction";
 import type { ImageUpload } from "../../../../shared/images";
+import { NotFound } from "../../../../shared/errors";
 import type { AuthorView } from "../../domain/Author";
 import type { AuthorshipIntegration } from "../../domain/AuthorshipIntegration";
+import { findAuthor, toAuthorView, type AuthorRow } from "../../infrastructure/authors";
+import { photoKey } from "../../infrastructure/photos";
+import { invalidateAuthorSearch } from "../../infrastructure/searchCache";
 
 /**
  * UC26: grava a foto do autor no RustFS e marca no Postgres quando ela mudou.
@@ -23,5 +28,38 @@ export async function uploadAuthorPhoto(
   integration: AuthorshipIntegration,
   { client = storage, now = new Date() } = {},
 ): Promise<AuthorView> {
-  throw new NotImplemented("UC26 ainda não implementado: enviar a foto do autor");
+
+  // 1. Verifica se o autor existe antes de enviar qualquer arquivo.
+  await findAuthor(sql, id);
+
+  // 2. Envia ou substitui a imagem no RustFS.
+  await putObject(photoKey(id), image.bytes, image.type, client);
+
+  // 3. Atualiza a data da foto no PostgreSQL.
+  const author = await inTransaction(async (tx) => {
+    const [row] = await tx`
+      UPDATE autores
+      SET foto_atualizada_em = ${now}
+      WHERE id = ${id}
+      RETURNING
+        id,
+        nome AS name,
+        tipo AS type,
+        livros_no_acervo AS "bookCount"
+    ` as AuthorRow[];
+
+    return row ? toAuthorView(tx, row, integration) : null;
+  });
+
+  // 4. Se o autor foi excluído durante o envio,
+  // remove o objeto que acabou de ser enviado.
+  if (!author) {
+    await discardObject(photoKey(id), client);
+    throw new NotFound("Autor não encontrado");
+  }
+
+  // 5. Invalida o cache depois do COMMIT.
+  await invalidateAuthorSearch();
+
+  return author;
 }

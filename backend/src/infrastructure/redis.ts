@@ -10,8 +10,9 @@ export function createRedis(url: string, options: { autoReconnect?: boolean } = 
 }
 
 /**
- * O Redis só guarda dados derivados do Postgres (cache e índice de busca). Sem
- * REDIS_URL a aplicação funciona do mesmo jeito, só que sem eles.
+ * O Redis só guarda dados derivados do Postgres (o cache da busca de autores;
+ * os vetores da busca semântica moram no próprio Postgres, com o pgvector). Sem
+ * REDIS_URL a aplicação funciona do mesmo jeito, só que sem o cache.
  */
 export const redis: RedisClient | null = process.env.REDIS_URL ? createRedis(process.env.REDIS_URL) : null;
 

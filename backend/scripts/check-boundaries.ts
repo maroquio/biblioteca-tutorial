@@ -7,6 +7,7 @@ const problems: string[] = [];
 /** Quem é o dono de cada tabela. Nenhum módulo cita uma tabela que não é dele. */
 const TABLE_OWNERS: Record<string, string> = {
   livros: "catalog",
+  livros_vetores: "catalog",
   exemplares: "catalog",
   acervo_sequencias: "catalog",
   autores: "authorship",
@@ -19,7 +20,6 @@ const TABLE_OWNERS: Record<string, string> = {
 /** O mesmo vale para o Redis: o primeiro trecho de redisKey(...) diz o módulo dono da chave. */
 const KEY_OWNERS: Record<string, string> = {
   autoria: "authorship",
-  acervo: "catalog",
 };
 
 /** Pasta da fatia (src/modules/<módulo>/features/<fatia>), ou null fora de uma fatia. */

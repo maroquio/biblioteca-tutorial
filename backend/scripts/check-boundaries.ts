@@ -9,6 +9,7 @@ const TABLE_OWNERS: Record<string, string> = {
   livros: "catalog",
   exemplares: "catalog",
   acervo_sequencias: "catalog",
+  livros_vetores: "catalog",
   autores: "authorship",
   autoria_migracoes: "authorship",
   leitores: "readers",
@@ -19,7 +20,6 @@ const TABLE_OWNERS: Record<string, string> = {
 /** O mesmo vale para o Redis: o primeiro trecho de redisKey(...) diz o módulo dono da chave. */
 const KEY_OWNERS: Record<string, string> = {
   autoria: "authorship",
-  acervo: "catalog",
 };
 
 /** Pasta da fatia (src/modules/<módulo>/features/<fatia>), ou null fora de uma fatia. */

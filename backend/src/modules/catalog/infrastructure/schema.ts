@@ -61,8 +61,23 @@ async function prepareCopies(): Promise<void> {
   });
 }
 
-/** Prepara as tabelas do Acervo: livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
+/**
+ * UC24: a extensão pgvector, para os vetores da busca semântica. Ela é instalada
+ * por banco, e o prepare roda tanto na subida do servidor quanto no início da
+ * suíte: assim o banco da aula e o de testes ficam cobertos. IF NOT EXISTS a
+ * deixa idempotente, e o lock das escritas evita duas criações ao mesmo tempo.
+ * A tabela dos vetores não nasce aqui: a dimensão dela depende do embedder
+ * (veja ensureBookVectors em bookVectors.ts).
+ */
+async function createVectorExtension(): Promise<void> {
+  await inTransaction(async (tx) => {
+    await tx`CREATE EXTENSION IF NOT EXISTS vector`;
+  });
+}
+
+/** Prepara o Acervo: a extensão vector, livros, a migração de UC01 e os exemplares de UC13, nesta ordem. */
 export async function prepareCatalog(): Promise<void> {
+  await createVectorExtension();
   await createBooksTable();
   await dropBookCopyRequirement();
   await prepareCopies();

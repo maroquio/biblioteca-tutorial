@@ -1,8 +1,9 @@
+
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { civilDate } from "../../../../shared/dates";
 import type { BookInput, BookView } from "../../domain/Book";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { syncBookIndex } from "../../infrastructure/bookIndex";
+import { syncBookVectors } from "../../infrastructure/bookVectors";
 import { checkBookRules, toBookView, type BookRow } from "../../infrastructure/books";
 
 export async function createBook(input: BookInput, integration: CatalogIntegration, now = new Date()): Promise<BookView> {
@@ -17,8 +18,12 @@ export async function createBook(input: BookInput, integration: CatalogIntegrati
     await integration.syncAuthorBookCounts(tx, [input.authorId]);
     return toBookView(tx, row!, integration, today);
   });
-  // efeitos derivados só depois do COMMIT: antes dele, ninguém mais vê o livro novo
+
+  // Efeitos derivados só depois do COMMIT.
   await integration.bookCountsChanged([input.authorId]);
-  await syncBookIndex([book.id], integration);
+
+  // Sincroniza o vetor do livro no PostgreSQL.
+  await syncBookVectors([book.id], integration);
+
   return book;
 }

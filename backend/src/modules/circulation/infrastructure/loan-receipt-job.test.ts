@@ -13,9 +13,7 @@ import { brazilianDate } from "./receiptEmail";
 import { RegisterLoan } from "../features/register-loan/RegisterLoan";
 
 /*
- * Testes de aceite da atividade. Cada um começa como test.todo: o bun test lista,
- * mas não executa. Quando implementar a parte que um teste cobre, troque
- * test.todo por test e rode a suíte. Não altere o que os testes esperam.
+ * Testes de aceite da atividade: os nove estão habilitados, sem alterar as expectativas.
  */
 
 // a suíte roda sem QUEUE_URL; aqui o cliente da fila é explícito, como nos testes da aula
@@ -47,11 +45,11 @@ async function receiptSentAt(loanId: number): Promise<Date | null> {
 
 const sentTo = (sender: MemorySender, address: string) => sender.sent.filter((email) => email.to === address);
 
-test.todo("o stream dos comprovantes pertence à Circulação", () => {
+test("o stream dos comprovantes pertence à Circulação", () => {
   expect(loanReceiptJob(null).stream).toBe(`${process.env.REDIS_PREFIX ?? "biblioteca"}:circulacao:fila:comprovantes`);
 });
 
-test.todo("UC19 API: sem fila, o comprovante sai na hora, para o e-mail do leitor", async () => {
+test("UC19 API: sem fila, o comprovante sai na hora, para o e-mail do leitor", async () => {
   const reader = await testReader();
   const copy = await testCopy();
   const response = await api("POST", "/emprestimos", { leitorId: reader.id, exemplarId: copy.id });
@@ -66,7 +64,7 @@ test.todo("UC19 API: sem fila, o comprovante sai na hora, para o e-mail do leito
   expect(await receiptSentAt(loan.id)).not.toBeNull();
 });
 
-test.todo("UC19: com fila, a mensagem leva só o id do empréstimo, e o worker manda o comprovante", async () => {
+test("UC19: com fila, a mensagem leva só o id do empréstimo, e o worker manda o comprovante", async () => {
   const { reader, loan } = await newLoan();
   const sender = createMemorySender();
   const job = loanReceiptJob(sender);
@@ -82,7 +80,7 @@ test.todo("UC19: com fila, a mensagem leva só o id do empréstimo, e o worker m
   expect(await receiptSentAt(loan.id)).not.toBeNull();
 });
 
-test.todo("a mesma mensagem entregue duas vezes manda um e-mail só", async () => {
+test("a mesma mensagem entregue duas vezes manda um e-mail só", async () => {
   const { reader, loan } = await newLoan();
   const sender = createMemorySender();
   const job = loanReceiptJob(sender);
@@ -92,7 +90,7 @@ test.todo("a mesma mensagem entregue duas vezes manda um e-mail só", async () =
   expect(await sendLoanReceipt(loan.id, sender)).toBe("já enviado");
 });
 
-test.todo("o leitor trocou de e-mail antes do envio: o comprovante vai para o endereço atual", async () => {
+test("o leitor trocou de e-mail antes do envio: o comprovante vai para o endereço atual", async () => {
   const { reader, loan } = await newLoan();
   const sender = createMemorySender();
   const job = loanReceiptJob(sender);
@@ -106,7 +104,7 @@ test.todo("o leitor trocou de e-mail antes do envio: o comprovante vai para o en
   expect(sentTo(sender, newEmail)).toHaveLength(1);
 });
 
-test.todo("se o provedor falha, a tarefa lança e o comprovante não fica marcado; a nova tentativa envia", async () => {
+test("se o provedor falha, a tarefa lança e o comprovante não fica marcado; a nova tentativa envia", async () => {
   const { reader, loan } = await newLoan();
   await expect(loanReceiptJob(failing).handle({ loanId: loan.id })).rejects.toThrow("provedor de e-mail fora do ar");
   expect(await receiptSentAt(loan.id)).toBeNull();
@@ -116,7 +114,7 @@ test.todo("se o provedor falha, a tarefa lança e o comprovante não fica marcad
   expect(await receiptSentAt(loan.id)).not.toBeNull();
 });
 
-test.todo("sem fila, o comprovante sai na hora; se o provedor falha, pedir o comprovante não lança", async () => {
+test("sem fila, o comprovante sai na hora; se o provedor falha, pedir o comprovante não lança", async () => {
   const { reader, loan } = await newLoan();
   await scheduleLoanReceipt(loan.id, { client: null, sender: failing });
   expect(await receiptSentAt(loan.id)).toBeNull();
@@ -125,7 +123,7 @@ test.todo("sem fila, o comprovante sai na hora; se o provedor falha, pedir o com
   expect(sentTo(sender, reader.email)).toHaveLength(1);
 });
 
-test.todo("empréstimo inexistente não manda nada nem lança; mensagem sem o id falha", async () => {
+test("empréstimo inexistente não manda nada nem lança; mensagem sem o id falha", async () => {
   const sender = createMemorySender();
   expect(await sendLoanReceipt(2147483647, sender)).toBe("empréstimo não encontrado");
   await loanReceiptJob(sender).handle({ loanId: 2147483647 });
@@ -134,9 +132,31 @@ test.todo("empréstimo inexistente não manda nada nem lança; mensagem sem o id
   expect(sender.sent).toHaveLength(0);
 });
 
-test.todo("sem remetente configurado, nada é enviado nem marcado", async () => {
+test("sem remetente configurado, nada é enviado nem marcado", async () => {
   const { loan } = await newLoan();
   expect(await sendLoanReceipt(loan.id, null)).toBe("sem remetente");
   await loanReceiptJob(null).handle({ loanId: loan.id });
   expect(await receiptSentAt(loan.id)).toBeNull();
 });
+
+
+/* Passo 07 — discussão
+ * 1. Enviar antes de marcar permite repetição se o processo morrer antes do
+ * COMMIT; marcar antes pode perder o envio. Para comprovante, repetição é
+ * preferível à ausência. Para cobrança, usar idempotência no provedor.
+ * 2. Uma queda entre o COMMIT do UC19 e o XADD pode perder a tarefa. Um outbox
+ * transacional resolve a lacuna. Uma varredura pode republicar IDs sem marca,
+ * mas deve limitar-se aos empréstimos elegíveis criados após a implantação.
+ * 3. SELECT FOR UPDATE serializa os envios do mesmo empréstimo. A segunda
+ * transação espera e verifica a marca. O timeout de 5 s reduz reentregas
+ * concorrentes (10 s). Marcar antes com UPDATE condicional exige desfazer a
+ * marca na falha e pode perder o envio se o processo morrer.
+ * 4. Após restaurar o provedor, republicar os IDs válidos da fila de mortas
+ * no stream original, conferindo o resultado antes de remover os registros.
+ * A marca evita reenviar os já concluídos. Corrigir ou descartar mensagens
+ * inválidas como loanId string. Alertar a operação sobre lag e fila de mortas.
+ * 5. O endereço passa pelo PostgreSQL, pela porta de consulta e pelo provedor
+ * de e-mail; pode ficar no Mailpit, no provedor real e em backups. A fila e
+ * a fila de mortas carregam apenas o ID como payload, reduzindo exposição de
+ * dados pessoais. Mensagens de erro de provedores também exigem cuidado.
+ */

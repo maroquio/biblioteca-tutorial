@@ -47,11 +47,11 @@ async function receiptSentAt(loanId: number): Promise<Date | null> {
 
 const sentTo = (sender: MemorySender, address: string) => sender.sent.filter((email) => email.to === address);
 
-test.todo("o stream dos comprovantes pertence à Circulação", () => {
+test("o stream dos comprovantes pertence à Circulação", () => {
   expect(loanReceiptJob(null).stream).toBe(`${process.env.REDIS_PREFIX ?? "biblioteca"}:circulacao:fila:comprovantes`);
 });
 
-test.todo("UC19 API: sem fila, o comprovante sai na hora, para o e-mail do leitor", async () => {
+test("UC19 API: sem fila, o comprovante sai na hora, para o e-mail do leitor", async () => {
   const reader = await testReader();
   const copy = await testCopy();
   const response = await api("POST", "/emprestimos", { leitorId: reader.id, exemplarId: copy.id });
@@ -66,7 +66,7 @@ test.todo("UC19 API: sem fila, o comprovante sai na hora, para o e-mail do leito
   expect(await receiptSentAt(loan.id)).not.toBeNull();
 });
 
-test.todo("UC19: com fila, a mensagem leva só o id do empréstimo, e o worker manda o comprovante", async () => {
+test("UC19: com fila, a mensagem leva só o id do empréstimo, e o worker manda o comprovante", async () => {
   const { reader, loan } = await newLoan();
   const sender = createMemorySender();
   const job = loanReceiptJob(sender);
@@ -82,7 +82,7 @@ test.todo("UC19: com fila, a mensagem leva só o id do empréstimo, e o worker m
   expect(await receiptSentAt(loan.id)).not.toBeNull();
 });
 
-test.todo("a mesma mensagem entregue duas vezes manda um e-mail só", async () => {
+test("a mesma mensagem entregue duas vezes manda um e-mail só", async () => {
   const { reader, loan } = await newLoan();
   const sender = createMemorySender();
   const job = loanReceiptJob(sender);
@@ -92,7 +92,7 @@ test.todo("a mesma mensagem entregue duas vezes manda um e-mail só", async () =
   expect(await sendLoanReceipt(loan.id, sender)).toBe("já enviado");
 });
 
-test.todo("o leitor trocou de e-mail antes do envio: o comprovante vai para o endereço atual", async () => {
+test("o leitor trocou de e-mail antes do envio: o comprovante vai para o endereço atual", async () => {
   const { reader, loan } = await newLoan();
   const sender = createMemorySender();
   const job = loanReceiptJob(sender);
@@ -106,7 +106,7 @@ test.todo("o leitor trocou de e-mail antes do envio: o comprovante vai para o en
   expect(sentTo(sender, newEmail)).toHaveLength(1);
 });
 
-test.todo("se o provedor falha, a tarefa lança e o comprovante não fica marcado; a nova tentativa envia", async () => {
+test("se o provedor falha, a tarefa lança e o comprovante não fica marcado; a nova tentativa envia", async () => {
   const { reader, loan } = await newLoan();
   await expect(loanReceiptJob(failing).handle({ loanId: loan.id })).rejects.toThrow("provedor de e-mail fora do ar");
   expect(await receiptSentAt(loan.id)).toBeNull();
@@ -116,7 +116,7 @@ test.todo("se o provedor falha, a tarefa lança e o comprovante não fica marcad
   expect(await receiptSentAt(loan.id)).not.toBeNull();
 });
 
-test.todo("sem fila, o comprovante sai na hora; se o provedor falha, pedir o comprovante não lança", async () => {
+test("sem fila, o comprovante sai na hora; se o provedor falha, pedir o comprovante não lança", async () => {
   const { reader, loan } = await newLoan();
   await scheduleLoanReceipt(loan.id, { client: null, sender: failing });
   expect(await receiptSentAt(loan.id)).toBeNull();
@@ -125,7 +125,7 @@ test.todo("sem fila, o comprovante sai na hora; se o provedor falha, pedir o com
   expect(sentTo(sender, reader.email)).toHaveLength(1);
 });
 
-test.todo("empréstimo inexistente não manda nada nem lança; mensagem sem o id falha", async () => {
+test("empréstimo inexistente não manda nada nem lança; mensagem sem o id falha", async () => {
   const sender = createMemorySender();
   expect(await sendLoanReceipt(2147483647, sender)).toBe("empréstimo não encontrado");
   await loanReceiptJob(sender).handle({ loanId: 2147483647 });
@@ -134,9 +134,54 @@ test.todo("empréstimo inexistente não manda nada nem lança; mensagem sem o id
   expect(sender.sent).toHaveLength(0);
 });
 
-test.todo("sem remetente configurado, nada é enviado nem marcado", async () => {
+test("sem remetente configurado, nada é enviado nem marcado", async () => {
   const { loan } = await newLoan();
   expect(await sendLoanReceipt(loan.id, null)).toBe("sem remetente");
   await loanReceiptJob(null).handle({ loanId: loan.id });
   expect(await receiptSentAt(loan.id)).toBeNull();
 });
+
+/*
+ * Respostas do passo 07
+ *
+ * 1. Marcar antes ou depois. Aqui o comprovante é enviado e só depois marcado.
+ *    Se o processo morrer entre os dois, a coluna fica nula, a mensagem fica sem
+ *    XACK e volta: o leitor recebe o comprovante duas vezes. Na ordem inversa, a
+ *    coluna já estaria preenchida, e ele não receberia nenhum. Para um
+ *    comprovante, repetido é melhor do que nenhum. Numa cobrança no cartão é o
+ *    contrário: cobrar duas vezes é pior, e aí é preciso marcar antes ou mandar
+ *    uma chave de idempotência para o provedor de pagamento.
+ *
+ * 2. O outbox. Se a aplicação cair entre o COMMIT e o XADD, o empréstimo fica
+ *    gravado, mas a tarefa nunca chega à fila: o leitor fica sem comprovante. A
+ *    coluna nula ajuda a achar esses empréstimos: uma varredura periódica
+ *    republica { loanId } para quem está com comprovante_enviado_em nula há
+ *    alguns minutos (republicar é seguro, porque a coluna evita o e-mail
+ *    repetido). O cuidado: os empréstimos de antes desta atividade também estão
+ *    com a coluna nula. A varredura precisa de um corte (só os registrados depois
+ *    que o comprovante entrou no ar), senão manda comprovantes antigos.
+ *
+ * 3. Dois workers, a mesma mensagem. Aqui nada impede de vez: se o provedor
+ *    demorar mais de 10 s, o segundo worker também envia. Por isso o adaptador
+ *    desiste em 5 s: o envio termina, com sucesso ou com erro, antes de a fila
+ *    entregar a mensagem de novo. O UPDATE … WHERE comprovante_enviado_em IS NULL
+ *    RETURNING id antes do envio resolveria (só um worker ganha a linha), mas
+ *    vira "marcar antes": quando o envio falha, é preciso desfazer a marca, e se
+ *    o processo morrer entre a marca e o envio, o leitor fica sem comprovante.
+ *
+ * 4. A fila de mortas. Ler com XRANGE …:mortas - +, publicar cada { loanId } de
+ *    novo no stream dos comprovantes e apagar da fila de mortas (XDEL). É seguro
+ *    porque a coluna impede o e-mail repetido: o que já saiu volta "já enviado".
+ *    A {"loanId":"7"} não adianta reprocessar: ela falhou pela forma, e não pelo
+ *    provedor, e vai falhar sempre; alguém precisa olhar e descartar. Quem cuida
+ *    do sistema deveria saber por um alerta quando a fila de mortas (XLEN) passar
+ *    de zero ou quando o lag crescer.
+ *
+ * 5. O e-mail é dado pessoal. Ele passa pela consulta ao Postgres, pela memória
+ *    do worker e pela requisição ao Mailpit (num provedor de verdade, pelos
+ *    servidores e pelos logs dele). Fica guardado na tabela leitores, nos backups
+ *    do banco e na caixa do provedor. Na fila e na fila de mortas ele não
+ *    aparece, porque a mensagem leva só o id: elas ficam em disco (appendonly) e
+ *    podem ir para backups, e quem lê a fila ou o log não vê o endereço de
+ *    ninguém.
+ */

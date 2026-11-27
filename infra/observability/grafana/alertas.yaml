@@ -1,0 +1,121 @@
+# Os alertas: o que vigiar, de quanto em quanto tempo e para quem avisar.
+# Alertamos SINTOMAS (tarefa perdida, leitor vendo erro, API fora do ar), não
+# causas (Redis caiu, CPU alta): o sintoma é o que o leitor sente.
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: biblioteca
+    folder: Biblioteca
+    interval: 10s # avalia as regras a cada 10 s
+    rules:
+      - uid: tarefas-na-fila-de-mortas
+        title: Tarefas na fila de mortas
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 60, to: 0 }
+            model:
+              refId: A
+              expr: max(queue_dead_letters)
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator: { type: gt, params: [0] }
+        for: 0s # dispara na primeira avaliação: uma tarefa perdida já é problema
+        # sem dado (a fila fora do ar apaga o gauge), fica como estava: falta de
+        # dado não é boa notícia, e um "resolvido" falso seria pior que nada
+        noDataState: KeepLast
+        execErrState: Error
+        annotations:
+          summary: Há tarefas na fila de mortas.
+          description: >-
+            Uma tarefa esgotou as tentativas: um livro ficou fora da busca semântica
+            (ou um comprovante não saiu). O trace_id está na mensagem morta; procure-o
+            no log do worker para ver o erro de cada tentativa.
+
+      - uid: leitores-recebendo-erro
+        title: Leitores recebendo erro
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 60, to: 0 }
+            model:
+              refId: A
+              expr: sum(rate(http_server_request_duration_seconds_count{status=~"5.."}[1m]))
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator: { type: gt, params: [0] }
+        # o sintoma precisa durar 20 s seguidos; como o rate olha o último minuto,
+        # até um 500 solto dura isso: aqui, qualquer 5xx avisa
+        for: 20s
+        # sem nenhum 5xx a série nem existe: aqui, sem dado é mesmo "tudo bem"
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: A API está respondendo 5xx.
+          description: >-
+            Leitores estão recebendo erro. No log do app, procure as linhas
+            "level":"error"; o trace_id liga cada uma à resposta que o leitor recebeu.
+
+      # Com o app fora do ar, o leitor recebe "conexão recusada", e não 5xx: a
+      # regra de cima fica calada. Quem vê é o Prometheus, que grava up = 0
+      # para o alvo que não respondeu à coleta.
+      - uid: api-fora-do-ar
+        title: API fora do ar
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 60, to: 0 }
+            model:
+              refId: A
+              expr: max(up{job="biblioteca"})
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator: { type: lt, params: [1] }
+        for: 30s # um restart do contêiner leva poucos segundos e não acorda ninguém
+        noDataState: Alerting # nem o up existe: o Prometheus não está coletando o app
+        execErrState: Error
+        annotations:
+          summary: O Prometheus não consegue coletar o /metrics do app.
+          description: >-
+            O app caiu ou parou de responder. Veja docker compose ps e o fim do log
+            do app (docker compose logs app).
+
+contactPoints:
+  - orgId: 1
+    name: equipe
+    receivers:
+      - uid: equipe-email
+        type: email
+        settings:
+          addresses: equipe@biblioteca.local
+          singleEmail: true
+
+policies:
+  - orgId: 1
+    receiver: equipe
+    group_by: ["alertname"]
+    group_wait: 5s # espera 5 s para juntar alertas parecidos num e-mail só
+    group_interval: 1m
+    repeat_interval: 4h # se continuar disparando, lembra de novo em 4 h

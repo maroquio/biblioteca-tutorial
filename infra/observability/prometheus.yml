@@ -1,0 +1,10 @@
+# Modelo pull: o Prometheus vai até a aplicação buscar os números no /metrics.
+# O worker não abre porta: os números da fila o app lê do Redis na hora da coleta.
+global:
+  scrape_interval: 5s # de quanto em quanto tempo ler o /metrics
+
+scrape_configs:
+  - job_name: biblioteca
+    static_configs:
+      # o app, pelo nome do serviço na rede do compose
+      - targets: ["app:3000"]

@@ -205,6 +205,58 @@ services:
       timeout: 3s
       retries: 15
 
+  # Prometheus: vem buscar o /metrics do app a cada 5 s e guarda cada número com
+  # a hora em que foi lido (uma série temporal). Sem volume: o histórico some
+  # com o contêiner, o que basta para desenvolver. Em http://localhost:9090.
+  prometheus:
+    image: prom/prometheus:v3.16.0
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  # Grafana: o painel e os alertas, em http://localhost:3001. Tudo vem de
+  # arquivos de observability/grafana/: fonte de dados, painel, regras e para
+  # quem mandar o e-mail (o SMTP do Mailpit, na porta 1025).
+  grafana:
+    image: grafana/grafana:13.3.2
+    environment:
+      # entra direto como leitor, sem login; para editar, "Sign in" com
+      # admin / biblioteca. Senha no compose só porque a porta está presa ao
+      # 127.0.0.1: num servidor de verdade, nunca.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_SECURITY_ADMIN_PASSWORD: biblioteca
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: mailpit:1025
+      GF_SMTP_FROM_ADDRESS: grafana@biblioteca.local
+      GF_SMTP_FROM_NAME: Grafana da biblioteca
+      # os links do e-mail apontam para cá (sem isto, para localhost:3000, que é o app)
+      GF_SERVER_ROOT_URL: http://localhost:3001
+    volumes:
+      - ./observability/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ./observability/grafana/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./observability/grafana/biblioteca.json:/var/lib/grafana/dashboards/biblioteca.json:ro
+      - ./observability/grafana/alertas.yaml:/etc/grafana/provisioning/alerting/alertas.yaml:ro
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      # na primeira subida o Grafana cria o próprio banco: pode passar de 1 min
+      start_period: 3m
+
 volumes:
   pgdata:
   rustfsdata:

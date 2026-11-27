@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import { captureLogs } from "../src/infrastructure/log";
+import { renderHttpMetrics, resetMetrics } from "../src/infrastructure/metrics";
 import { traceIdOf } from "../src/infrastructure/trace";
 import { createApp } from "../src/server";
 
@@ -13,6 +14,7 @@ const app = createApp([
 
 let capture: ReturnType<typeof captureLogs>;
 beforeEach(() => {
+  resetMetrics();
   capture = captureLogs();
 });
 afterEach(() => capture.restore());
@@ -43,9 +45,34 @@ test("o log de acesso tem método, padrão da rota, status, duração e trace_id
   expect(typeof access!.duration_ms).toBe("number");
 });
 
+test("a métrica usa o padrão da rota, nunca a URL com o id", async () => {
+  await app.request("/api/teste/42");
+  await app.request("/api/teste/43");
+  const text = renderHttpMetrics();
+  expect(text).toContain('route="/api/teste/:id",status="200",le="+Inf"} 2');
+  expect(text).not.toContain("/api/teste/42");
+});
+
+test("uma rota que não existe não vira rótulo com a URL", async () => {
+  const response = await app.request("/api/nao-existe/123");
+  expect(response.status).toBe(404);
+  const text = renderHttpMetrics();
+  expect(text).toContain('status="404"');
+  expect(text).not.toContain("nao-existe");
+});
+
 test("o erro 500 sai no log com o mesmo trace_id da resposta", async () => {
   const response = await app.request("/api/teste-erro");
   expect(response.status).toBe(500);
   const error = capture.lines.find((line) => line.level === "error");
   expect(error).toMatchObject({ msg: "erro interno", error: "explodiu", trace_id: traceIdOf(response.headers.get("traceparent"))! });
+});
+
+test("/metrics responde no formato do Prometheus e não entra no log de acesso", async () => {
+  await app.request("/api/teste/42");
+  const response = await app.request("/metrics");
+  expect(response.status).toBe(200);
+  expect(response.headers.get("content-type")).toStartWith("text/plain; version=0.0.4");
+  expect(await response.text()).toContain('route="/api/teste/:id"');
+  expect(capture.lines.filter((line) => line.msg === "requisição")).toHaveLength(1);
 });

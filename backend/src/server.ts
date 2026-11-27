@@ -2,6 +2,8 @@ import { Hono, type MiddlewareHandler } from "hono";
 import { serveStatic } from "hono/bun";
 import { routePath } from "hono/route";
 import { log } from "./infrastructure/log";
+import { observeRequest, renderHttpMetrics, renderQueueMetrics } from "./infrastructure/metrics";
+import { queue } from "./infrastructure/queue";
 import { continueTrace, withTrace } from "./infrastructure/trace";
 import { DomainError, InvalidValue } from "./shared/domain-errors";
 import { InvalidInput, NotFound, NotImplemented, PayloadTooLarge, RuleConflict, ServiceUnavailable } from "./shared/errors";
@@ -44,7 +46,7 @@ function errorResponse(error: unknown): Response {
 /**
  * Toda requisição da API passa por aqui: continua o traceparent recebido (ou
  * começa um), roda o resto dentro dele, devolve o cabeçalho na resposta e
- * registra uma linha de log.
+ * registra uma linha de log e uma observação no histograma.
  */
 const observe: MiddlewareHandler = (c, next) => {
   const traceparent = continueTrace(c.req.header("traceparent"));
@@ -57,6 +59,7 @@ const observe: MiddlewareHandler = (c, next) => {
     const route = routePath(c);
     c.header("traceparent", traceparent);
     log.info("requisição", { method: c.req.method, route, status: c.res.status, duration_ms: Math.round(seconds * 1000) });
+    observeRequest(c.req.method, route, c.res.status, seconds);
   });
 };
 
@@ -70,6 +73,14 @@ export function createApp(slices: RegisterRoutes[] = []) {
   for (const registerRoutes of slices) registerRoutes(api);
 
   const app = new Hono();
+
+  // O Prometheus vem buscar aqui a cada 5 s. Fora do /api e do observe(): a
+  // coleta não é pedido de usuário e só encheria o log. Num servidor exposto à
+  // internet, esta rota ficaria numa porta interna ou atrás de autenticação.
+  app.get("/metrics", async () =>
+    new Response(renderHttpMetrics() + await renderQueueMetrics(queue), {
+      headers: { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" },
+    }));
 
   // toda a API mora sob /api: o resto dos endereços fica livre para o frontend
   app.route("/api", api);

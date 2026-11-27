@@ -20,6 +20,7 @@ const TABLE_OWNERS: Record<string, string> = {
 const KEY_OWNERS: Record<string, string> = {
   autoria: "authorship",
   acervo: "catalog",
+  circulacao: "circulation",
 };
 
 /** Pasta da fatia (src/modules/<módulo>/features/<fatia>), ou null fora de uma fatia. */
@@ -125,5 +126,6 @@ if (problems.length > 0) {
   for (const problem of problems) console.error(`  ${problem}\n`);
   process.exit(1);
 }
+
 
 console.log("Fronteiras de módulo respeitadas.");

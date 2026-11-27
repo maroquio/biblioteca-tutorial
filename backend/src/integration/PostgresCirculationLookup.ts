@@ -3,10 +3,10 @@ import type { CirculationLookup, CopySummary, ReaderSummary } from "../modules/c
 
 /** Adapter de integração: só aqui há SQL que atravessa leitores, exemplares e livros. */
 export class PostgresCirculationLookup implements CirculationLookup {
-  constructor(private readonly db: SQL) {}
+  constructor(private readonly db: SQL) { }
 
   async reader(id: number): Promise<ReaderSummary | null> {
-    const [row] = await this.db<ReaderSummary[]>`SELECT id, nome AS name, cpf FROM leitores WHERE id = ${id}`;
+    const [row] = await this.db<ReaderSummary[]>`SELECT id, nome AS name, cpf, email FROM leitores WHERE id = ${id}`;
     return row ?? null;
   }
 

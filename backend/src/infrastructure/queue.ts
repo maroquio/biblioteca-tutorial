@@ -1,5 +1,7 @@
 import type { RedisClient } from "bun";
+import { log } from "./log";
 import { createRedis, ready } from "./redis";
+import { continueTrace, currentTraceparent, withTrace } from "./trace";
 
 /**
  * A fila mora num Redis só dela (o serviço fila do compose), com volume: ao
@@ -49,14 +51,20 @@ export function deadLetterStream(stream: string): string {
  * Publica a tarefa e devolve o id da mensagem; null quando não há fila ou ela
  * não respondeu. A mensagem leva só identificadores, nunca o objeto inteiro:
  * quando o worker for trabalhar, ele lê o estado atual no Postgres.
+ *
+ * Leva também o traceparent de quem publicou: o worker continua o mesmo trace,
+ * e o rastro não se parte na fila.
  */
 export async function enqueue(stream: string, data: unknown, client: RedisClient | null = queue): Promise<string | null> {
   if (!client) return null;
+  const fields = ["dados", JSON.stringify(data)];
+  const traceparent = currentTraceparent();
+  if (traceparent) fields.push("traceparent", traceparent);
   try {
     await ready(client);
-    return await client.send("XADD", [stream, "MAXLEN", "~", MAX_LENGTH, "*", "dados", JSON.stringify(data)]) as string;
+    return await client.send("XADD", [stream, "MAXLEN", "~", MAX_LENGTH, "*", ...fields]) as string;
   } catch (error) {
-    console.warn("Fila indisponível:", (error as Error).message);
+    log.warn("fila indisponível", { stream, error: error as Error });
     return null;
   }
 }
@@ -76,24 +84,37 @@ export async function prepareGroups(jobs: Job[], client: RedisClient): Promise<v
   }
 }
 
-/** Executa uma mensagem. Só o XACK tira a mensagem da lista de pendentes. */
+/**
+ * Executa uma mensagem dentro do trace de quem a publicou (mensagem sem o
+ * campo, de antes desta fase, ganha um trace novo). Só o XACK tira a mensagem
+ * da lista de pendentes.
+ */
 async function run(job: Job, [id, fields]: Entry, deliveries: number, settings: Settings): Promise<void> {
   const { client, maxDeliveries } = settings;
-  try {
-    await job.handle(JSON.parse(fields[fields.indexOf("dados") + 1] ?? "null"));
-    await client.send("XACK", [job.stream, GROUP, id]);
-  } catch (error) {
-    const reason = (error as Error).message;
-    if (deliveries < maxDeliveries) {
-      // sem XACK, a mensagem continua pendente e volta depois de retryAfterMs
-      console.warn(`Tarefa ${id} de ${job.stream} falhou na tentativa ${deliveries}: ${reason}`);
-      return;
+  const field = (name: string) => {
+    const at = fields.indexOf(name);
+    return at === -1 ? undefined : fields[at + 1];
+  };
+  const about = { stream: job.stream, message_id: id, attempt: deliveries };
+  await withTrace(continueTrace(field("traceparent")), async () => {
+    try {
+      await job.handle(JSON.parse(field("dados") ?? "null"));
+      await client.send("XACK", [job.stream, GROUP, id]);
+      log.info("tarefa concluída", about);
+    } catch (error) {
+      const reason = (error as Error).message;
+      if (deliveries < maxDeliveries) {
+        // sem XACK, a mensagem continua pendente e volta depois de retryAfterMs
+        log.warn("tarefa falhou; volta para a fila", { ...about, error: reason });
+        return;
+      }
+      // desistir também é uma decisão: a mensagem sai da fila, mas não some
+      // (...fields leva o traceparent junto para a fila de mortas)
+      await client.send("XADD", [deadLetterStream(job.stream), "*", ...fields, "erro", reason, "origem", id]);
+      await client.send("XACK", [job.stream, GROUP, id]);
+      log.error("tarefa foi para a fila de mortas", { ...about, error: reason });
     }
-    // desistir também é uma decisão: a mensagem sai da fila, mas não some
-    await client.send("XADD", [deadLetterStream(job.stream), "*", ...fields, "erro", reason, "origem", id]);
-    await client.send("XACK", [job.stream, GROUP, id]);
-    console.warn(`Tarefa ${id} de ${job.stream} foi para a fila de mortas depois de ${deliveries} tentativa(s): ${reason}`);
-  }
+  });
 }
 
 /**
@@ -164,7 +185,7 @@ export async function work(jobs: Job[], options: WorkerOptions): Promise<void> {
     } catch (error) {
       if (!running) break;
       // fila fora do ar ou recriada sem os grupos: espera e começa de novo
-      console.warn("Fila indisponível:", (error as Error).message);
+      log.warn("fila indisponível", { error: error as Error });
       await Bun.sleep(1000);
     }
   }

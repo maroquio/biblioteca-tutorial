@@ -22,6 +22,8 @@ services:
       QUEUE_URL: redis://fila:6379
       # e o provedor de e-mail, pelo nome mailpit (sem fila, o app envia na hora)
       EMAIL_URL: http://mailpit:8025
+      # o campo "service" de cada linha do log estruturado
+      SERVICE_NAME: app
     ports:
       - "3000:3000"
     depends_on:
@@ -51,6 +53,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       QUEUE_URL: redis://fila:6379
       EMAIL_URL: http://mailpit:8025
+      SERVICE_NAME: worker
     depends_on:
       db:
         condition: service_healthy
@@ -69,6 +72,9 @@ services:
       dockerfile: infra/Dockerfile
     command: ["bun", "test"]
     environment:
+      # a imagem vem com NODE_ENV=production, e o bun test só põe "test" quando a
+      # variável está vazia; com "test", o log estruturado fica mudo na suíte
+      NODE_ENV: test
       DATABASE_URL: postgres://biblioteca:biblioteca@db:5432/biblioteca_test
       REDIS_URL: redis://redis:6379
       REDIS_PREFIX: biblioteca_test

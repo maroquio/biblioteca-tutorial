@@ -1,16 +1,18 @@
-# Biblioteca — evolução SaaS, fase 04
+# Biblioteca — evolução SaaS, fase 05
 
 Tópicos Especiais em Engenharia de Software II · Ifes 2026.2
 
-A branch `saas-evolution/fase04` parte da `saas-evolution/fase03`, que trouxe o
-RustFS (as capas dos livros, UC25). Esta fase implementa a
-[aula de filas e workers](.docs/saas-evolution/saas-fase04.html): cadastrar, editar e
-excluir um livro (UC01, UC03 e UC04) publicam a indexação semântica numa fila do
-Redis Streams e respondem na hora; um worker, outro processo com o mesmo código,
-consome a fila e chama o Gemini fora da requisição. Os [slides da aula](.docs/aulas/filas/slides-filas.html)
-e um [exemplo com Bun](.docs/aulas/filas/exemplo-filas/) acompanham o tutorial. A
-[atividade](.docs/atividades/atividade-fila.html) leva a fila para a Circulação: o
-comprovante do empréstimo (UC19) por e-mail.
+A branch `saas-evolution/fase05` parte da `saas-evolution/fase04`, que trouxe a fila
+e o worker: cadastrar, editar e excluir um livro publicam a indexação semântica no
+Redis Streams, e o worker chama o Gemini fora da requisição. Esta fase implementa a
+[aula de observabilidade](.docs/saas-evolution/saas-fase05.html): logs estruturados
+em JSON, com o `trace_id` no formato `traceparent` da W3C indo da requisição até o
+worker; um `/metrics` com o histograma HTTP e os gauges da fila; Prometheus e Grafana
+no compose, com um painel e três alertas por e-mail. Os
+[slides da aula](.docs/aulas/observabilidade/slides-observabilidade.html) e um
+[exemplo com Bun](.docs/aulas/observabilidade/exemplo-observabilidade/) acompanham o
+tutorial. A [atividade da fase 04](.docs/atividades/atividade-fila.html), o
+comprovante do empréstimo (UC19) por e-mail, continua valendo.
 
 ## Executar a aplicação
 
@@ -43,7 +45,22 @@ cada capa enviada, em `acervo/livros/<id>/capa`.
 O Mailpit, um provedor de e-mail só para desenvolvimento, mostra em
 <http://localhost:8025> cada e-mail que a aplicação envia, sem entregar nada a
 ninguém. Nesta branch, o comprovante do empréstimo ainda é o esqueleto da atividade:
-até ela ser feita, a caixa fica vazia.
+até ela ser feita, só os alertas do Grafana chegam à caixa.
+
+O Prometheus (<http://localhost:9090>) lê o `/metrics` do app a cada 5 s, e o Grafana
+(<http://localhost:3001>) mostra o painel *Biblioteca* e avalia três alertas,
+*Tarefas na fila de mortas*, *Leitores recebendo erro* e *API fora do ar*, que chegam
+por e-mail ao Mailpit. O Grafana abre como leitor; para editar, entre com `admin` / `biblioteca`
+(só para desenvolvimento). Na primeira subida, ele pode levar uns dois minutos para
+ficar pronto. A configuração dos dois fica em `infra/observability/`.
+
+Cada linha de log do `app` e do `worker` é um JSON com `trace_id`, e toda resposta da
+API traz o cabeçalho `traceparent` com o mesmo id. Para seguir um cadastro do POST
+até o worker (no PowerShell, `Select-String` no lugar de `grep`):
+
+```bash
+docker compose -f infra/compose.yaml logs --no-log-prefix app worker | grep <trace_id>
+```
 
 Para parar e preservar os dados:
 
@@ -69,7 +86,8 @@ Os testes de integração usam `biblioteca_test`; a aplicação usa `biblioteca`
 A suíte roda sem `QUEUE_URL`: sem fila, cada caso de uso faz o trabalho na hora, e
 os testes da fila criam o próprio cliente com `TEST_QUEUE_URL`. Os e-mails vão para
 uma caixa de saída em memória (`EMAIL_PROVIDER=memory`); só o teste do adaptador
-fala com o Mailpit.
+fala com o Mailpit. Com `NODE_ENV=test`, o log estruturado fica mudo; os testes que
+precisam ler o log usam `captureLogs()`.
 Se remover o volume com `docker compose -f infra/compose.yaml down -v`, crie novamente o banco de testes.
 
 As verificações que dispensam PostgreSQL podem rodar localmente com Bun 1.4 ou

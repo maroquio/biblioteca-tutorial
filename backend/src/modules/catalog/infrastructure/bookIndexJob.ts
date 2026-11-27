@@ -1,4 +1,5 @@
 import type { RedisClient } from "bun";
+import { log } from "../../../infrastructure/log";
 import { enqueue, queue, type Job } from "../../../infrastructure/queue";
 import { redisKey } from "../../../infrastructure/redis";
 import type { CatalogIntegration } from "../domain/CatalogIntegration";
@@ -30,7 +31,7 @@ export function bookIndexJob(integration: CatalogIntegration): Job<BookIndexTask
         throw new Error("Tarefa de indexação sem a lista de ids");
       }
       const { indexed, removed } = await indexBooks(task.ids, integration);
-      console.log(`Índice semântico: livro(s) ${task.ids.join(", ")}: ${indexed} indexado(s), ${removed} removido(s)`);
+      log.info("índice semântico atualizado", { book_ids: task.ids, indexed, removed });
     },
   };
 }

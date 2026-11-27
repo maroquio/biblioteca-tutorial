@@ -1,4 +1,5 @@
 import type { RedisClient } from "bun";
+import { log } from "../infrastructure/log";
 import { redis } from "../infrastructure/redis";
 import { invalidateAuthorSearch } from "../modules/authorship";
 import { reconcileBookIndex } from "../modules/catalog";
@@ -12,7 +13,7 @@ import { catalogIntegration } from "./catalogIntegration";
 export async function refreshDerivedData(): Promise<void> {
   await invalidateAuthorSearch();
   const { indexed, removed } = await reconcileBookIndex(catalogIntegration);
-  console.log(`Índice semântico: ${indexed} livro(s) indexado(s), ${removed} removido(s)`);
+  log.info("índice semântico recalculado", { indexed, removed });
 }
 
 /**

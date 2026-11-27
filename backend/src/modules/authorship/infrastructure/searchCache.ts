@@ -1,4 +1,5 @@
 import type { RedisClient } from "bun";
+import { log } from "../../../infrastructure/log";
 import { ready, redis, redisKey } from "../../../infrastructure/redis";
 import type { AuthorView } from "../domain/Author";
 
@@ -34,7 +35,7 @@ export async function readCachedSearch(term: string, client: RedisClient | null 
     const cached = await client.hget(generationHash(generation), field(term));
     return { generation, authors: cached === null ? null : JSON.parse(cached) as AuthorView[] };
   } catch (error) {
-    console.warn("Cache de autores indisponível:", (error as Error).message);
+    log.warn("cache de autores indisponível", { error: (error as Error).message });
     return null;
   }
 }
@@ -50,7 +51,7 @@ export async function writeCachedSearch(term: string, generation: number, author
     await ready(client);
     await client.send("HSETEX", [generationHash(generation), "EX", String(TTL_SECONDS), "FIELDS", "1", field(term), JSON.stringify(authors)]);
   } catch (error) {
-    console.warn("Cache de autores indisponível:", (error as Error).message);
+    log.warn("cache de autores indisponível", { error: (error as Error).message });
   }
 }
 
@@ -65,6 +66,6 @@ export async function invalidateAuthorSearch(client: RedisClient | null = redis)
     await ready(client);
     await client.incr(GENERATION);
   } catch (error) {
-    console.warn("Cache de autores indisponível:", (error as Error).message);
+    log.warn("cache de autores indisponível", { error: (error as Error).message });
   }
 }

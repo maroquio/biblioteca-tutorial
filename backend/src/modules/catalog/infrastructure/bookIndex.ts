@@ -1,5 +1,6 @@
 import type { RedisClient } from "bun";
 import { embedder as defaultEmbedder } from "../../../infrastructure/embedder";
+import { log } from "../../../infrastructure/log";
 import { sql } from "../../../infrastructure/postgres";
 import { ready, redis, redisKey } from "../../../infrastructure/redis";
 import type { Embedder } from "../../../shared/Embedder";
@@ -121,7 +122,7 @@ export async function syncBookIndex(ids: number[], integration: CatalogIntegrati
   try {
     return await indexBooks(ids, integration, embedder, client);
   } catch (error) {
-    console.warn("Índice semântico indisponível:", (error as Error).message);
+    log.warn("índice semântico indisponível", { error: (error as Error).message });
     return { indexed: 0, removed: 0 };
   }
 }
@@ -141,7 +142,7 @@ export async function reconcileBookIndex(integration: CatalogIntegration, embedd
     const { created, ...result } = await syncIds([...ids], integration, embedder, client);
     return result;
   } catch (error) {
-    console.warn("Índice semântico indisponível:", (error as Error).message);
+    log.warn("índice semântico indisponível", { error: (error as Error).message });
     return { indexed: 0, removed: 0 };
   }
 }
@@ -152,7 +153,7 @@ export async function syncAuthorBookIndex(authorId: number, integration: Catalog
     const rows = await sql`SELECT id FROM livros WHERE autor_id = ${authorId}` as { id: number }[];
     await syncBookIndex(rows.map((row) => row.id), integration);
   } catch (error) {
-    console.warn("Índice semântico indisponível:", (error as Error).message);
+    log.warn("índice semântico indisponível", { error: (error as Error).message });
   }
 }
 

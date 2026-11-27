@@ -1,4 +1,5 @@
 import { queue, work } from "./infrastructure/queue";
+import { log } from "./infrastructure/log";
 import { catalogIntegration } from "./integration/catalogIntegration";
 import { bookIndexJob } from "./modules/catalog";
 
@@ -11,7 +12,7 @@ if (!queue) throw new Error("QUEUE_URL não definida: o worker só existe junto 
 
 // no Docker, o HOSTNAME é o id do contêiner: com --scale, cada worker tem o seu nome
 const consumer = process.env.HOSTNAME ?? `worker-${process.pid}`;
-console.log(`Worker ${consumer} esperando tarefas`);
+log.info("worker esperando tarefas", { consumer });
 
 // TODO (atividade): registre aqui também a tarefa do comprovante do empréstimo
 // (loanReceiptJob), que chega pelo index.ts do módulo Circulação.

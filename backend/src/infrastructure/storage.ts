@@ -1,5 +1,6 @@
 import { S3Client } from "bun";
 import { ServiceUnavailable } from "../shared/errors";
+import { log } from "./log";
 
 /**
  * Cliente S3 do próprio Bun, apontando para o RustFS do compose. Sem S3_ENDPOINT
@@ -39,7 +40,7 @@ export function requireStorage(client: S3Client | null = storage): S3Client {
 /** Qualquer falha do RustFS (fora do ar, bucket inexistente, credencial errada) vira 503. */
 function unavailable(error: unknown): ServiceUnavailable {
   const { code, message } = error as { code?: string; message?: string };
-  console.warn("Armazenamento indisponível:", code ?? message);
+  log.warn("armazenamento indisponível", { error: code ?? message });
   return new ServiceUnavailable(UNAVAILABLE);
 }
 
@@ -85,5 +86,5 @@ export async function deleteObject(key: string, client = storage): Promise<void>
  */
 export async function discardObject(key: string, client = storage): Promise<void> {
   if (!client) return;
-  await deleteObject(key, client).catch(() => console.warn(`Objeto órfão no armazenamento: ${key}`));
+  await deleteObject(key, client).catch(() => log.warn("objeto órfão no armazenamento", { key }));
 }

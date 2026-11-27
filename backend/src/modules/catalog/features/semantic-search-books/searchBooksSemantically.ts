@@ -1,5 +1,6 @@
 import type { RedisClient } from "bun";
 import { embedder as defaultEmbedder } from "../../../../infrastructure/embedder";
+import { log } from "../../../../infrastructure/log";
 import { sql } from "../../../../infrastructure/postgres";
 import { ready, redis } from "../../../../infrastructure/redis";
 import { civilDate } from "../../../../shared/dates";
@@ -20,7 +21,7 @@ async function nearestBooks(q: string, integration: CatalogIntegration, embedder
     const [vector] = await embedder.embed([q], "query");
     return await knnSearch(vector!, limit, client);
   } catch (error) {
-    console.warn("Busca semântica indisponível:", (error as Error).message);
+    log.warn("busca semântica indisponível", { error: (error as Error).message });
     throw new ServiceUnavailable("A busca semântica está indisponível no momento");
   }
 }

@@ -1,5 +1,8 @@
-import { Hono } from "hono";
+import { Hono, type MiddlewareHandler } from "hono";
 import { serveStatic } from "hono/bun";
+import { routePath } from "hono/route";
+import { log } from "./infrastructure/log";
+import { continueTrace, withTrace } from "./infrastructure/trace";
 import { DomainError, InvalidValue } from "./shared/domain-errors";
 import { InvalidInput, NotFound, NotImplemented, PayloadTooLarge, RuleConflict, ServiceUnavailable } from "./shared/errors";
 import type { RegisterRoutes } from "./shared/http";
@@ -32,13 +35,35 @@ function errorResponse(error: unknown): Response {
     return Response.json({ error: error.message }, { status: 503 });
   }
 
-  console.error(error);
+  // só o inesperado vai para o log como erro; o trace_id liga a linha à resposta
+  log.error("erro interno", { error: error as Error, stack: (error as Error)?.stack });
 
   return Response.json({ error: "Erro interno" }, { status: 500 });
 }
 
+/**
+ * Toda requisição da API passa por aqui: continua o traceparent recebido (ou
+ * começa um), roda o resto dentro dele, devolve o cabeçalho na resposta e
+ * registra uma linha de log.
+ */
+const observe: MiddlewareHandler = (c, next) => {
+  const traceparent = continueTrace(c.req.header("traceparent"));
+  return withTrace(traceparent, async () => {
+    const start = performance.now();
+    await next();
+    const seconds = (performance.now() - start) / 1000;
+    // o padrão da rota que respondeu ("/api/livros/:id"), nunca a URL com o id:
+    // depois do next(), o Hono aponta routeIndex para o handler que respondeu
+    const route = routePath(c);
+    c.header("traceparent", traceparent);
+    log.info("requisição", { method: c.req.method, route, status: c.res.status, duration_ms: Math.round(seconds * 1000) });
+  });
+};
+
 export function createApp(slices: RegisterRoutes[] = []) {
   const api = new Hono();
+
+  api.use("*", observe);
 
   api.get("/", (context) => context.json({ message: "API da Biblioteca" }));
 

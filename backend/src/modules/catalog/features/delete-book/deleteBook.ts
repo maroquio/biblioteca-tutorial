@@ -1,7 +1,7 @@
 import { inTransaction } from "../../../../infrastructure/transaction";
 import { RuleConflict } from "../../../../shared/errors";
 import type { CatalogIntegration } from "../../domain/CatalogIntegration";
-import { syncBookIndex } from "../../infrastructure/bookIndex";
+import { syncBookIndex } from "../../infrastructure/bookVectors";
 import { findBook } from "../../infrastructure/books";
 
 export async function deleteBook(id: number, integration: CatalogIntegration): Promise<void> {

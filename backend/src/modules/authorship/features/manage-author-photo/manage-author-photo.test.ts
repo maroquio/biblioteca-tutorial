@@ -20,11 +20,11 @@ const sendPhoto = (id: number, bytes: Uint8Array, name = "foto.png", type = "ima
 
 const authorById = async (id: number) => (await api("GET", `/autores/${id}`)).json();
 
-test.todo("UC26: a chave da foto pertence ao módulo Autoria", () => {
+test("UC26: a chave da foto pertence ao módulo Autoria", () => {
   expect(photoKey(7)).toBe("autoria/autores/7/foto");
 });
 
-test.todo("UC26: envia a foto, devolve fotoUrl e serve os mesmos bytes", async () => {
+test("UC26: envia a foto, devolve fotoUrl e serve os mesmos bytes", async () => {
   const author = await testAuthor();
   const response = await sendPhoto(author.id, PNG);
   expect(response.status).toBe(200);
@@ -39,7 +39,7 @@ test.todo("UC26: envia a foto, devolve fotoUrl e serve os mesmos bytes", async (
   expect(await getObject(photoKey(author.id))).not.toBeNull();
 });
 
-test.todo("UC26: trocar a foto substitui o objeto e muda a fotoUrl", async () => {
+test("UC26: trocar a foto substitui o objeto e muda a fotoUrl", async () => {
   const author = await testAuthor();
   const first = (await (await sendPhoto(author.id, PNG)).json()).fotoUrl;
   await Bun.sleep(5);
@@ -50,7 +50,7 @@ test.todo("UC26: trocar a foto substitui o objeto e muda a fotoUrl", async () =>
   expect(new Uint8Array(await photo.arrayBuffer())).toEqual(JPEG);
 });
 
-test.todo("UC26: recusa o que não é imagem (400), o que passa de 2 MB (413) e autor inexistente (404)", async () => {
+test("UC26: recusa o que não é imagem (400), o que passa de 2 MB (413) e autor inexistente (404)", async () => {
   const author = await testAuthor();
   expect((await sendPhoto(author.id, FAKE_JPEG, "foto.jpg", "image/jpeg")).status).toBe(400);
   const big = new Uint8Array(MAX_IMAGE_BYTES + 1);
@@ -64,7 +64,7 @@ test.todo("UC26: recusa o que não é imagem (400), o que passa de 2 MB (413) e 
   expect(await getObject(photoKey(author.id))).toBeNull();
 });
 
-test.todo("UC26: remover a foto zera fotoUrl e apaga o objeto do bucket", async () => {
+test("UC26: remover a foto zera fotoUrl e apaga o objeto do bucket", async () => {
   const author = await testAuthor();
   await sendPhoto(author.id, PNG);
   expect((await api("DELETE", `/autores/${author.id}/foto`)).status).toBe(204);
@@ -74,7 +74,7 @@ test.todo("UC26: remover a foto zera fotoUrl e apaga o objeto do bucket", async 
   expect((await api("DELETE", "/autores/2147483647/foto")).status).toBe(404);
 });
 
-test.todo("UC26: sem RustFS, 503 e o autor continua como estava", async () => {
+test("UC26: sem RustFS, 503 e o autor continua como estava", async () => {
   const author = await testAuthor();
   const image = { bytes: PNG, type: "image/png" as const };
   await expect(uploadAuthorPhoto(author.id, image, authorshipIntegration, { client: null })).rejects.toBeInstanceOf(ServiceUnavailable);
@@ -85,7 +85,7 @@ test.todo("UC26: sem RustFS, 503 e o autor continua como estava", async () => {
   expect((await authorById(author.id)).fotoUrl).not.toBeNull();
 });
 
-test.todo("UC26: enviar e remover a foto invalidam o cache da busca de autores", async () => {
+test("UC26: enviar e remover a foto invalidam o cache da busca de autores", async () => {
   const author = await testAuthor();
   const search = async () => {
     const response = await api("GET", `/autores?q=${encodeURIComponent(author.nome)}`);
@@ -106,10 +106,51 @@ test.todo("UC26: enviar e remover a foto invalidam o cache da busca de autores",
   expect(afterRemove.authors[0]!.fotoUrl).toBeNull();
 });
 
-test.todo("UC08: excluir o autor apaga a foto do bucket", async () => {
+test("UC08: excluir o autor apaga a foto do bucket", async () => {
   const author = await testAuthor();
   await sendPhoto(author.id, PNG);
   expect(await getObject(photoKey(author.id))).not.toBeNull();
   expect((await api("DELETE", `/autores/${author.id}`)).status).toBe(204);
   expect(await getObject(photoKey(author.id))).toBeNull();
 });
+
+/*
+ * Discussão da atividade
+ *
+ * 1. No primeiro envio, uma queda entre o PUT e o COMMIT deixa um objeto órfão.
+ * Se a coluna fosse gravada primeiro, o autor anunciaria uma foto que pode dar
+ * 404. Na troca, uma queda após o PUT pode deixar bytes novos sob a versão
+ * antiga. Na remoção, zerar a coluna primeiro pode deixar um órfão recuperável.
+ * Apagar os bytes primeiro quebraria o link ainda publicado pelo banco.
+ *
+ * 2. Pode sobrar um objeto se o processo cair ou a transação falhar após o PUT,
+ * ou se a limpeza falhar após remover a foto, excluir o autor ou detectar que
+ * ele sumiu durante o envio. Com o cliente configurado e o RustFS parado,
+ * a remoção confirma no banco e discardObject registra a falha. Para reconciliar,
+ * percorreria as páginas de list({ prefix: "autoria/autores/" }) e consultaria
+ * foto_atualizada_em para cada id. Um autor ausente ou uma coluna nula indica
+ * um candidato. Aguardaria um período de carência e, sob um bloqueio por autor
+ * compartilhado com os envios, reconferiria o banco e o objeto antes de apagar.
+ *
+ * 3. A fotoUrl apontaria para o domínio de mídia. O backend autorizaria o leitor
+ * e assinaria uma URL com vencimento. O serviço de mídia verificaria assinatura
+ * e prazo a cada requisição. Para fotos restritas, private, no-store evita que
+ * o navegador reutilize uma resposta depois do vencimento. Com cache permitido,
+ * o max-age deveria caber no tempo restante da assinatura. Uma chave por versão
+ * já distingue as imagens. Com chave fixa, ?v= pode fazer parte da URL assinada.
+ *
+ * 4. Na chave fixa, o último PUT substitui os bytes e ?v= muda o endereço usado
+ * pelo cache. Dois envios podem concluir seus PUTs e COMMITs em ordens diferentes,
+ * deixando a versão de um envio associada aos bytes do outro. Com chaves únicas
+ * por envio, a atualização confirmada por último escolhe qual objeto servir.
+ * Cada URL continua identificando seus próprios bytes e as versões sem referência
+ * precisam de limpeza. Uma chave por hash permite reutilizar conteúdo idêntico.
+ *
+ * 5. Navegadores e proxies podem reter a resposta immutable por um ano. Parar o
+ * contêiner preserva rustfsdata. Um DELETE bem-sucedido remove o objeto ativo,
+ * mas snapshots do volume, backups e downloads anteriores podem conter cópias.
+ * Para atender um pedido de exclusão, seria preciso localizar as cópias sob
+ * controle do serviço, invalidar caches gerenciados e aplicar a política de
+ * retenção aos backups, reaplicando a exclusão após uma restauração. O servidor
+ * não consegue recolher um download já salvo no dispositivo de outra pessoa.
+ */

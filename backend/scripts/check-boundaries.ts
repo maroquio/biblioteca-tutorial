@@ -9,6 +9,8 @@ const TABLE_OWNERS: Record<string, string> = {
   livros: "catalog",
   exemplares: "catalog",
   acervo_sequencias: "catalog",
+  livros_vetores: "catalog",
+  acervo_modelo_vetorial: "catalog",
   autores: "authorship",
   autoria_migracoes: "authorship",
   leitores: "readers",

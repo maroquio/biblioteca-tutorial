@@ -7,6 +7,69 @@ A branch `saas-evolution/fase02` parte da `saas-evolution/fase01`, que implement
 e os 23 casos de uso da turma. O monólito modular usa PostgreSQL 18 e uma
 interface React 19 com acervo, autores, leitores, exemplares, reservas e empréstimos.
 
+## Atividade #152 — índice semântico com pgvector
+
+O índice da UC24 passa a usar PostgreSQL com pgvector, preservando a API
+`GET /api/busca-semantica/livros?q=` e a tela `/livros/semantica`.
+O Redis continua atendendo o cache de autores.
+
+O `bookIndex.ts` existente cria `livros_vetores` com `vector(N)`, chave estrangeira
+com `ON DELETE CASCADE` e índice HNSW para distância cosseno. A tabela
+`acervo_modelo_vetorial` identifica o modelo e a dimensão; trocar qualquer um
+recria os vetores e reindexa os livros. Cadastro, edição e renomeação de autor
+sincronizam depois do COMMIT. Texto igual não chama o embedder novamente, e uma
+falha do provedor não desfaz o cadastro. A subida e o seed reconciliam os dados
+independentemente do Redis. Os testes próprios ficam em `book-vectors.test.ts`.
+
+Para executar, crie ou edite `infra/.env` com `GEMINI_API_KEY=sua-chave` e rode:
+
+```bash
+docker compose -f infra/compose.yaml up -d --build
+```
+
+O Compose passa a usar `pgvector/pgvector:pg18`, preservando o volume `pgdata`.
+A aplicação cria a extensão automaticamente em cada banco. Abra
+<http://localhost:3000/livros/seed> para a carga inicial e depois
+<http://localhost:3000/livros/semantica>. Aguarde a reconciliação nos logs de `app`.
+Para demonstrar a independência do Redis, pare-o com
+`docker compose -f infra/compose.yaml stop redis` e repita a busca; depois use
+`docker compose -f infra/compose.yaml start redis`.
+
+Se houver um índice legado no Redis, confira com `redis-cli FT._LIST` dentro do
+contêiner. Remova `biblioteca:acervo:livros` com `FT.DROPINDEX biblioteca:acervo:livros DD`
+e sua chave de modelo com `DEL biblioteca:acervo:livros:modelo`.
+
+Para inspecionar o armazenamento, abra o `psql` com
+`docker compose -f infra/compose.yaml exec db psql -U biblioteca -d biblioteca`:
+
+```sql
+\dx
+\d livros_vetores
+TABLE acervo_modelo_vetorial;
+SELECT livro_id, texto, vector_dims(embedding) FROM livros_vetores LIMIT 5;
+```
+
+Discussão do enunciado:
+
+1. **Redis ou pgvector:** pgvector permite FK, CASCADE, JOIN e backup conjunto,
+   além de persistir os vetores após reinícios do Redis. Em contrapartida, busca
+   vetorial disputa memória, disco e CPU com o banco principal. Uma separação
+   deve ser decidida por medições de tráfego, latência e volume do acervo.
+2. **Depois do COMMIT:** chamadas ao Gemini dentro da transação segurariam o lock
+   das escritas e uma falha poderia desfazer o cadastro. Uma outbox transacional
+   com worker e retentativas pode tornar a atualização eventual durável.
+3. **Reconexão do Redis:** invalida somente o cache de autores. A reconciliação
+   dos vetores acontece na subida e depois do seed, sem depender da conexão.
+4. **HNSW:** com 50 livros a busca exata é barata; com milhões, aproximação reduz
+   o custo. Aumentar `hnsw.ef_search` aumenta os candidatos e tende a melhorar o
+   recall, com maior latência. O ajuste deve ser medido com consultas reais.
+5. **Disponibilidade:** no PostgreSQL, a integração pode combinar vetores e
+   exemplares com `EXISTS`, excluindo empréstimos abertos e reservas vigentes.
+   No Redis seria preciso replicar disponibilidade ou filtrar candidatos usando
+   o PostgreSQL. No HNSW, filtros podem exigir mais candidatos ou busca iterativa.
+
+O PR da atividade deve ter `saas-evolution/fase02` como base.
+
 ## Executar a aplicação
 
 Com Docker Desktop aberto, na raiz do projeto:
